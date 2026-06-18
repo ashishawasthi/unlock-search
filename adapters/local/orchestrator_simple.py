@@ -1,5 +1,5 @@
 """Local OrchestratorRuntime: runs the shared CORE agent loop in-process (no ADK
-dependency for dev). gcp runs the same graph on Vertex Agent Engine; on-prem runs
+dependency for dev). gcp runs the same graph on Agent Runtime on Gemini Enterprise Agent Platform; on-prem runs
 the same ADK graph on K8s. All three reuse core.agents.prompts and the Validator gate."""
 from __future__ import annotations
 

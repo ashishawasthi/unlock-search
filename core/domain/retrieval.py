@@ -1,7 +1,7 @@
 """
 Post-retrieval continuation. Pure CORE logic over chunk_seq; reads chunk text and
 neighbors from the RelationalStore port (the source of truth for text), so it works
-identically whether the ranker is FTS5, OpenSearch, or Vertex AI Search.
+identically whether the ranker is FTS5, OpenSearch, or Agent Search on Gemini Enterprise Agent Platform.
 """
 from __future__ import annotations
 

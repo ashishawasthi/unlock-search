@@ -1,20 +1,20 @@
 """
-GCP Embedder: Vertex AI text embeddings (google-cloud-aiplatform / vertexai).
+GCP Embedder: Gemini Enterprise Agent Platform text embeddings (google-cloud-aiplatform / vertexai).
 
-Backing service: a Vertex AI text-embedding model (default text-embedding-004, dim
+Backing service: a Gemini Enterprise Agent Platform text-embedding model (default text-embedding-004, dim
 768, matching the pgvector/AlloyDB vector(768) column). embed() maps kind to the
-Vertex task type (document -> RETRIEVAL_DOCUMENT, query -> RETRIEVAL_QUERY) for
+Gemini Enterprise Agent Platform task type (document -> RETRIEVAL_DOCUMENT, query -> RETRIEVAL_QUERY) for
 asymmetric retrieval quality. Batches are sent in groups under the API's per-request
 instance cap.
 
-Note: when retriever=vertex (Vertex AI Search auto-embeds and reranks server-side),
+Note: when retriever=agentsearch (Agent Search on Gemini Enterprise Agent Platform auto-embeds and reranks server-side),
 this embedder is typically UNUSED for the search path; it stays bound for profiles
-that pair Vertex embeddings with a SQL vector store (AlloyDB/pgvector kNN).
+that pair Gemini Enterprise Agent Platform embeddings with a SQL vector store (AlloyDB/pgvector kNN).
 
 Config / env (config.embedder in profiles/gcp.yaml):
   project, region (e.g. "us-central1"), model (default "text-embedding-004")
 
-Importable without the Vertex SDK installed (lazy SDK imports).
+Importable without the Gemini Enterprise Agent Platform SDK installed (lazy SDK imports).
 """
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ _TASK = {"document": "RETRIEVAL_DOCUMENT", "query": "RETRIEVAL_QUERY"}
 _MAX_BATCH = 250
 
 
-class VertexEmbedder:
+class GeapEmbedder:
     def __init__(self, project: str | None = None, region: str = "us-central1",
                  model: str = "text-embedding-004", dim: int = _DIM, **kw):
         self.project = project

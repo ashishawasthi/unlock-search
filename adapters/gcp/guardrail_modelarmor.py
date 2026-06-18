@@ -1,7 +1,7 @@
 """
 GCP Guardrail adapter: Model Armor sanitize APIs.
 
-Backing service: Vertex AI Model Armor (sanitizeUserPrompt / sanitizeModelResponse).
+Backing service: Gemini Enterprise Agent Platform Model Armor (sanitizeUserPrompt / sanitizeModelResponse).
 Screens for prompt injection + jailbreak, Responsible AI categories, and is DLP-aware
 (Sensitive Data Protection sanitization filter). Needs a configured Model Armor template.
 Config kwargs: project, location, template_id. Env fallbacks: GOOGLE_CLOUD_PROJECT,

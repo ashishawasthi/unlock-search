@@ -1,6 +1,6 @@
 """Local Telemetry: structured stdout + no-op spans/metrics. The append-only audit
 log is still written by the store; this mirrors events for dev visibility.
-gcp uses Cloud Observability + Vertex Eval; on-prem uses OTel + Prometheus + Grafana."""
+gcp uses Cloud Observability + Gemini Enterprise Agent Platform Evals; on-prem uses OTel + Prometheus + Grafana."""
 from __future__ import annotations
 
 import json

@@ -1,13 +1,13 @@
 """
-GCP OrchestratorRuntime adapter: Vertex AI Agent Engine + ADK.
+GCP OrchestratorRuntime adapter: Agent Runtime on Gemini Enterprise Agent Platform + ADK.
 
-Backing service: Vertex AI Agent Engine hosting an ADK (Agent Development Kit) agent that
+Backing service: Agent Runtime on Gemini Enterprise Agent Platform hosting an ADK (Agent Development Kit) agent that
 runs the SAME graph (Orchestrator -> Retriever -> Generator -> Validator) with the SAME
 prompts from core.agents.prompts, on Gemini Flash. The retrieve tool is bound to the CORE
 RetrievalPort via the container, so ABAC is enforced server-side (the predicate is built
 from the principal and pushed into the retriever) and is never delegated to the model.
 
-If Agent Engine / ADK is unavailable (SDK not installed, no project, runtime error), this
+If Agent Runtime / ADK is unavailable (SDK not installed, no project, runtime error), this
 falls back to the in-process shared loop core.agents.loop.run_rag_turn so the path still
 returns a uniform AgentResult. Reuses Gemini via the container LLM (already gemini-flash
 in the gcp profile), so the model binding stays consistent across the two execution modes.
@@ -27,7 +27,7 @@ from core.domain.retrieval import expand_continuation
 from core.ports.types import AgentResult
 
 
-class AgentEngineOrchestrator:
+class AgentRuntimeOrchestrator:
     def __init__(self, container=None, project: str | None = None, location: str | None = None,
                  model: str = "gemini-2.5-flash", **kw):
         self.c = container
@@ -56,7 +56,7 @@ class AgentEngineOrchestrator:
                      instruction=ORCHESTRATOR_INSTRUCTION, tools=[retrieve])
 
     def run_turn(self, *, principal, query, history, doc_ids) -> AgentResult:
-        # Try the hosted Agent Engine / ADK path; on any unavailability, fall back to the
+        # Try the hosted Agent Runtime / ADK path; on any unavailability, fall back to the
         # shared in-process loop so the contract (AgentResult) is always satisfied.
         try:
             from vertexai import agent_engines       # lazy import (vertexai)
@@ -79,5 +79,5 @@ class AgentEngineOrchestrator:
                                docs=sorted({b.doc_id for b in blocks}),
                                grounded=bool(cites), trace_id=None)
         except Exception:
-            # Agent Engine/ADK unavailable: same prompts, same retriever, in-process loop.
+            # Agent Runtime/ADK unavailable: same prompts, same retriever, in-process loop.
             return run_rag_turn(self.c, principal, query, history, doc_ids)

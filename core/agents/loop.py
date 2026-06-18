@@ -2,7 +2,7 @@
 The shared RAG agent loop: Orchestrator -> Retriever -> Generator -> Validator.
 
 This is the CANONICAL orchestration that the local SimpleOrchestrator runs in-process
-and that the ADK-based runtimes (gcp Agent Engine, on-prem ADK-on-K8s) reuse (same
+and that the ADK-based runtimes (gcp Agent Runtime, on-prem ADK-on-K8s) reuse (same
 prompts from core.agents.prompts, same retrieval tool, same Validator gate). Only the
 model binding and the host differ.
 

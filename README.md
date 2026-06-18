@@ -21,7 +21,7 @@ Deployable two ways from one codebase:
 
 | Target | Posture | Why |
 |---|---|---|
-| **GCP** | Managed-first | Vertex AI Search + Document AI fold embedding and reranking into one managed service. Smallest ops surface. |
+| **GCP** | Managed-first | Agent Search on Gemini Enterprise Agent Platform + Document AI fold embedding and reranking into one managed service. Smallest ops surface. |
 | **on-prem / K8s** | No lock-in | OpenSearch + pgvector + bge-reranker on Kubernetes. Portable, but depends on hosted inference endpoints (see below). |
 
 ## Ports-and-adapters principle
@@ -41,38 +41,38 @@ AIBOX_PROFILE = local | onprem | gcp
 
 | Port | local | onprem | gcp |
 |---|---|---|---|
-| llm | Anthropic | Gemma (LiteLLM) | Vertex Gemini |
-| embedder | noop / extractive | hosted endpoint | Vertex |
-| reranker | noop | bge (hosted) | Vertex (folded in) |
+| llm | Anthropic | Gemma (LiteLLM) | Gemini on Gemini Enterprise Agent Platform |
+| embedder | noop / extractive | hosted endpoint | Gemini Enterprise Agent Platform |
+| reranker | noop | bge (hosted) | Gemini Enterprise Agent Platform (folded in) |
 | object_store | filesystem | MinIO | GCS |
 | relational | SQLite | PostgreSQL + pgvector | AlloyDB |
-| retriever | FTS5 | OpenSearch (BM25 + kNN) | Vertex AI Search |
+| retriever | FTS5 | OpenSearch (BM25 + kNN) | Agent Search on Gemini Enterprise Agent Platform |
 | parser | pypdf | Tika | Document AI |
 | guardrail | noop | Llama Guard / NeMo | Model Armor |
 | dlp | noop | Presidio | Cloud DLP |
 | identity | dev header | OIDC | Apigee |
-| orchestrator | in-process loop | ADK on K8s | Vertex Agent Engine + ADK |
+| orchestrator | in-process loop | ADK on K8s | Agent Runtime on Gemini Enterprise Agent Platform + ADK |
 
-**Agent layer.** ADK is the agent runtime in both production targets (GCP: Vertex AI Agent Engine
+**Agent layer.** ADK is the agent runtime in both production targets (GCP: Agent Runtime on Gemini Enterprise Agent Platform
 + ADK; on-prem: ADK on K8s). The agent **prompts** and the Orchestrator -> Retriever -> Generator
 -> Validator **graph** live in `core/agents/` and are reused by every runtime. Only the model
 binding (Gemini vs Gemma via LiteLLM) and the host differ. Local dev runs a lightweight in-process
 runner of the **same** prompts.
 
 **Retrieval.**
-- GCP: Vertex AI Search + Document AI for best quality. AlloyDB holds the canonical chunk **text** +
+- GCP: Agent Search on Gemini Enterprise Agent Platform + Document AI for best quality. AlloyDB holds the canonical chunk **text** +
   ABAC side-tables and is the source of truth for neighbor-continuation and citation -> source highlight.
 - on-prem: OpenSearch (BM25 + kNN) + bge-reranker; PostgreSQL + pgvector holds chunk text + ABAC.
 
 **ABAC.** ABAC is a CORE-owned model (`AccessPredicate`) compiled per backend: a shared SQL compiler
-for SQLite/pgvector/AlloyDB, a filter-DSL compiler for Vertex, and a DLS compiler for OpenSearch. The
+for SQLite/pgvector/AlloyDB, a filter-DSL compiler for Gemini Enterprise Agent Platform, and a DLS compiler for OpenSearch. The
 **policy model + orchestration is reused**; the **enforcement mechanism is per-adapter**. It is not
 verbatim-identical SQL across targets.
 
 **Embedder and Reranker are first-class ports.** Consequence, stated plainly: the on-prem profile
 depends on **four external hosted inference endpoints** (LLM/Gemma, embedder, reranker/bge,
 safety/Llama Guard). There is **no on-prem GPU**. GCP folds embedding and reranking into managed
-Vertex AI Search, which is the core of the GCP operational-surface argument.
+Agent Search on Gemini Enterprise Agent Platform, which is the core of the GCP operational-surface argument.
 
 ### The hexagon
 
@@ -94,7 +94,7 @@ flowchart LR
 
     PORTS --- L["adapters/local<br/>SQLite, FTS5, fs,<br/>Anthropic, in-proc"]
     PORTS --- O["adapters/onprem<br/>pgvector, OpenSearch, MinIO,<br/>Gemma, bge, ADK/K8s"]
-    PORTS --- G["adapters/gcp<br/>AlloyDB, Vertex AI Search, GCS,<br/>Gemini, DocAI, Agent Engine"]
+    PORTS --- G["adapters/gcp<br/>AlloyDB, Agent Search on Gemini Enterprise Agent Platform, GCS,<br/>Gemini, DocAI, Agent Runtime"]
 
     PROF["profiles/{local,onprem,gcp}.yaml<br/>AIBOX_PROFILE -> one adapter per port"] -.->|binds| PORTS
 ```
@@ -110,7 +110,7 @@ core/        provider-agnostic domain, agents, api, ports, schema
   container.py composition root: static REGISTRY allowlist, one adapter per port
 adapters/
   local/       SQLite, FTS5, filesystem, Anthropic, in-process orchestrator
-  gcp/         AlloyDB, Vertex AI Search, GCS, Gemini, Document AI, Agent Engine
+  gcp/         AlloyDB, Agent Search on Gemini Enterprise Agent Platform, GCS, Gemini, Document AI, Agent Runtime
   onprem/      pgvector, OpenSearch, MinIO, Gemma, bge, ADK-on-K8s
 profiles/      local.yaml | onprem.yaml | gcp.yaml (bind adapters per port)
 deploy/        K8s manifests + docker-compose for the onprem profile
@@ -148,8 +148,8 @@ for the LLM (Gemma), embedder, reranker (bge), and safety (Llama Guard) configur
 
 ## gcp profile
 
-`AIBOX_PROFILE=gcp` binds the Vertex / AlloyDB / GCS / Document AI / Agent Engine adapters. These are
-real code and require a configured GCP project. Vertex AI Search folds embedding and reranking into
+`AIBOX_PROFILE=gcp` binds the Gemini Enterprise Agent Platform / AlloyDB / GCS / Document AI / Agent Runtime adapters. These are
+real code and require a configured GCP project. Agent Search on Gemini Enterprise Agent Platform folds embedding and reranking into
 one managed service, removing two of the four inference endpoints the on-prem profile must host.
 
 ## Current state (honest scaffold reality)
@@ -163,7 +163,7 @@ one managed service, removing two of the four inference endpoints the on-prem pr
 ## Security invariant
 
 **ABAC is enforced server-side on every retrieval.** The `AccessPredicate` is composed in CORE and
-compiled into the backend's native filter (SQL `WHERE` fragment, Vertex filter-DSL, or OpenSearch DLS)
+compiled into the backend's native filter (SQL `WHERE` fragment, Agent Search filter-DSL, or OpenSearch DLS)
 and pushed **into** the query. Access is never post-filtered, never decided by the model, and never
 enforced in the UI. Restricted documents are returned as server-side redacted cards. Secrets stay in
 the environment (profiles reference them via `*_env` indirection; YAML never holds a secret).

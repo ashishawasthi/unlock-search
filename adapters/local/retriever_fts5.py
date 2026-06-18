@@ -1,7 +1,7 @@
 """Local Retriever: SQLite FTS5 BM25 + a lexical title boost, ABAC pushed into the SQL.
 
 Ranking behavior (stopword strip, phrase/AND preference, title boost) is adapter-local;
-it does NOT survive a backend swap to Vertex AI Search / OpenSearch, by design.
+it does NOT survive a backend swap to Agent Search on Gemini Enterprise Agent Platform / OpenSearch, by design.
 Scores are normalized 0..1 higher=better so CORE sorts uniformly.
 """
 from __future__ import annotations

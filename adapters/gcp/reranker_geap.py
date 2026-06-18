@@ -1,11 +1,11 @@
 """
-GCP Reranker: Vertex AI Ranking API (Discovery Engine RankService), OR passthrough.
+GCP Reranker: Gemini Enterprise Agent Platform Ranking API (Discovery Engine RankService), OR passthrough.
 
 Backing service: the Discovery Engine RankService semantic-ranker model
 (default "semantic-ranker-512"). Given a query and candidate Hits, it returns a
 relevance-ordered subset with scores normalized 0..1 (higher = better).
 
-PASSTHROUGH MODE (default when retriever=vertex): Vertex AI Search already reranks
+PASSTHROUGH MODE (default when retriever=agentsearch): Agent Search on Gemini Enterprise Agent Platform already reranks
 results server-side inside the search call, so a second ranking pass is redundant and
 costs an extra round trip. With mode="passthrough" this adapter just trims the
 already-ranked Hits to top_k. Set mode="rank" (and a project) to call RankService,
@@ -21,7 +21,7 @@ Importable without the Discovery Engine SDK installed (lazy SDK imports).
 from __future__ import annotations
 
 
-class VertexReranker:
+class GeapReranker:
     def __init__(self, mode: str = "passthrough", project: str | None = None,
                  location: str = "global", ranking_config: str = "default_ranking_config",
                  model: str = "semantic-ranker-512", **kw):
@@ -42,7 +42,7 @@ class VertexReranker:
     def rerank(self, query, hits, top_k):
         hits = list(hits)
         if self.mode != "rank" or not self.project or not hits:
-            # passthrough: Vertex AI Search already reranked; just trim.
+            # passthrough: Agent Search on Gemini Enterprise Agent Platform already reranked; just trim.
             hits.sort(key=lambda h: h.score, reverse=True)
             return hits[:top_k]
         de = None

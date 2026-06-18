@@ -1,14 +1,14 @@
 # GCP profile: managed Google Cloud data plane.
-# Gemini + Vertex AI Search + AlloyDB + GCS + Document AI, with GCP-native safety,
-# eventing, telemetry, identity, and the Vertex Agent Engine orchestrator.
+# Gemini + Agent Search on Gemini Enterprise Agent Platform + AlloyDB + GCS + Document AI, with GCP-native safety,
+# eventing, telemetry, identity, and the Agent Runtime on Gemini Enterprise Agent Platform orchestrator.
 profile: gcp
 adapters:
   llm: gemini
-  embedder: vertex
-  reranker: vertex
+  embedder: geap
+  reranker: geap
   object_store: gcs
   relational: alloydb
-  retriever: vertex
+  retriever: agentsearch
   parser: docai
   guardrail: modelarmor
   dlp: clouddlp
@@ -16,7 +16,7 @@ adapters:
   telemetry: cloudobs
   identity: apigee
   notifier: pubsub
-  orchestrator: agentengine
+  orchestrator: agentruntime
 config:
   llm: { project: my-gcp-project, location: us-central1, model: gemini-2.5-flash }
   embedder: { project: my-gcp-project, region: us-central1, model: text-embedding-004 }

@@ -82,7 +82,7 @@ def _decide(c, r: dict, decision: str, note: str, actor_id: str) -> None:
         store.execute("INSERT INTO doc_user_grants(doc_id,user_id,expires_at) VALUES(?,?,?)",
                       (r["doc_id"], r["requester_id"], time.time() + GRANT_DAYS * 86400))
         # Refresh the pushdown index so the new grant is enforced there too (no-op-cheap for
-        # SQL/FTS backends which read grants live; required for OpenSearch/Vertex).
+        # SQL/FTS backends which read grants live; required for OpenSearch/Gemini Enterprise Agent Platform).
         from core.domain.ingest import reindex_acl
         try:
             reindex_acl(c, r["doc_id"])

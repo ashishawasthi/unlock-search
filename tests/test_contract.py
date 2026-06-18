@@ -9,7 +9,7 @@ the three seeded personas (password == username) plus a few extra seeded princip
 The SAME suite runs against any backend: set AIBOX_PROFILE before invoking pytest.
 It defaults to local. ABAC is enforced server-side identically across profiles, so
 the accessible-set assertions below are profile-independent (they assert the rule,
-not the ranking). Backends needing a live service (Postgres, OpenSearch, Vertex,
+not the ranking). Backends needing a live service (Postgres, OpenSearch, Gemini Enterprise Agent Platform,
 AlloyDB, ...) are skipped at import-time if the SDK/credentials are unavailable.
 
 ABAC rule under test (core.domain.abac):

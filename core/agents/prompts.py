@@ -1,5 +1,5 @@
 """
-Shared agent prompts. REUSED VERBATIM by every runtime (Vertex Agent Engine + ADK
+Shared agent prompts. REUSED VERBATIM by every runtime (Agent Runtime on Gemini Enterprise Agent Platform + ADK
 on GCP, ADK on K8s on-prem, and the in-process SimpleOrchestrator locally). The
 prompts are a CORE asset so the four agent roles behave identically regardless of
 which model (Gemini vs Gemma) or host runs them.

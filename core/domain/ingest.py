@@ -23,7 +23,7 @@ MEDIA = {"pdf": "application/pdf", "txt": "text/plain; charset=utf-8",
 
 
 def _acl_attrs(store, doc_id: str) -> dict:
-    """The denormalized ACL a pushdown retriever (OpenSearch / Vertex AI Search) needs to
+    """The denormalized ACL a pushdown retriever (OpenSearch / Agent Search on Gemini Enterprise Agent Platform) needs to
     enforce the predicate at the index. Superset so every retriever reads consistent keys:
     `departments` and `doc_grant_groups` are the same group-id set (two names different
     backends expect); `doc_user_grants` is the live, non-expired grantee set."""
@@ -121,7 +121,7 @@ def rollback_document(c, doc_id: str, key: str) -> None:
 def reindex_acl(c, doc_id: str) -> None:
     """Re-sync denormalized chunk ACL + the retriever index after attributes change.
     No-op-ish for SQL backends that enforce via live joins; required for pushdown
-    backends (OpenSearch/Vertex) whose index carries per-chunk access attributes."""
+    backends (OpenSearch/Gemini Enterprise Agent Platform) whose index carries per-chunk access attributes."""
     store = c.store()
     acl = _acl_attrs(store, doc_id)
     store.execute("UPDATE chunks SET owner_id=?, min_clearance=?, departments=?, user_types=?, projects=? "

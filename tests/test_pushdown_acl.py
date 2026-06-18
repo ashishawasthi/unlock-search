@@ -1,16 +1,16 @@
-"""Regression tests for the pushdown-ABAC filter builders (OpenSearch + Vertex).
+"""Regression tests for the pushdown-ABAC filter builders (OpenSearch + Gemini Enterprise Agent Platform).
 
 These backends cannot be enforced by SQL, so the filter MUST mirror core.domain.abac
 exactly. The builders are pure (no live cluster needed). Guards the two fixes:
   - OpenSearch must use a `terms departments` clause (empty list -> matches nothing for a
     groupless user), NOT `must_not exists` (which over-grants unshared docs).
-  - Vertex must constrain group access (and deny groupless users via a sentinel group).
+  - Gemini Enterprise Agent Platform must constrain group access (and deny groupless users via a sentinel group).
 """
 import json
 
 from core.ports.types import AccessPredicate
 from adapters.onprem.retriever_opensearch import OpenSearchRetriever
-from adapters.gcp.retriever_vertex import VertexSearchRetriever
+from adapters.gcp.retriever_agentsearch import AgentSearchRetriever
 
 
 def _pred(groups, admin=False, clearance=2, user_type="employee", projects=()):
@@ -44,7 +44,7 @@ def test_opensearch_admin_is_match_all():
 
 
 def test_vertex_filter_constrains_groups_and_clearance():
-    r = VertexSearchRetriever(project="p", data_store_id="d")
+    r = AgentSearchRetriever(project="p", data_store_id="d")
     f = r.compile_filter(_pred(["g-finance"], clearance=3))
     assert "owner_id: ANY(" in f and "doc_user_grants: ANY(" in f
     assert "min_clearance <= 3" in f
@@ -53,12 +53,12 @@ def test_vertex_filter_constrains_groups_and_clearance():
 
 
 def test_vertex_groupless_user_cannot_match_group_path():
-    r = VertexSearchRetriever(project="p", data_store_id="d")
+    r = AgentSearchRetriever(project="p", data_store_id="d")
     f = r.compile_filter(_pred([]))
     # a sentinel group nobody has -> the attribute branch can never match for a groupless user
     assert "__none__" in f
 
 
 def test_vertex_admin_has_no_filter():
-    r = VertexSearchRetriever(project="p", data_store_id="d")
+    r = AgentSearchRetriever(project="p", data_store_id="d")
     assert r.compile_filter(_pred([], admin=True)) is None

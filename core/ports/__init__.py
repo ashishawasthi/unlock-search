@@ -10,7 +10,7 @@ Refinements folded in from the architecture review:
     source of truth for chunk text, so neighbor-continuation and citation->source
     highlight work uniformly even when the retriever owns opaque segment ids.
   - Embedder + Reranker are first-class ports (on-prem needs 3 hosted inference
-    endpoints beyond the LLM; GCP folds them into managed Vertex AI Search).
+    endpoints beyond the LLM; GCP folds them into managed Agent Search on Gemini Enterprise Agent Platform).
   - Hit.score is normalized 0..1 higher=better (single sort direction).
 """
 from __future__ import annotations
@@ -32,7 +32,7 @@ class AclCompiler(Protocol):
         ...
 
     def to_filter(self, pred: AccessPredicate) -> Any:
-        """Return a backend-native filter (Vertex filter-expression, OpenSearch bool/DLS).
+        """Return a backend-native filter (Gemini Enterprise Agent Platform filter-expression, OpenSearch bool/DLS).
         SQL stores may raise NotImplementedError; retrievers implement the one they need."""
         ...
 
@@ -160,7 +160,7 @@ class Notifier(Protocol):
 class OrchestratorRuntime(Protocol):
     """Hosts the Orchestrator -> Retriever -> Generator -> Validator graph. The
     agent PROMPTS and the loop contract live in core.agents and are reused by every
-    runtime; only the model binding and the host (Vertex Agent Engine / ADK-on-K8s /
+    runtime; only the model binding and the host (Agent Runtime on Gemini Enterprise Agent Platform / ADK-on-K8s /
     in-process) differ."""
     def run_turn(self, *, principal: Principal, query: str, history: list[dict],
                  doc_ids: Sequence[str] | None) -> AgentResult: ...

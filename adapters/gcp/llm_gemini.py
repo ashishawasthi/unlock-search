@@ -1,7 +1,7 @@
 """
-GCP LLM adapter: Vertex AI Gemini (default model 'gemini-2.5-flash').
+GCP LLM adapter: Gemini on Gemini Enterprise Agent Platform (default model 'gemini-2.5-flash').
 
-Backing service: Vertex AI Generative Models. Needs a GCP project with the Vertex AI
+Backing service: Gemini Enterprise Agent Platform Generative Models. Needs a GCP project with the Gemini Enterprise Agent Platform
 API enabled and ADC credentials (GOOGLE_APPLICATION_CREDENTIALS or workload identity).
 Config kwargs: project, location, model. Env fallbacks: GOOGLE_CLOUD_PROJECT /
 GCP_PROJECT, GOOGLE_CLOUD_LOCATION (default 'us-central1'), AIBOX_MODEL.
@@ -21,7 +21,7 @@ from core.domain.rag import build_context
 from core.ports.types import LlmResult, ModelCapabilities, TokenUsage
 
 
-class VertexGeminiLLM:
+class GeminiLLM:
     def __init__(self, project: str | None = None, location: str | None = None,
                  model: str = "gemini-2.5-flash", **kw):
         self.project = project or os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCP_PROJECT", "")
@@ -30,7 +30,7 @@ class VertexGeminiLLM:
         self._model = None
 
     def _client(self):
-        # lazy import: importable without the Vertex SDK installed
+        # lazy import: importable without the Gemini Enterprise Agent Platform SDK installed
         if self._model is None:
             import vertexai
             from vertexai.generative_models import GenerativeModel
@@ -68,7 +68,7 @@ class VertexGeminiLLM:
                  response_schema=None, max_tokens=2048, temperature=0.2, metadata=None) -> LlmResult:
         from vertexai.generative_models import Content, GenerationConfig, Part
         model_obj = self._client()
-        # rebuild the model with the system instruction (Vertex binds it per-model)
+        # rebuild the model with the system instruction (Gemini Enterprise Agent Platform binds it per-model)
         sys_text = self._system(system, context_blocks)
         if sys_text != system or self._model is None:
             from vertexai.generative_models import GenerativeModel

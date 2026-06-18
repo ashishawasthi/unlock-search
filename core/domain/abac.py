@@ -1,7 +1,7 @@
 """
 ABAC: the security crown jewel. The POLICY MODEL (AccessPredicate) and the grant
 rule live here in CORE. The SQL compiler below is shared verbatim by every SQL-family
-backend (SQLite, PostgreSQL+pgvector, AlloyDB). Non-SQL retrievers (Vertex AI Search,
+backend (SQLite, PostgreSQL+pgvector, AlloyDB). Non-SQL retrievers (Agent Search on Gemini Enterprise Agent Platform,
 OpenSearch) compile the SAME predicate to their own filter dialect in their adapter.
 
 Grant if: admin OR owner OR a valid doc-scoped grant OR

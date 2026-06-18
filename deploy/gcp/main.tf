@@ -4,13 +4,13 @@
 # THIS IS A SKETCH, NOT A TURNKEY MODULE. It enumerates the managed services the
 # gcp profile binds to and how they connect. It needs project-specific values
 # (CMEK keys, VPC + AlloyDB Auth Proxy / Private Service Connect, IAM bindings,
-# Vertex AI Search data store schema, Eventarc service account, Apigee/IAP). Treat
+# Agent Search on Gemini Enterprise Agent Platform data store schema, Eventarc service account, Apigee/IAP). Treat
 # every resource as a starting point to harden, not production-ready as written.
 #
 # Maps to profiles/gcp.yaml:
-#   object_store: gcs        relational: alloydb     retriever: vertex (Discovery Engine)
-#   parser: docai            event_bus: eventarc     orchestrator: agentengine (Vertex)
-#   llm/embedder/reranker: Vertex-managed (no infra here; just IAM + the Cloud Run SA).
+#   object_store: gcs        relational: alloydb     retriever: agentsearch (Discovery Engine)
+#   parser: docai            event_bus: eventarc     orchestrator: agentruntime (Gemini Enterprise Agent Platform)
+#   llm/embedder/reranker: platform-managed (no infra here; just IAM + the Cloud Run SA).
 ###############################################################################
 
 terraform {
@@ -76,9 +76,9 @@ resource "google_alloydb_instance" "primary" {
   machine_config { cpu_count = 2 }
 }
 
-# --- Vertex AI Search: managed retriever data store -------------------------
-# Discovery Engine data store. retriever_vertex.py indexes/searches here; ABAC is
-# compiled to a Vertex filter expression over denormalized per-chunk ACL fields.
+# --- Agent Search on Gemini Enterprise Agent Platform: managed retriever data store -------------------------
+# Discovery Engine data store. retriever_agentsearch.py indexes/searches here; ABAC is
+# compiled to a Agent Search filter expression over denormalized per-chunk ACL fields.
 resource "google_discovery_engine_data_store" "chunks" {
   location          = "global"
   data_store_id     = "aibox-datastore"
@@ -204,8 +204,8 @@ resource "google_service_account" "app" {
 locals {
   app_roles = [
     "roles/storage.objectAdmin",          # GCS object store
-    "roles/aiplatform.user",              # Vertex: Gemini, embeddings, ranking
-    "roles/discoveryengine.editor",       # Vertex AI Search data store
+    "roles/aiplatform.user",              # Gemini Enterprise Agent Platform: Gemini, embeddings, ranking
+    "roles/discoveryengine.editor",       # Agent Search on Gemini Enterprise Agent Platform data store
     "roles/documentai.apiUser",           # Document AI parser
     "roles/alloydb.client",               # AlloyDB connect
     "roles/secretmanager.secretAccessor", # read secrets

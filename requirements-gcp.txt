@@ -1,9 +1,9 @@
 # GCP-target extras (install on top of requirements.txt) for the gcp profile.
 # Adapters lazy-import these, so the repo stays importable without them; install to RUN.
 
-# Vertex AI: Gemini LLM, text embeddings, ranking API
+# Gemini Enterprise Agent Platform: Gemini LLM, text embeddings, ranking API
 google-cloud-aiplatform>=1.60
-# Vertex AI Search / Discovery Engine: retriever + RankService reranker
+# Agent Search on Gemini Enterprise Agent Platform / Discovery Engine: retriever + RankService reranker
 google-cloud-discoveryengine>=0.11
 # Document AI Layout Parser
 google-cloud-documentai>=2.29
@@ -14,7 +14,7 @@ google-cloud-dlp>=3.18
 # Model Armor (prompt/response safety). If unavailable in your region/SDK channel,
 # the guardrail adapter degrades; pin/replace per availability.
 google-cloud-modelarmor>=0.1 ; python_version >= "3.10"
-# Agent runtime (Vertex Agent Engine uses ADK)
+# Agent runtime (Agent Runtime on Gemini Enterprise Agent Platform uses ADK)
 google-adk>=0.1
 # AlloyDB is Postgres-wire compatible: reuse the pgvector client stack
 psycopg[binary]>=3.1

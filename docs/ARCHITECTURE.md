@@ -28,7 +28,7 @@ provider edges (adapters), the per-target config (profiles), and the IaC (deploy
   mechanism is per-adapter. There is no claim of "verbatim identical SQL" across targets.
 - The agent **prompts and the Orchestrator->Retriever->Generator->Validator graph live in CORE**
   (`core/agents/prompts.py`) and are reused by every runtime. Only the model binding (Gemini vs Gemma
-  via LiteLLM) and the host (Vertex AI Agent Engine vs ADK-on-K8s vs in-process) differ.
+  via LiteLLM) and the host (Agent Runtime on Gemini Enterprise Agent Platform vs ADK-on-K8s vs in-process) differ.
 - A **Validator / groundedness gate is a real step** before any answer is returned.
 - Adapters are thin: most are SDK glue mapping a neutral request/result to a vendor API.
 - A single **composition root** (`core/container.py`) reads the active profile and injects concrete
@@ -54,16 +54,16 @@ flowchart LR
 
     subgraph GCP["adapters/gcp (profile=gcp)"]
         direction TB
-        G0["Agent Engine + ADK (Gemini)"]
-        G1["Gemini Flash (Vertex)"]
+        G0["Agent Runtime + ADK (Gemini)"]
+        G1["Gemini Flash (Gemini Enterprise Agent Platform)"]
         G2["GCS"]
         G3["AlloyDB (ScaNN)"]
-        G4["Vertex AI Search (auto embed + rerank)"]
+        G4["Agent Search on Gemini Enterprise Agent Platform (auto embed + rerank)"]
         G5["Document AI"]
         G6["Model Armor"]
         G7["Cloud DLP / SDP"]
         G8["Eventarc + Cloud Functions"]
-        G9["Cloud Observability + Vertex Eval"]
+        G9["Cloud Observability + Gemini Enterprise Agent Platform Evals"]
         G10["Apigee / IAP identity"]
     end
 
@@ -111,7 +111,7 @@ flowchart LR
 
 | Invariant | Enforcement |
 |---|---|
-| ABAC is server-side, on every retrieval | CORE builds `AccessPredicate`; each backend's `AclCompiler` pushes it INTO the query (SQL WHERE fragment / Vertex filter-DSL / OpenSearch DLS). ACL attributes are **denormalized onto each chunk at index time** so the predicate is pushed down, never post-filtered. Never filtered in the UI. |
+| ABAC is server-side, on every retrieval | CORE builds `AccessPredicate`; each backend's `AclCompiler` pushes it INTO the query (SQL WHERE fragment / Agent Search filter-DSL / OpenSearch DLS). ACL attributes are **denormalized onto each chunk at index time** so the predicate is pushed down, never post-filtered. Never filtered in the UI. |
 | Default owner-only | New document is private to its uploader until shared to groups. CORE policy. |
 | Restricted cards | Server-side redaction. The restricted set is computed by `Retriever.search_inaccessible` (a first-class port method), never CSS-blur of plaintext. |
 | Stable chunk identity | `chunk_id` is a stable, fetchable string (uuid in the canonical schema), not an autoincrement int. Citations and citation->source highlight round-trip through `RelationalStore.get_chunks`. |
@@ -123,16 +123,16 @@ flowchart LR
 
 - **Ranking is not portable.** BM25, the lexical title-boost, the stopword list, RRF, and the
   reranker are CORE-resident retrieval behaviors only in the `local` adapter; they do not survive a
-  backend swap. GCP folds embedding + reranking into Vertex AI Search; on-prem uses OpenSearch +
+  backend swap. GCP folds embedding + reranking into Agent Search on Gemini Enterprise Agent Platform; on-prem uses OpenSearch +
   bge-reranker. There is no ranking parity claim.
 - **`status='published'` and any title-boost re-rank** are retrieval behaviors of the active retriever
   adapter, not a guaranteed cross-backend behavior.
 - **Chunk boundaries (and therefore citation spans, section labels, the restricted-card head)** differ
   by target when Document AI emits native layout chunks vs CORE's `chunk_pages`. Accepted, documented.
 - **Eval scores are backend-relative.** The EvalPort normalizes metric names and ranges, not absolute
-  values (a Vertex autorater faithfulness is not numerically comparable to a RAGAS faithfulness).
+  values (a Gemini Enterprise Agent Platform autorater faithfulness is not numerically comparable to a RAGAS faithfulness).
 - **On-prem depends on FOUR external hosted inference endpoints** (LLM/Gemma, embedder, reranker/bge,
-  safety/Llama Guard), whereas GCP folds embedding + reranking into managed Vertex AI Search and safety
+  safety/Llama Guard), whereas GCP folds embedding + reranking into managed Agent Search on Gemini Enterprise Agent Platform and safety
   into Model Armor. This is a real operational-surface difference, not a footnote.
 
 ## 2. Ports catalog (final signatures)
@@ -154,11 +154,11 @@ class AccessPredicate:
 
 class AclCompiler(Protocol):
     def to_sql(self, pred: AccessPredicate, table_alias: str = "d") -> tuple[str, list[Any]]: ...
-    def to_filter(self, pred: AccessPredicate) -> Any: ...   # Vertex filter-DSL / OpenSearch DLS
+    def to_filter(self, pred: AccessPredicate) -> Any: ...   # Agent Search filter-DSL / OpenSearch DLS
 ```
 
 - SQL compiler is shared by `sqlite` / `pgvector` / `alloydb` (Postgres-family WHERE fragment + params).
-- `to_filter` produces a Vertex filter expression or an OpenSearch bool-filter / DLS clause.
+- `to_filter` produces a Agent Search filter expression or an OpenSearch bool-filter / DLS clause.
 - ACL attributes are **denormalized onto each chunk row** (`chunks.owner_id`, `min_clearance`,
   `departments`, `user_types`, `projects` in `core/schema/schema.sql`) so the predicate is pushed into
   the retriever index, not applied after retrieval.
@@ -186,7 +186,7 @@ class Reranker(Protocol):
 - `ModelCapabilities` (`max_context_tokens`, `supports_tools`, `supports_parallel_tools`,
   `strict_json`, `supports_streaming`) lets CORE tune retriever `k` and history depth per profile and
   keep a validate-and-repair fallback when `strict_json` is false.
-- GCP: Gemini Flash via Vertex `generateContent`; embedding + reranking folded into Vertex AI Search,
+- GCP: Gemini Flash on Gemini Enterprise Agent Platform `generateContent`; embedding + reranking folded into Agent Search on Gemini Enterprise Agent Platform,
   so `Embedder`/`Reranker` are no-ops there. On-prem: Gemma via OpenAI-compatible endpoint (LiteLLM),
   a **hosted** embedder, and a **hosted** bge-reranker (two of the four on-prem inference endpoints).
 
@@ -249,7 +249,7 @@ class Retriever(Protocol):
   (BM25 vs RRF vs cosine).
 - `search_inaccessible` returns the doc ids the user CANNOT access, for restricted-card rendering. The
   redaction text comes from the canonical store, not from the UI.
-- GCP: Vertex AI Search (auto-chunk, auto-embed, RRF + managed reranker). On-prem: OpenSearch hybrid
+- GCP: Agent Search on Gemini Enterprise Agent Platform (auto-chunk, auto-embed, RRF + managed reranker). On-prem: OpenSearch hybrid
   (BM25 + kNN, RRF pipeline) then the hosted bge-reranker.
 
 ### 2.5 DocumentParser
@@ -329,8 +329,7 @@ class Eval(Protocol):
 - The append-only `audit()` becomes one adapter behind `Telemetry.log`. CORE wraps retrieval,
   continuation, generation, and the agent turn in spans/metrics; OpenTelemetry is the portable seam.
 - `RagTurn` carries `retrieved`, `context_blocks`, `answer`, `citations`, `grounded`, `tool_calls`,
-  `latency_ms`, so the Validator verdict and tool-use feed eval. GCP: Cloud Observability + Vertex Gen
-  AI Eval (managed autorater) + ADK auto-spans. On-prem: OTel -> Prometheus/Tempo/Loki/Grafana +
+  `latency_ms`, so the Validator verdict and tool-use feed eval. GCP: Cloud Observability + Gemini Enterprise Agent Platform Evals (managed autorater) + ADK auto-spans. On-prem: OTel -> Prometheus/Tempo/Loki/Grafana +
   Langfuse + RAGAS + Phoenix (judge via hosted Gemma/Gemini). Absolute scores are backend-relative.
 
 ### 2.10 Identity (gateway contract)
@@ -370,7 +369,7 @@ class OrchestratorRuntime(Protocol):
   never delegated to the model.
 - `AgentResult` is `{answer, cites, chunks_used, docs, grounded, trace_id, usage}`, identical on every
   runtime.
-- GCP: ADK app on Vertex AI Agent Engine (Gemini), managed sessions/memory/tracing. On-prem: the
+- GCP: ADK app on Agent Runtime on Gemini Enterprise Agent Platform (Gemini), managed sessions/memory/tracing. On-prem: the
   byte-for-byte same ADK app on K8s, model bound to Gemma via `LiteLlm(...)`, sessions on Postgres,
   traces to Langfuse/Phoenix. Local: `SimpleOrchestrator`, an in-process runner of the same prompts and
   the same four-step graph.
@@ -383,7 +382,7 @@ one set selected per target. **CONFIG/INFRA** is wiring, env, IaC.
 | Capability / function group | CORE | ADAPTER-gcp | ADAPTER-onprem | CONFIG/INFRA |
 |---|---|---|---|---|
 | ABAC policy model (`AccessPredicate`, `build_predicate`, clearance/user-type vocab) | yes (`core/domain/abac.py`) | -- | -- | -- |
-| ABAC enforcement (`AclCompiler`) | model + SQL compiler shared | Vertex filter-DSL compiler | OpenSearch DLS compiler | -- |
+| ABAC enforcement (`AclCompiler`) | model + SQL compiler shared | Agent Search filter-DSL compiler | OpenSearch DLS compiler | -- |
 | Chunking (`chunk_pages`, heading regex) | yes (`core/domain/chunking.py`) | may bypass via Document AI native chunks | reuses CORE chunking | -- |
 | Neighbor continuation (`neighbors`, +/-1) | yes (reads via RelationalStore) | -- | -- | -- |
 | Stable chunk id + canonical text | yes (schema + `get_chunks`) | -- | -- | -- |
@@ -397,20 +396,20 @@ one set selected per target. **CONFIG/INFRA** is wiring, env, IaC.
 | Response shaping (`_file_response`, media, Content-Disposition) | yes (bytes from ObjectStore) | -- | -- | -- |
 | SPA | yes (`ui/index.html`) | -- | -- | -- |
 | Reference schema text | yes (`core/schema/schema.sql`) | -- | -- | -- |
-| LLM | -- | Gemini Flash (Vertex) | Gemma (OpenAI-compat via LiteLLM) | model id, endpoint in profile |
-| Embedder | no-op port consumer | folded into Vertex AI Search (no-op) | hosted embedder endpoint | endpoint in profile |
-| Reranker | no-op port consumer | folded into Vertex AI Search (no-op) | hosted bge-reranker endpoint | endpoint in profile |
+| LLM | -- | Gemini Flash (Gemini Enterprise Agent Platform) | Gemma (OpenAI-compat via LiteLLM) | model id, endpoint in profile |
+| Embedder | no-op port consumer | folded into Agent Search on Gemini Enterprise Agent Platform (no-op) | hosted embedder endpoint | endpoint in profile |
+| Reranker | no-op port consumer | folded into Agent Search on Gemini Enterprise Agent Platform (no-op) | hosted bge-reranker endpoint | endpoint in profile |
 | RelationalStore | -- | AlloyDB (ScaNN DDL) | pgvector (HNSW DDL) | DSN, index flavor |
-| Retriever | ranking-only consumer | Vertex AI Search | OpenSearch + bge | datastore/index config |
+| Retriever | ranking-only consumer | Agent Search on Gemini Enterprise Agent Platform | OpenSearch + bge | datastore/index config |
 | DocumentParser | chunking fallback | Document AI | Tika / Unstructured | -- |
 | ObjectStore | -- | GCS | MinIO | bucket/endpoint/creds |
 | Guardrail | three-seam check | Model Armor | Llama Guard 4 + NeMo + Presidio | template/policy in profile |
 | DLP | three-seam scrub | Cloud DLP / SDP | Presidio | info-types, thresholds |
 | EventBus | `handle_document_uploaded` worker | Eventarc + Cloud Function | Knative/KEDA/Argo (local: inline) | manifests |
-| Telemetry + Eval | spans/metrics + EvalPort | Cloud Observability + Vertex Eval | OTel + Prom/Grafana + Langfuse/RAGAS/Phoenix | exporters |
+| Telemetry + Eval | spans/metrics + EvalPort | Cloud Observability + Gemini Enterprise Agent Platform Evals | OTel + Prom/Grafana + Langfuse/RAGAS/Phoenix | exporters |
 | Identity | trust contract, profile-gated | Apigee/IAP | Kong/Envoy + OIDC (local: dev) | issuer/JWKS |
 | Notifier | workflow caller | Pub/Sub + SendGrid | SMTP relay | -- |
-| OrchestratorRuntime | prompts + graph (`core/agents`) | Agent Engine + ADK | ADK on K8s | runtime/session config |
+| OrchestratorRuntime | prompts + graph (`core/agents`) | Agent Runtime + ADK | ADK on K8s | runtime/session config |
 | Profile + composition root + settings loader | -- | -- | -- | `core/container.py`, `infra/settings.py`, `profiles/*.yaml` |
 | IaC | -- | `deploy/gcp/*` (Terraform/gcloud) | `deploy/k8s/*` (Helm/Kustomize) | per-target |
 
@@ -468,11 +467,11 @@ gcp-unlock/
 │   │   └── schema.sql         # dialect-neutral REFERENCE table set; adapters own dialect migrations
 │   └── container.py           # composition root: static REGISTRY allowlist + eager build + validation
 ├── adapters/
-│   ├── gcp/                   # llm_gemini, embedder_vertex, reranker_vertex, store_alloydb,
-│   │                          #   retriever_vertex, parser_docai, objectstore_gcs,
+│   ├── gcp/                   # llm_gemini, embedder_geap, reranker_geap, store_alloydb,
+│   │                          #   retriever_agentsearch, parser_docai, objectstore_gcs,
 │   │                          #   guardrail_modelarmor, dlp_clouddlp, eventbus_eventarc,
 │   │                          #   telemetry_cloudobs, identity_apigee, notifier_pubsub,
-│   │                          #   orchestrator_agentengine
+│   │                          #   orchestrator_agentruntime
 │   ├── onprem/                # llm_gemma, embedder_hosted, reranker_bge, store_pgvector,
 │   │                          #   retriever_opensearch, parser_tika, objectstore_minio,
 │   │                          #   guardrail_llamaguard, dlp_presidio, eventbus_knative,
@@ -486,7 +485,7 @@ gcp-unlock/
 │   ├── onprem.yaml            # ports -> onprem adapter keys; K8s endpoints
 │   └── local.yaml             # ports -> local adapter keys (dev default; runs end-to-end now)
 ├── deploy/
-│   ├── gcp/                   # Terraform/gcloud: Apigee, Agent Engine, Vertex, AlloyDB, GCS,
+│   ├── gcp/                   # Terraform/gcloud: Apigee, Agent Runtime, Gemini Enterprise Agent Platform, AlloyDB, GCS,
 │   │                          #   Eventarc, DLP, Model Armor
 │   └── k8s/                   # Helm/Kustomize: Kong/Envoy, ADK pods, OpenSearch, pgvector, MinIO,
 │                              #   OTel stack, KEDA, hosted-endpoint wiring
@@ -511,13 +510,13 @@ One env var (`AIBOX_PROFILE`) selects a YAML profile. The profile binds each por
 # profiles/gcp.yaml
 profile: gcp
 adapters:
-  orchestrator: agentengine
+  orchestrator: agentruntime
   llm:          gemini
-  embedder:     vertex
-  reranker:     vertex
+  embedder:     geap
+  reranker:     geap
   object_store: gcs
   relational:   alloydb
-  retriever:    vertex
+  retriever:    agentsearch
   parser:       docai
   guardrail:    modelarmor
   dlp:          clouddlp
@@ -585,15 +584,15 @@ flowchart TD
     LB --> APG["Apigee X<br/>OIDC verify, SpikeArrest, Quota"]
     APG -->|mTLS + signed identity header| CR["Cloud Run: CORE (FastAPI + SPA)<br/>AIBOX_PROFILE=gcp"]
 
-    CR -->|run_turn| AE["Vertex AI Agent Engine + ADK<br/>Orchestrator->Retriever->Generator->Validator"]
-    AE -->|LLM| GEM["Vertex AI: Gemini Flash"]
-    AE -->|retrieve tool (ABAC pushed down)| VAS["Vertex AI Search<br/>auto-embed + RRF + reranker"]
+    CR -->|run_turn| AE["Agent Runtime on Gemini Enterprise Agent Platform + ADK<br/>Orchestrator->Retriever->Generator->Validator"]
+    AE -->|LLM| GEM["Gemini Enterprise Agent Platform: Gemini Flash"]
+    AE -->|retrieve tool (ABAC pushed down)| VAS["Agent Search on Gemini Enterprise Agent Platform<br/>auto-embed + RRF + reranker"]
     AE -->|Validator groundedness gate| GEM
     CR -->|Guardrail| MA["Model Armor (inject + RAI + DLP)"]
     CR -->|chunk text + neighbors + ABAC SQL| ADB[("AlloyDB (ScaNN)")]
     CR -->|ObjectStore| GCS[("GCS (versioned, CMEK)")]
     CR -->|DLP| DLP["Cloud DLP / SDP"]
-    CR -->|Telemetry/Eval| OBS["Cloud Observability + Vertex Gen AI Eval"]
+    CR -->|Telemetry/Eval| OBS["Cloud Observability + Gemini Enterprise Agent Platform Evals"]
 
     GCS -->|object.finalized| EVT["Eventarc"]
     EVT --> FN["Cloud Function (2nd gen)<br/>handle_document_uploaded"]
@@ -629,15 +628,15 @@ flowchart TD
 ```
 
 The on-prem diagram shows the four hosted inference endpoints explicitly: Gemma (LLM), embedder, bge
-(reranker), Llama Guard (safety). GCP folds the first three of those into managed Vertex services.
+(reranker), Llama Guard (safety). GCP folds the first three of those into managed Gemini Enterprise Agent Platform services.
 
 ## 7. Phased delivery roadmap
 
 | Phase | What ships | Adapters active | Demo milestone |
 |---|---|---|---|
 | 0. Carve-out (shared Year-0 build, costed once) | Refactor prototype into `core/` + `core/agents/` + `adapters/local/*` + ports + static-registry composition root + profiles. `SimpleOrchestrator` runs the 4-step graph in-process. Contract tests green. | `local/*` | `AIBOX_PROFILE=local` runs the AI Box demo (upload -> access-aware search -> multi-doc agentic chat with Validator + citations) on SQLite/FTS5/pypdf/Anthropic. (This profile runs end-to-end now.) |
-| 1. GCP data + retrieval spine | AlloyDB store, GCS object store, Document AI parser, Vertex AI Search retriever, Eventarc async ingest. ABAC compiled to Vertex filter-DSL and validated as pushdown. | gcp data/retrieval + `local` LLM/orchestrator | `AIBOX_PROFILE=gcp` ingests a PDF via Eventarc, layout-parsed by Document AI, retrieved with managed rerank, ACL-filtered. Side-by-side recall vs FTS5. |
-| 2. GCP agent + generation + edge | Gemini Flash LLM, Agent Engine + ADK orchestrator (Validator on Gemini), Apigee/IAP identity (dev path off) + Cloud Armor, Cloud Observability + Vertex Eval. | gcp llm/orchestrator/identity/telemetry | Full GCP agentic RAG behind Apigee with OIDC; groundedness gate active; faithfulness/Recall@k/MRR on a dashboard. |
+| 1. GCP data + retrieval spine | AlloyDB store, GCS object store, Document AI parser, Agent Search on Gemini Enterprise Agent Platform retriever, Eventarc async ingest. ABAC compiled to Agent Search filter-DSL and validated as pushdown. | gcp data/retrieval + `local` LLM/orchestrator | `AIBOX_PROFILE=gcp` ingests a PDF via Eventarc, layout-parsed by Document AI, retrieved with managed rerank, ACL-filtered. Side-by-side recall vs FTS5. |
+| 2. GCP agent + generation + edge | Gemini Flash LLM, Agent Runtime + ADK orchestrator (Validator on Gemini), Apigee/IAP identity (dev path off) + Cloud Armor, Cloud Observability + Gemini Enterprise Agent Platform Evals. | gcp llm/orchestrator/identity/telemetry | Full GCP agentic RAG behind Apigee with OIDC; groundedness gate active; faithfulness/Recall@k/MRR on a dashboard. |
 | 3. GCP safety | Model Armor guardrail (inject + RAI), Cloud DLP at the three scrub seams. | gcp guardrail/dlp | Injection prompt blocked with audited refusal; PII redacted at ingest and in answers. GCP target complete. |
 | 4. On-prem data + retrieval | pgvector store, MinIO, Tika parser, OpenSearch + bge-reranker + hosted embedder, Knative/KEDA ingest. Same contract tests pass. ABAC compiled to OpenSearch DLS. | onprem data/retrieval/embedder/reranker | `AIBOX_PROFILE=onprem` on K8s runs the identical demo. NEGATIVE ACL test green on OpenSearch DLS. |
 | 5. On-prem agent + safety + obs | Gemma LLM (LiteLLM), ADK-on-K8s orchestrator (Validator on Gemma), Kong/Envoy OIDC, Llama Guard + NeMo + Presidio, OTel + Prom + Grafana + Langfuse/RAGAS/Phoenix. | `onprem/*` complete | Both targets pass the same conformance suite and the same eval golden set. The four-endpoint on-prem inference fan-out is provisioned and measured. |
@@ -664,18 +663,18 @@ The on-prem diagram shows the four hosted inference endpoints explicitly: Gemma 
 
 | New work | Scope |
 |---|---|
-| OrchestratorRuntime adapters | gcp Agent Engine + ADK, onprem ADK-on-K8s, local in-process. Prompts/graph reused from CORE; only model binding + host differ. |
-| AclCompiler implementations | shared SQL compiler (sqlite/pgvector/alloydb), Vertex filter-DSL compiler, OpenSearch DLS compiler. |
+| OrchestratorRuntime adapters | gcp Agent Runtime + ADK, onprem ADK-on-K8s, local in-process. Prompts/graph reused from CORE; only model binding + host differ. |
+| AclCompiler implementations | shared SQL compiler (sqlite/pgvector/alloydb), Agent Search filter-DSL compiler, OpenSearch DLS compiler. |
 | LLM adapters | gcp Gemini, onprem Gemma (LiteLLM), local Anthropic. `ModelCapabilities` drives `k`/history; CORE keeps validate-and-repair. |
-| Embedder + Reranker adapters | onprem hosted endpoints (two of the four inference dependencies); no-ops on GCP (folded into Vertex AI Search). |
+| Embedder + Reranker adapters | onprem hosted endpoints (two of the four inference dependencies); no-ops on GCP (folded into Agent Search on Gemini Enterprise Agent Platform). |
 | RelationalStore adapters | gcp AlloyDB (ScaNN), onprem pgvector (HNSW); shared Postgres-family SQL; only DSN + index DDL differ. |
-| Retriever adapters | gcp Vertex AI Search, onprem OpenSearch + bge; the biggest quality lever; ABAC pushdown tested. |
+| Retriever adapters | gcp Agent Search on Gemini Enterprise Agent Platform, onprem OpenSearch + bge; the biggest quality lever; ABAC pushdown tested. |
 | DocumentParser adapters | gcp Document AI, onprem Tika/Unstructured. |
 | ObjectStore adapter | one S3 client (GCS + MinIO) + small native-GCS branch for V4 signing/versioning/CMEK. |
 | Guardrail adapters | gcp Model Armor, onprem Llama Guard 4 + NeMo + Presidio. |
 | DLP adapters | gcp Cloud DLP, onprem Presidio; canonical info-type enum + per-adapter mapping. |
 | EventBus adapters | gcp Eventarc + Cloud Function, onprem Knative/KEDA/Argo, local inline; shared `handle_document_uploaded`. |
-| Telemetry + Eval adapters | gcp Cloud Observability + Vertex Eval, onprem OTel + Langfuse/RAGAS/Phoenix. |
+| Telemetry + Eval adapters | gcp Cloud Observability + Gemini Enterprise Agent Platform Evals, onprem OTel + Langfuse/RAGAS/Phoenix. |
 | Identity adapters | gcp Apigee/IAP, onprem Kong/Envoy + OIDC, local dev (profile-gated). |
 | Notifier adapters | gcp Pub/Sub + SendGrid, onprem SMTP, local outbox. |
 | Composition root + profiles + registry | `core/container.py`, `infra/settings.py`, `profiles/*.yaml`. |
@@ -707,11 +706,9 @@ same suite the `local` profile passes.
 - Profile status:
   - `local`: runs end-to-end now (SQLite/FTS5/pypdf/Anthropic, in-process orchestrator).
   - `onprem`: code-complete against docker-compose; depends on four external hosted inference endpoints.
-  - `gcp`: real adapters that require a live GCP project (Vertex, Agent Engine, AlloyDB, Vertex AI
-    Search, Document AI, Eventarc, Cloud DLP, Model Armor, Apigee/IAP).
+  - `gcp`: real adapters that require a live GCP project (Gemini Enterprise Agent Platform, Agent Runtime, AlloyDB, Agent Search on Gemini Enterprise Agent Platform, Document AI, Eventarc, Cloud DLP, Model Armor, Apigee/IAP).
 - The agent layer is **ADK in both targets**, with the prompts and the
-  Orchestrator->Retriever->Generator->Validator graph owned by CORE; GCP runs it on Vertex AI Agent
-  Engine, on-prem runs the same ADK app on K8s, and local runs an in-process runner of the same prompts.
+  Orchestrator->Retriever->Generator->Validator graph owned by CORE; GCP runs it on Agent Runtime on Gemini Enterprise Agent Platform, on-prem runs the same ADK app on K8s, and local runs an in-process runner of the same prompts.
 
 ## See also
 

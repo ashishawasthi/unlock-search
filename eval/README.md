@@ -38,7 +38,7 @@ python -m eval.harness --http http://127.0.0.1:8000 --user alice --password alic
 ## Metric glossary
 
 The harness computes the lightweight, dependency-free subset directly. The fuller RAG metrics
-below are the SAME names that a managed evaluator (Vertex Gen AI Eval) or an OSS evaluator
+below are the SAME names that a managed evaluator (Gemini Enterprise Agent Platform Evals) or an OSS evaluator
 (RAGAS / Langfuse / Phoenix) computes; in this architecture they are produced behind the `Eval`
 port (`core.ports.Eval.score_turn`), so the metric names are stable across backends.
 
@@ -48,8 +48,8 @@ port (`core.ports.Eval.score_turn`), so the metric names are stable across backe
 | MRR | yes (in-process) | Mean Reciprocal Rank: 1/rank of the first correct document. Rewards ranking the right source higher. |
 | Answer keyword-coverage | yes | Fraction of `expected_answer_keywords` present in the answer. A cheap faithfulness/correctness proxy with no judge model. |
 | Grounded rate | yes | Fraction of answers the Validator gate marked grounded (every cited `[n]` points to a provided excerpt). |
-| Faithfulness | via Eval port | Are the answer's claims supported by the retrieved context (no hallucination)? RAGAS `faithfulness`; Vertex `groundedness`. |
-| Answer relevance | via Eval port | Does the answer actually address the question? RAGAS `answer_relevancy`; Vertex `answer_relevance`. |
+| Faithfulness | via Eval port | Are the answer's claims supported by the retrieved context (no hallucination)? RAGAS `faithfulness`; Gemini Enterprise Agent Platform `groundedness`. |
+| Answer relevance | via Eval port | Does the answer actually address the question? RAGAS `answer_relevancy`; Gemini Enterprise Agent Platform `answer_relevance`. |
 | Context precision | via Eval port | Of the retrieved chunks, how many are relevant (signal vs noise in the context window)? |
 | Context recall | via Eval port | Of the facts needed to answer, how many appear in the retrieved context? |
 | Chunk utilization | via Eval port | Share of retrieved chunks the answer actually drew on. Low values mean over-retrieval. |
@@ -61,7 +61,7 @@ port (`core.ports.Eval.score_turn`), so the metric names are stable across backe
 ```mermaid
 flowchart LR
     H["eval/harness.py<br/>golden.jsonl"] --> E["Eval port<br/>core.ports.Eval"]
-    E --> V["Vertex Gen AI Eval<br/>(managed, gcp profile)"]
+    E --> V["Gemini Enterprise Agent Platform Evals<br/>(managed, gcp profile)"]
     E --> O["RAGAS / Langfuse / Phoenix<br/>(OSS, onprem/local)"]
     V --> M["faithfulness, answer-relevance,<br/>context-precision/recall, drift"]
     O --> M

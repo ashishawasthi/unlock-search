@@ -1,5 +1,5 @@
 """
-GCP Retriever: Vertex AI Search (Discovery Engine).
+GCP Retriever: Agent Search on Gemini Enterprise Agent Platform (Discovery Engine).
 
 Backing service: a Discovery Engine data store + serving config in a given project /
 location. Chunks are indexed as structured documents carrying their TEXT plus the
@@ -31,7 +31,7 @@ def _q(v) -> str:
     return '"' + str(v).replace('"', '\\"') + '"'
 
 
-class VertexSearchRetriever:
+class AgentSearchRetriever:
     def __init__(self, project: str | None = None, location: str = "global",
                  data_store_id: str | None = None,
                  serving_config_id: str = "default_search",
@@ -43,7 +43,7 @@ class VertexSearchRetriever:
         self.serving_config_id = serving_config_id
         self.branch = branch
         if not (project and data_store_id):
-            raise RuntimeError("vertex retriever needs project and data_store_id (config.retriever)")
+            raise RuntimeError("agentsearch retriever needs project and data_store_id (config.retriever)")
         self._search = None
         self._docsvc = None
 

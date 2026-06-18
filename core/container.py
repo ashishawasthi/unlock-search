@@ -21,17 +21,17 @@ from infra.settings import load_profile
 REGISTRY: dict[str, dict[str, str]] = {
     "llm": {
         "anthropic": "adapters.local.llm_anthropic:AnthropicLLM",
-        "gemini":    "adapters.gcp.llm_gemini:VertexGeminiLLM",
+        "gemini":    "adapters.gcp.llm_gemini:GeminiLLM",
         "gemma":     "adapters.onprem.llm_gemma:GemmaLLM",
     },
     "embedder": {
         "noop":      "adapters.local.embedder_noop:NoopEmbedder",
-        "vertex":    "adapters.gcp.embedder_vertex:VertexEmbedder",
+        "geap":      "adapters.gcp.embedder_geap:GeapEmbedder",
         "hosted":    "adapters.onprem.embedder_hosted:HostedEmbedder",
     },
     "reranker": {
         "noop":      "adapters.local.reranker_noop:NoopReranker",
-        "vertex":    "adapters.gcp.reranker_vertex:VertexReranker",
+        "geap":      "adapters.gcp.reranker_geap:GeapReranker",
         "bge":       "adapters.onprem.reranker_bge:BgeReranker",
     },
     "object_store": {
@@ -46,7 +46,7 @@ REGISTRY: dict[str, dict[str, str]] = {
     },
     "retriever": {
         "fts5":      "adapters.local.retriever_fts5:Fts5Retriever",
-        "vertex":    "adapters.gcp.retriever_vertex:VertexSearchRetriever",
+        "agentsearch":"adapters.gcp.retriever_agentsearch:AgentSearchRetriever",
         "opensearch":"adapters.onprem.retriever_opensearch:OpenSearchRetriever",
     },
     "parser": {
@@ -86,7 +86,7 @@ REGISTRY: dict[str, dict[str, str]] = {
     },
     "orchestrator": {
         "simple":    "adapters.local.orchestrator_simple:SimpleOrchestrator",
-        "agentengine":"adapters.gcp.orchestrator_agentengine:AgentEngineOrchestrator",
+        "agentruntime":"adapters.gcp.orchestrator_agentruntime:AgentRuntimeOrchestrator",
         "adk":       "adapters.onprem.orchestrator_adk:AdkOrchestrator",
     },
 }

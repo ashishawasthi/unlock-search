@@ -9,7 +9,7 @@ execute() time so the SAME ABAC rule runs on SQLite, Postgres, and AlloyDB.
 
 Config / env:
   dsn:  libpq DSN, e.g. "postgresql://user:pass@host:5432/db" (or PGVECTOR_DSN /
-        ALLOYDB_DSN env). vector dim is 768 (matches the Vertex / hosted embedders).
+        ALLOYDB_DSN env). vector dim is 768 (matches the Gemini Enterprise Agent Platform / hosted embedders).
 
 Importable without psycopg installed: the SDK is lazy-imported inside __init__.
 """
