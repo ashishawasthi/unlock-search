@@ -7,9 +7,11 @@ header: 'gcp-unlock: GCP-managed vs No-Lock-In On-Prem'
 ---
 
 <style>
+/* One uniform font size for everything except the slide title (headings). */
 section { font-size: 20px; }
-table { font-size: 15px; }
-blockquote { font-size: 17px; }
+table { font-size: 20px; }
+blockquote { font-size: 20px; }
+header, footer, section::after { font-size: 20px; }  /* running header + page number */
 h2 { margin-bottom: 0.3em; }
 li { margin-bottom: 0.2em; }
 </style>

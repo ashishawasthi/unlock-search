@@ -74,7 +74,7 @@ flowchart TB
 
 Same codebase, same domain logic — the comparison is purely the **platform** around the model
 (inference is an external hosted endpoint in **both** targets). Condensed below; the full
-dimension-by-dimension analysis lives in the [comparison deck (PDF — downloads)](https://raw.githubusercontent.com/ashishawasthi/unlock-search/main/docs/comparison/gcp-vs-onprem.pdf).
+dimension-by-dimension analysis lives in the [comparison deck](https://raw.githubusercontent.com/ashishawasthi/unlock-search/main/docs/comparison/gcp-vs-onprem.pdf).
 
 | Dimension | GCP-managed | On-prem | Edge |
 |---|---|---|---|
