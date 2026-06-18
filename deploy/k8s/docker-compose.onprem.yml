@@ -1,0 +1,132 @@
+# Local stand-up of the on-prem profile's backing services + the CORE app.
+#
+#   docker compose -f deploy/k8s/docker-compose.onprem.yml up --build
+#   open http://localhost:8000
+#
+# This gives a WORKING onprem data plane on one machine: PostgreSQL+pgvector (relational
+# store), OpenSearch (retriever), MinIO (object store). Apache Tika is included for rich
+# parsing; the parser falls back to pypdf if Tika is down.
+#
+# ----------------------------------------------------------------------------------------
+# WHAT STILL NEEDS A HOSTED INFERENCE ENDPOINT (not stood up here; they need GPUs):
+#   - LLM (Gemma):      set GEMMA_BASE_URL to an OpenAI-compatible /v1 server (vLLM/TGI/Ollama).
+#   - Embedder:         set EMBED_ENDPOINT to an OpenAI-compatible /v1/embeddings server (BGE).
+#   - Reranker:         set RERANK_ENDPOINT to a hosted bge-reranker (optional; passthrough if unset).
+#   - Safety (Llama Guard): set LLAMAGUARD_BASE_URL to a hosted Llama Guard classifier.
+# Until GEMMA_BASE_URL is set the LLM raises "gemma-endpoint-unset"; the placeholder below
+# documents where to point it. Everything else (upload, ABAC, lexical search) works offline.
+# ----------------------------------------------------------------------------------------
+
+name: gcp-unlock-onprem
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: aibox
+      POSTGRES_PASSWORD: aibox
+      POSTGRES_DB: aibox
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aibox -d aibox"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  opensearch:
+    image: opensearchproject/opensearch:2.15.0
+    environment:
+      discovery.type: single-node
+      # Dev only: security plugin off so the app talks plain HTTP with no auth.
+      DISABLE_SECURITY_PLUGIN: "true"
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+      bootstrap.memory_lock: "true"
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    ports:
+      - "9200:9200"
+    volumes:
+      - osdata:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: aibox
+      MINIO_ROOT_PASSWORD: aiboxsecret
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # web console
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  tika:
+    image: apache/tika:latest-full
+    ports:
+      - "9998:9998"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9998/tika || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ../..
+      dockerfile: infra/Dockerfile
+      args:
+        EXTRAS: onprem
+    image: gcp-unlock:onprem
+    environment:
+      AIBOX_PROFILE: onprem
+      # --- relational: pgvector (PgVectorStore reads config.relational.dsn via dsn_env: PG_DSN) ---
+      PG_DSN: "postgresql://aibox:aibox@postgres:5432/aibox"
+      # --- retriever: OpenSearch (OpenSearchRetriever reads url_env: OPENSEARCH_URL) ---
+      OPENSEARCH_URL: "http://opensearch:9200"
+      # security plugin is off in dev, so no OPENSEARCH_USER / OPENSEARCH_PASSWORD needed.
+      # --- object store: MinIO (MinioObjectStore reads endpoint_url_env / access_key_env / secret_key_env) ---
+      MINIO_ENDPOINT: "http://minio:9000"
+      MINIO_ACCESS_KEY: aibox
+      MINIO_SECRET_KEY: aiboxsecret
+      # --- parser: Tika (TikaParser reads tika_url_env: TIKA_URL; falls back to pypdf if down) ---
+      TIKA_URL: "http://tika:9998"
+      # --- telemetry: OTel collector endpoint (optional; logs to stdout if the collector is absent) ---
+      # OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
+      # --- identity: dev gateway header (OidcIdentity trusts a gateway-attested header) ---
+      OIDC_IDENTITY_HEADER: "x-aibox-user"
+      # --- HOSTED INFERENCE ENDPOINTS (point these at real GPU-backed servers) ---
+      GEMMA_BASE_URL: "${GEMMA_ENDPOINT:-}"      # OpenAI-compatible /v1 (vLLM/TGI/Ollama). REQUIRED for chat.
+      GEMMA_MODEL: "gemma-2-9b-it"
+      EMBED_ENDPOINT: "${EMBED_ENDPOINT:-}"      # OpenAI-compatible /v1/embeddings (BGE)
+      RERANK_ENDPOINT: "${RERANK_ENDPOINT:-}"    # hosted bge-reranker (optional)
+      LLAMAGUARD_BASE_URL: "${LLAMAGUARD_ENDPOINT:-}"   # hosted Llama Guard (optional in dev)
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres: { condition: service_healthy }
+      opensearch: { condition: service_healthy }
+      minio: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  osdata:
+  miniodata:

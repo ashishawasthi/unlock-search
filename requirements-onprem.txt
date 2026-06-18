@@ -1,0 +1,36 @@
+# On-prem profile dependencies (open-source data plane, no cloud SDKs).
+# Install on top of the base requirements: pip install -r requirements.txt -r requirements-onprem.txt
+# All of these are lazy-imported by their adapters, so the package stays importable for CI
+# even before this file is installed.
+
+# relational: PostgreSQL + pgvector
+psycopg[binary]
+pgvector
+
+# retriever: OpenSearch hybrid BM25 + kNN
+opensearch-py
+
+# object store: S3-compatible (MinIO / Ceph RGW)
+boto3
+
+# parser: Apache Tika / unstructured (optional rich extraction; pypdf is the fallback)
+tika
+unstructured
+
+# DLP: Microsoft Presidio
+presidio-analyzer
+presidio-anonymizer
+
+# guardrail: NeMo Guardrails + Llama Guard
+nemoguardrails
+
+# LLM gateway used by the gemma/hosted adapters (OpenAI-compatible routing)
+litellm
+
+# telemetry: OpenTelemetry + Langfuse tracing
+opentelemetry-sdk
+opentelemetry-exporter-otlp
+langfuse
+
+# HTTP client (embedder / reranker / hosted LLM)
+httpx

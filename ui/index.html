@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Box</title>
+<style>
+/* ============================================================
+   AIBox — Design System (from AIBox-Design/css/aibox.css)
+   navy #0B1F3A + electric blue #1E6FD9 · Space Grotesk + IBM Plex
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --navy-900:#0B1F3A; --navy-800:#122B4D; --navy-700:#1B3A63; --navy-600:#2A4D7C;
+  --blue-700:#1751A8; --blue-600:#1E6FD9; --blue-500:#3A86E8; --blue-100:#DCE9FC; --blue-50:#EEF4FE;
+  --ink-900:#0B1F3A; --ink-700:#2E3D52; --ink-500:#5A6B82; --ink-400:#8693A6; --ink-300:#AAB4C2;
+  --line-200:#E5E9EF; --line-100:#EEF1F5;
+  --canvas:#F6F8FB; --surface:#FFFFFF; --surface-2:#FBFCFE;
+  --amber-600:#B7791F; --amber-100:#FBEBCF; --amber-50:#FDF6E9;
+  --green-700:#1B7A4B; --green-100:#D6F0E0; --green-50:#ECF8F1;
+  --red-600:#C0392B; --red-50:#FCEEEC; --purple-600:#6D4AB8; --purple-50:#F1ECFB;
+  --cl-public:#5A6B82; --cl-internal:#1E6FD9; --cl-confidential:#B7791F; --cl-restricted:#C0392B; --cl-board:#6D4AB8;
+  --r-xs:6px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:22px; --r-pill:999px;
+  --sh-xs:0 1px 2px rgba(11,31,58,.06);
+  --sh-sm:0 1px 3px rgba(11,31,58,.08), 0 1px 2px rgba(11,31,58,.04);
+  --sh-md:0 4px 16px rgba(11,31,58,.08), 0 1px 3px rgba(11,31,58,.05);
+  --sh-lg:0 16px 40px rgba(11,31,58,.12), 0 4px 12px rgba(11,31,58,.06);
+  --sh-focus:0 0 0 3px rgba(30,111,217,.18);
+  --font-ui:'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-display:'Space Grotesk', 'IBM Plex Sans', sans-serif;
+  --font-mono:'IBM Plex Mono', ui-monospace, monospace;
+  --topbar-h:64px; --rail-w:248px;
+}
+* { box-sizing:border-box; }
+html, body { margin:0; padding:0; }
+body { font-family:var(--font-ui); color:var(--ink-700); background:var(--canvas); -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; font-size:15px; line-height:1.5; }
+button { font-family:inherit; cursor:pointer; }
+input, textarea, select { font-family:inherit; }
+::selection { background:var(--blue-100); color:var(--navy-900); }
+*::-webkit-scrollbar { width:10px; height:10px; }
+*::-webkit-scrollbar-thumb { background:#D4DAE3; border-radius:999px; border:3px solid transparent; background-clip:padding-box; }
+*::-webkit-scrollbar-thumb:hover { background:#BCC4D0; background-clip:padding-box; }
+*::-webkit-scrollbar-track { background:transparent; }
+
+.h-display { font-family:var(--font-display); font-weight:600; color:var(--ink-900); letter-spacing:-0.02em; line-height:1.1; }
+.h1 { font-family:var(--font-display); font-weight:600; font-size:30px; letter-spacing:-0.02em; color:var(--ink-900); line-height:1.15; }
+.h2 { font-family:var(--font-display); font-weight:600; font-size:22px; letter-spacing:-0.01em; color:var(--ink-900); line-height:1.2; }
+.h3 { font-weight:600; font-size:17px; color:var(--ink-900); letter-spacing:-0.01em; }
+.lbl { font-size:11px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; color:var(--ink-400); }
+.mono { font-family:var(--font-mono); }
+.muted { color:var(--ink-500); }
+.dim { color:var(--ink-400); }
+
+.app { display:grid; grid-template-columns:var(--rail-w) minmax(0,1fr); height:100vh; overflow:hidden; }
+.rail { background:var(--surface); border-right:1px solid var(--line-200); display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+.rail-logo { display:flex; align-items:center; gap:11px; padding:18px 20px 16px; }
+.rail-logo .mark { width:34px; height:34px; border-radius:9px; flex:0 0 auto; box-shadow:var(--sh-xs); }
+.rail-logo .wordmark { font-family:var(--font-display); font-weight:600; font-size:19px; color:var(--navy-900); letter-spacing:-0.01em; }
+.rail-logo .wordmark b { color:var(--blue-600); font-weight:600; }
+.rail-nav { padding:6px 12px; display:flex; flex-direction:column; gap:2px; overflow-y:auto; flex:1; }
+.nav-section { margin-top:16px; padding:4px 10px 6px; }
+.nav-item { display:flex; align-items:center; gap:11px; padding:9px 11px; border-radius:var(--r-sm); color:var(--ink-500); font-weight:500; font-size:14.5px; border:none; background:none; text-align:left; width:100%; transition:background .12s, color .12s; }
+.nav-item svg { width:19px; height:19px; flex:0 0 auto; }
+.nav-item:hover { background:var(--line-100); color:var(--ink-900); }
+.nav-item.active { background:var(--blue-50); color:var(--blue-700); font-weight:600; }
+.nav-item.active svg { color:var(--blue-600); }
+.nav-item .count { margin-left:auto; font-size:11.5px; font-weight:600; background:var(--line-100); color:var(--ink-500); padding:1px 7px; border-radius:var(--r-pill); }
+.nav-item.active .count { background:var(--blue-100); color:var(--blue-700); }
+.nav-item .dot { margin-left:auto; width:7px; height:7px; border-radius:50%; background:var(--blue-600); }
+.rail-foot { border-top:1px solid var(--line-200); padding:12px; }
+
+.main { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+.topbar { height:var(--topbar-h); flex:0 0 auto; background:rgba(255,255,255,.86); backdrop-filter:saturate(1.4) blur(8px); border-bottom:1px solid var(--line-200); display:flex; align-items:center; gap:16px; padding:0 24px; z-index:20; }
+.content { flex:1; overflow-y:auto; }
+.content-pad { padding:30px 36px 60px; max-width:1240px; margin:0 auto; }
+
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:38px; padding:0 16px; border-radius:var(--r-sm); font-weight:600; font-size:14px; border:1px solid transparent; transition:background .14s, box-shadow .14s, border-color .14s, transform .05s; white-space:nowrap; }
+.btn:active { transform:translateY(.5px); }
+.btn svg { width:17px; height:17px; }
+.btn-primary { background:var(--blue-600); color:#fff; box-shadow:var(--sh-xs); }
+.btn-primary:hover { background:var(--blue-700); }
+.btn-ghost { background:var(--surface); color:var(--ink-700); border-color:var(--line-200); }
+.btn-ghost:hover { background:var(--line-100); border-color:#D8DEE7; }
+.btn-quiet { background:transparent; color:var(--ink-500); }
+.btn-quiet:hover { background:var(--line-100); color:var(--ink-900); }
+.btn-amber { background:var(--amber-600); color:#fff; }
+.btn-amber:hover { background:#9c660f; }
+.btn-danger { background:var(--surface); color:var(--red-600); border-color:#EAC7C2; }
+.btn-danger:hover { background:var(--red-50); }
+.btn-sm { height:32px; padding:0 12px; font-size:13px; }
+.btn-lg { height:44px; padding:0 22px; font-size:15px; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.btn-block { width:100%; }
+.icon-btn { width:38px; height:38px; border-radius:var(--r-sm); display:inline-flex; align-items:center; justify-content:center; background:var(--surface); border:1px solid var(--line-200); color:var(--ink-500); transition:background .12s, color .12s, border-color .12s; }
+.icon-btn:hover { background:var(--line-100); color:var(--ink-900); }
+.icon-btn svg { width:18px; height:18px; }
+
+.field { display:flex; flex-direction:column; gap:7px; }
+.field > label { font-size:13px; font-weight:600; color:var(--ink-700); }
+.field .hint { font-size:12.5px; color:var(--ink-400); }
+.input, .select, .textarea { width:100%; border:1px solid var(--line-200); background:var(--surface); border-radius:var(--r-sm); padding:10px 13px; font-size:14px; color:var(--ink-900); transition:border-color .14s, box-shadow .14s; }
+.input::placeholder, .textarea::placeholder { color:var(--ink-400); }
+.input:focus, .select:focus, .textarea:focus { outline:none; border-color:var(--blue-500); box-shadow:var(--sh-focus); }
+.textarea { resize:vertical; min-height:84px; line-height:1.5; }
+.search-box { position:relative; display:flex; align-items:center; }
+.search-box svg.lead { position:absolute; left:14px; width:18px; height:18px; color:var(--ink-400); pointer-events:none; }
+.search-box input { padding-left:42px; height:42px; }
+
+.card { background:var(--surface); border:1px solid var(--line-200); border-radius:var(--r-md); }
+.card-pad { padding:20px; }
+.card-hover { transition:box-shadow .16s, border-color .16s, transform .16s; }
+.card-hover:hover { box-shadow:var(--sh-md); border-color:#D8DEE7; }
+.panel { background:var(--surface); border:1px solid var(--line-200); border-radius:var(--r-lg); }
+
+.badge { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; padding:3px 9px; border-radius:var(--r-pill); background:var(--line-100); color:var(--ink-500); white-space:nowrap; line-height:1.4; }
+.badge svg { width:12px; height:12px; }
+.badge.blue { background:var(--blue-50); color:var(--blue-700); }
+.badge.amber { background:var(--amber-50); color:var(--amber-600); }
+.badge.green { background:var(--green-50); color:var(--green-700); }
+.badge.red { background:var(--red-50); color:var(--red-600); }
+.badge.purple { background:var(--purple-50); color:var(--purple-600); }
+.badge.solid-blue { background:var(--blue-600); color:#fff; }
+.badge.outline { background:transparent; border:1px solid var(--line-200); color:var(--ink-500); }
+.attr { display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:12px; font-weight:500; padding:3px 9px; border-radius:var(--r-xs); background:var(--surface-2); border:1px solid var(--line-200); color:var(--ink-700); }
+.attr .k { color:var(--ink-400); }
+.attr.blue { background:var(--blue-50); border-color:var(--blue-100); color:var(--blue-700); }
+.clr { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; padding:3px 9px 3px 8px; border-radius:var(--r-pill); }
+.clr .ico { width:7px; height:7px; border-radius:50%; }
+.clr-public { background:#EEF1F5; color:var(--cl-public); } .clr-public .ico { background:var(--cl-public); }
+.clr-internal { background:var(--blue-50); color:var(--cl-internal); } .clr-internal .ico { background:var(--cl-internal); }
+.clr-confidential { background:var(--amber-50); color:var(--cl-confidential); } .clr-confidential .ico { background:var(--cl-confidential); }
+.clr-restricted { background:var(--red-50); color:var(--cl-restricted); } .clr-restricted .ico { background:var(--cl-restricted); }
+.clr-board { background:var(--purple-50); color:var(--cl-board); } .clr-board .ico { background:var(--cl-board); }
+.avatar { border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:600; color:#fff; flex:0 0 auto; font-size:13px; letter-spacing:.01em; }
+.ftype { width:38px; height:38px; border-radius:9px; display:inline-flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:10px; font-weight:600; color:#fff; flex:0 0 auto; letter-spacing:.02em; }
+kbd { font-family:var(--font-mono); font-size:11px; background:var(--surface); border:1px solid var(--line-200); border-bottom-width:2px; border-radius:5px; padding:1px 5px; color:var(--ink-500); }
+.seg { display:inline-flex; background:var(--line-100); border-radius:var(--r-sm); padding:3px; gap:2px; }
+.seg button { border:none; background:none; padding:6px 13px; border-radius:6px; font-size:13px; font-weight:600; color:var(--ink-500); transition:all .12s; }
+.seg button.on { background:var(--surface); color:var(--navy-900); box-shadow:var(--sh-xs); }
+.seg button:hover:not(.on) { color:var(--ink-900); }
+.hr { height:1px; background:var(--line-200); border:none; margin:0; }
+.vr { width:1px; align-self:stretch; background:var(--line-200); }
+.row { display:flex; align-items:center; gap:10px; }
+.col { display:flex; flex-direction:column; }
+.spread { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.wrap { flex-wrap:wrap; }
+.grow { flex:1; }
+.gap6{gap:6px;} .gap8{gap:8px;} .gap12{gap:12px;} .gap16{gap:16px;} .gap20{gap:20px;} .gap24{gap:24px;}
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.fade-up { opacity:1; animation:fadeUp .32s cubic-bezier(.2,.7,.3,1); }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.fade-in { opacity:1; animation:fadeIn .3s ease; }
+@media (prefers-reduced-motion: reduce) { .fade-up, .fade-in { animation:none; } }
+@keyframes popIn { from { opacity:0; transform:scale(.97); } to { opacity:1; transform:none; } }
+.scrim { position:fixed; inset:0; background:rgba(11,31,58,.42); backdrop-filter:blur(2px); display:flex; align-items:center; justify-content:center; z-index:100; animation:fadeIn .18s ease both; padding:24px; }
+.modal { background:var(--surface); border-radius:var(--r-lg); box-shadow:var(--sh-lg); width:100%; max-width:540px; max-height:88vh; overflow:hidden; display:flex; flex-direction:column; animation:popIn .22s cubic-bezier(.2,.8,.3,1) both; }
+.modal-head { padding:20px 24px; border-bottom:1px solid var(--line-200); }
+.modal-body { padding:24px; overflow-y:auto; }
+.modal-foot { padding:16px 24px; border-top:1px solid var(--line-200); display:flex; justify-content:flex-end; gap:10px; background:var(--surface-2); }
+.toast-wrap { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:10px; align-items:center; }
+.toast { background:var(--navy-900); color:#fff; padding:12px 18px; border-radius:var(--r-md); box-shadow:var(--sh-lg); display:flex; align-items:center; gap:11px; font-size:14px; font-weight:500; animation:popIn .2s ease both; }
+.toast svg { width:18px; height:18px; }
+.toast .ok { color:#5BD68C; }
+.bar { height:6px; background:var(--line-100); border-radius:999px; overflow:hidden; }
+.bar > i { display:block; height:100%; background:var(--blue-600); border-radius:999px; transition:width .4s ease; }
+.lock-grid { background-image:linear-gradient(var(--line-200) 1px, transparent 1px), linear-gradient(90deg, var(--line-200) 1px, transparent 1px); background-size:22px 22px; }
+.persona-card { display:flex; align-items:center; gap:10px; padding:7px 10px; border-radius:var(--r-sm); border:1px solid var(--line-200); background:var(--surface); transition:background .12s, border-color .12s; }
+.persona-card:hover { background:var(--line-100); }
+.tabs { display:flex; gap:4px; border-bottom:1px solid var(--line-200); }
+.tab { padding:11px 14px; font-size:14px; font-weight:600; color:var(--ink-500); border:none; background:none; border-bottom:2px solid transparent; margin-bottom:-1px; transition:color .12s, border-color .12s; }
+.tab:hover { color:var(--ink-900); }
+.tab.on { color:var(--blue-700); border-bottom-color:var(--blue-600); }
+.tbl { width:100%; border-collapse:collapse; font-size:13.5px; }
+.tbl th { text-align:left; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-400); padding:10px 14px; border-bottom:1px solid var(--line-200); white-space:nowrap; }
+.tbl td { padding:12px 14px; border-bottom:1px solid var(--line-100); color:var(--ink-700); vertical-align:middle; }
+.tbl tr:last-child td { border-bottom:none; }
+.tbl tbody tr { transition:background .1s; }
+.tbl tbody tr:hover { background:var(--surface-2); }
+.cite-chip { display:inline-flex; align-items:center; justify-content:center; min-width:17px; height:17px; padding:0 4px; margin:0 1px; vertical-align:2px; font-family:var(--font-mono); font-size:10.5px; font-weight:700; border-radius:5px; border:1px solid var(--blue-100); background:var(--blue-50); color:var(--blue-700); cursor:pointer; transition:background .12s, transform .08s, box-shadow .12s; line-height:1; }
+.cite-chip:hover { background:var(--blue-100); }
+.cite-chip[data-on="true"] { background:var(--blue-600); color:#fff; border-color:var(--blue-600); box-shadow:var(--sh-focus); }
+.think-dot { width:7px; height:7px; border-radius:50%; background:var(--blue-500); display:inline-block; animation:thinkPulse 1s ease-in-out infinite; }
+@keyframes thinkPulse { 0%, 100% { opacity:.25; transform:translateY(0); } 40% { opacity:1; transform:translateY(-3px); } }
+@keyframes slideInRight { from { transform:translateX(28px); opacity:.4; } to { transform:none; opacity:1; } }
+mark, .src-mark { background:var(--amber-100); color:var(--ink-900); border-radius:3px; padding:0 2px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, createContext, useContext } = React;
+
+/* ============================================================
+   API client — every call carries the JWT bearer token (set at login)
+   ============================================================ */
+let TOKEN = localStorage.getItem('aibox_token') || '';
+let onAuthFail = () => {};   // set by <Root> to drop back to the login screen on 401
+function setToken(t){ TOKEN = t; if(t) localStorage.setItem('aibox_token', t); else localStorage.removeItem('aibox_token'); }
+const authHeader = () => TOKEN ? {'Authorization':'Bearer '+TOKEN} : {};
+const api = (p, opt={}) => fetch('/api'+p, {
+  ...opt,
+  headers:{ ...authHeader(),
+    ...(opt.body && !(opt.body instanceof FormData) ? {'Content-Type':'application/json'} : {}),
+    ...(opt.headers||{}) }
+}).then(async r => {
+  if(r.status === 401){ setToken(''); onAuthFail(); throw new Error('Session expired'); }
+  if(!r.ok) throw new Error((await r.json().catch(()=>({}))).detail || r.status);
+  return r.json();
+});
+
+// View/download a file with the bearer token attached (a bare link would drop the auth header).
+async function _open(url, download, onErr){
+  const win = download ? null : window.open('about:blank','_blank');
+  try{
+    const r = await fetch(url, {headers:authHeader()});
+    if(!r.ok){ if(win) win.close(); onErr && onErr(`Cannot open document (${r.status})`); return; }
+    const blobUrl = URL.createObjectURL(await r.blob());
+    if(download){
+      const fn = ((r.headers.get('Content-Disposition')||'').match(/filename="([^"]+)"/)||[])[1] || 'document';
+      const a = document.createElement('a'); a.href=blobUrl; a.download=fn; document.body.appendChild(a); a.click(); a.remove();
+    } else { win.location = blobUrl; }
+    setTimeout(()=>URL.revokeObjectURL(blobUrl), 60000);
+  }catch(e){ if(win) win.close(); onErr && onErr('Open failed: '+e.message); }
+}
+function openFile(id, download, onErr){ return _open(`/api/documents/${id}/file${download?'?download=1':''}`, download, onErr); }
+function openVersionFile(id, versionNo, onErr){ return _open(`/api/documents/${id}/versions/${versionNo}/file?download=1`, true, onErr); }
+
+const FILE_COLORS = { pdf:'#C0392B', docx:'#2A5FB8', pptx:'#C2591F', xlsx:'#1B7A4B', csv:'#1B7A4B', txt:'#5A6B82', md:'#5A6B82', png:'#6D4AB8', code:'#0B1F3A' };
+const AV_COLORS = ['#1E6FD9','#6D4AB8','#1B7A4B','#B7791F','#C0392B','#2A4D7C','#2B8AA6','#A8497F'];
+function avColor(name){ let h=0; for(const c of (name||'')) h=(h*31+c.charCodeAt(0))%AV_COLORS.length; return AV_COLORS[h]; }
+function initials(name){ return (name||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+function extOf(name){ const e=((name||'').toLowerCase().split('.').pop()||''); return FILE_COLORS[e]?e:'doc'; }   // safe glyph type when no extension
+function relTime(ts){ // epoch seconds -> "x ago"
+  if(!ts) return '';
+  const s = Math.max(1, Math.floor(Date.now()/1000 - ts));
+  if(s<60) return 'just now'; const m=Math.floor(s/60); if(m<60) return m+' min ago';
+  const h=Math.floor(m/60); if(h<24) return h+' hour'+(h>1?'s':'')+' ago';
+  const d=Math.floor(h/24); if(d<30) return d+' day'+(d>1?'s':'')+' ago';
+  return new Date(ts*1000).toLocaleDateString();
+}
+
+/* ============================================================
+   Icons (Lucide-style)
+   ============================================================ */
+const ICONS = {
+  search:'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM21 21l-4.3-4.3',
+  library:'M3 5h18M3 12h18M3 19h18',
+  grid:'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  chat:'M21 11.5a8.5 8.5 0 0 1-12.5 7.5L3 21l2-5.5A8.5 8.5 0 1 1 21 11.5Z',
+  upload:'M12 16V4M7 9l5-5 5 5M5 20h14',
+  doc:'M14 3v5h5M7 3h8l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z',
+  lock:'M6 11h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1ZM8 11V7a4 4 0 0 1 8 0v4',
+  unlock:'M6 11h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1ZM8 11V7a4 4 0 0 1 7.5-2',
+  shield:'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3Z',
+  shieldCheck:'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3ZM9 12l2 2 4-4',
+  bell:'M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0',
+  user:'M20 21a8 8 0 0 0-16 0M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
+  users:'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM23 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11',
+  check:'M20 6L9 17l-5-5',
+  checkCircle:'M22 11.1V12a10 10 0 1 1-5.9-9.1M22 4L12 14l-3-3',
+  x:'M18 6L6 18M6 6l12 12',
+  xCircle:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM15 9l-6 6M9 9l6 6',
+  chevDown:'M6 9l6 6 6-6', chevRight:'M9 6l6 6-6 6', chevLeft:'M15 6l-6 6 6 6',
+  arrowRight:'M5 12h14M13 6l6 6-6 6',
+  plus:'M12 5v14M5 12h14',
+  sliders:'M4 6h16M4 12h16M4 18h16M9 6v0M15 12v0M7 18v0',
+  folder:'M3 7a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7Z',
+  folderLock:'M3 7a1 1 0 0 1 1-1h5l2 2h8a1 1 0 0 1 1 1v3M12 14v4M9 14h6a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z',
+  tag:'M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0l-7.6-7.6V3h10l7.6 7.6a2 2 0 0 1 0 2.8ZM7.5 7.5h0',
+  clock:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 6v6l4 2',
+  download:'M12 3v12M7 10l5 5 5-5M5 21h14',
+  send:'M22 2L11 13M22 2l-7 20-4-9-9-4 20-7Z',
+  sparkle:'M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4L12 3ZM19 14l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8L19 14ZM5 13l.6 1.6L7 15l-1.4.5L5 17l-.6-1.5L3 15l1.4-.4L5 13Z',
+  quote:'M7 7h4v6a4 4 0 0 1-4 4M14 7h4v6a4 4 0 0 1-4 4',
+  settings:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 13a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0v-.2A1.6 1.6 0 0 0 7 19.3a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 0 1 0-4h.2A1.6 1.6 0 0 0 2.7 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H7a1.6 1.6 0 0 0 1-1.5V1a2 2 0 0 1 4 0v.2a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V7a1.6 1.6 0 0 0 1.5 1H23a2 2 0 0 1 0 4h-.2a1.6 1.6 0 0 0-1.4 1Z',
+  key:'M15 7a4 4 0 1 1-3.5 5.9L8 16H6v2H4v2H2v-3l5.1-5.1A4 4 0 0 1 15 7Z',
+  eye:'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
+  dots:'M12 6v0M12 12v0M12 18v0',
+  file:'M14 3v5h5M7 3h8l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z',
+  refresh:'M3.5 9a9 9 0 0 1 15-3.4L21 8M21 3v5h-5M20.5 15a9 9 0 0 1-15 3.4L3 16M3 21v-5h5',
+  database:'M12 8c4.4 0 8-1.3 8-3s-3.6-3-8-3-8 1.3-8 3 3.6 3 8 3ZM4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6',
+  layers:'M12 2l9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 17l9 5 9-5',
+  zap:'M13 2L4 14h7l-1 8 9-12h-7l1-8Z',
+  info:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 16v-4M12 8h0',
+  mail:'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1ZM3 7l9 6 9-6',
+  building:'M3 21h18M5 21V5a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v16M14 9h4a1 1 0 0 1 1 1v11M8 7h2M8 11h2M8 15h2',
+  globe:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z',
+  text:'M4 7V5h16v2M9 5v14M7 19h4',
+  hash:'M4 9h16M4 15h16M10 3L8 21M16 3l-2 18',
+  list:'M8 6h13M8 12h13M8 18h13M3 6h0M3 12h0M3 18h0',
+  login:'M15 3h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3',
+};
+function Icon({ name, size=20, className='', style={}, strokeWidth=2 }) {
+  const d = ICONS[name]; if(!d) return null;
+  const fill = ['grid'].includes(name);
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24"
+      fill={fill?'currentColor':'none'} stroke={fill?'none':'currentColor'}
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>
+      {d.split('M').filter(Boolean).map((seg,i)=><path key={i} d={'M'+seg} />)}
+    </svg>
+  );
+}
+function LogoMark({ size=34 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 512 512" className="mark" style={{ borderRadius:size*0.26 }}>
+      <rect width="512" height="512" rx="112" fill="#0B1F3A" />
+      <rect x="96" y="96" width="144" height="144" rx="20" fill="#1E6FD9" />
+      <rect x="272" y="96" width="144" height="144" rx="20" fill="#1E6FD9" opacity="0.45" />
+      <rect x="96" y="272" width="144" height="144" rx="20" fill="#1E6FD9" opacity="0.45" />
+      <rect x="272" y="272" width="144" height="144" rx="20" fill="#1E6FD9" opacity="0.20" />
+      <circle cx="368" cy="368" r="52" fill="#1E6FD9" />
+    </svg>
+  );
+}
+function Avatar({ name, size=32 }) {
+  return <span className="avatar" style={{ width:size, height:size, background:avColor(name), fontSize:size*0.4 }}>{initials(name)}</span>;
+}
+function FileGlyph({ type, size=38 }) {
+  const t = (type||'txt').toLowerCase(); const color = FILE_COLORS[t] || FILE_COLORS.txt;
+  return <span className="ftype" style={{ width:size, height:size, background:color, borderRadius:size*0.24 }}>{t.toUpperCase()}</span>;
+}
+function Clearance({ level, size }) {
+  const cls = 'clr-' + ({ 'Public':'public','Internal':'internal','Confidential':'confidential','Restricted':'restricted','Board-Only':'board' }[level] || 'public');
+  return <span className={'clr '+cls} style={size==='sm'?{fontSize:11,padding:'2px 8px'}:{}}><span className="ico" />{level}</span>;
+}
+function Attr({ k, v, blue }) { return <span className={'attr'+(blue?' blue':'')}>{k && <span className="k">{k}:</span>}{v}</span>; }
+
+const ToastCtx = createContext(()=>{});
+function useToast(){ return useContext(ToastCtx); }
+function ToastHost({ children }) {
+  const [toasts, setToasts] = useState([]);
+  const push = (msg, opts={}) => { const id = Math.random(); setToasts(t=>[...t,{id,msg,...opts}]); setTimeout(()=>setToasts(t=>t.filter(x=>x.id!==id)), opts.duration||3200); };
+  return (
+    <ToastCtx.Provider value={push}>
+      {children}
+      <div className="toast-wrap">
+        {toasts.map(t=>(
+          <div className="toast" key={t.id}>
+            <Icon name={t.icon||'checkCircle'} size={18} className={t.danger?'':'ok'} style={t.danger?{color:'#F5897E'}:{}} />
+            <span>{t.msg}</span>
+          </div>
+        ))}
+      </div>
+    </ToastCtx.Provider>
+  );
+}
+function Modal({ children, onClose, width=540 }) {
+  useEffect(()=>{ const h=e=>{ if(e.key==='Escape') onClose && onClose(); }; window.addEventListener('keydown',h); return ()=>window.removeEventListener('keydown',h); }, []);
+  return (
+    <div className="scrim" onMouseDown={onClose}>
+      <div className="modal" style={{ maxWidth:width }} onMouseDown={e=>e.stopPropagation()}>{children}</div>
+    </div>
+  );
+}
+function Menu({ trigger, children, align='left', width=220 }) {
+  const [open, setOpen] = useState(false); const ref = useRef();
+  useEffect(()=>{ const h=e=>{ if(ref.current && !ref.current.contains(e.target)) setOpen(false); }; document.addEventListener('mousedown',h); return ()=>document.removeEventListener('mousedown',h); }, []);
+  return (
+    <div ref={ref} style={{ position:'relative' }}>
+      <div onClick={()=>setOpen(o=>!o)}>{trigger(open)}</div>
+      {open && (
+        <div style={{ position:'absolute', top:'calc(100% + 6px)', [align]:0, width, background:'#fff', border:'1px solid var(--line-200)', borderRadius:'var(--r-md)', boxShadow:'var(--sh-lg)', padding:6, zIndex:50, animation:'popIn .15s ease both' }}>
+          {typeof children==='function' ? children(()=>setOpen(false)) : children}
+        </div>
+      )}
+    </div>
+  );
+}
+function MenuItem({ icon, children, onClick, danger }) {
+  return <button className="nav-item" onClick={onClick} style={{ padding:'8px 10px', color:danger?'var(--red-600)':undefined }}>{icon && <Icon name={icon} size={17} />}<span style={{ fontSize:14 }}>{children}</span></button>;
+}
+function Hint({ icon, children }) {
+  return <div className="row" style={{ gap:8, color:'var(--ink-400)', fontSize:13 }}><Icon name={icon||'info'} size={15} /><span>{children}</span></div>;
+}
+function Spinner({ label }) {
+  return <div className="row" style={{ gap:9, padding:'40px 0', justifyContent:'center', color:'var(--ink-400)' }}>{[0,1,2].map(i=><span key={i} className="think-dot" style={{ animationDelay:i*0.16+'s' }} />)}{label && <span className="dim" style={{ fontSize:13, marginLeft:6 }}>{label}</span>}</div>;
+}
+
+/* Access chips for a REAL document (group-based ACL, server-side) */
+function AccessChips({ d, me }) {
+  const mine = d.owner_id === (me && me.id);
+  const groups = (d.shared_with||'').split(',').map(s=>s.trim()).filter(Boolean);
+  return (
+    <div className="row wrap" style={{ gap:6 }}>
+      {mine && <span className="badge green"><Icon name="user" size={11} />Owned by you</span>}
+      {groups.length ? groups.map(g=><span key={g} className="badge blue"><Icon name="users" size={11} />{g}</span>)
+                     : <span className="badge amber"><Icon name="lock" size={11} />Private (owner-only)</span>}
+    </div>
+  );
+}
+
+/* ============================================================
+   SEARCH (real: POST /api/search)
+   ============================================================ */
+function FacetGroup({ title, icon, items, sel, onToggle, clearance }) {
+  if(!items || !items.length) return null;
+  return (
+    <div className="col" style={{ gap:9 }}>
+      <div className="row" style={{ gap:7, color:'var(--ink-400)' }}><Icon name={icon} size={15} /><span className="lbl" style={{ color:'var(--ink-500)' }}>{title}</span></div>
+      <div className="col" style={{ gap:1 }}>
+        {items.map(([label,count])=>{ const on = sel.includes(label); return (
+          <button key={label} onClick={()=>onToggle(label)} className="row" style={{ gap:9, padding:'6px 8px', borderRadius:7, border:'none', background:on?'var(--blue-50)':'transparent', cursor:'pointer', textAlign:'left', width:'100%' }}>
+            <span style={{ width:15, height:15, borderRadius:4, border:'1.5px solid '+(on?'var(--blue-600)':'var(--line-200)'), background:on?'var(--blue-600)':'#fff', display:'grid', placeItems:'center', flex:'0 0 auto' }}>{on && <Icon name="check" size={11} style={{ color:'#fff' }} strokeWidth={3} />}</span>
+            {clearance ? <span className="grow"><Clearance level={label} size="sm" /></span>
+              : <span className="grow" style={{ fontSize:13.5, color:on?'var(--blue-700)':'var(--ink-700)', textTransform:title==='Document type'?'uppercase':'none', fontWeight:on?600:500 }}>{label}</span>}
+            <span className="dim mono" style={{ fontSize:12 }}>{count}</span>
+          </button>
+        ); })}
+      </div>
+    </div>
+  );
+}
+function ScreenSearch({ go, me }) {
+  const toast = useToast();
+  const [q, setQ] = useState('');
+  const [res, setRes] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [filters, setFilters] = useState({ type:[], department:[], clearance:[] });
+  const [selected, setSelected] = useState(()=>new Set());   // doc_ids included in the conversation scope
+  const inputRef = useRef();
+  useEffect(()=>{ inputRef.current && inputRef.current.focus(); }, []);
+
+  const run = async (query, f) => {
+    query = (query ?? q).trim(); if(!query) return;
+    setBusy(true);
+    try {
+      const r = await api('/search',{method:'POST',body:JSON.stringify({q:query, filters:f||filters})});
+      setRes(r); setSelected(new Set(r.results.map(x=>x.doc_id)));
+    } catch(e){ toast('Search failed: '+e.message, {danger:true, icon:'xCircle'}); }
+    setBusy(false);
+  };
+  const toggleFacet = (group, val) => {
+    const cur = filters[group]||[];
+    const next = { ...filters, [group]: cur.includes(val) ? cur.filter(x=>x!==val) : [...cur, val] };
+    setFilters(next); run(q, next);
+  };
+  const toggleSel = (id) => setSelected(s=>{ const n=new Set(s); n.has(id)?n.delete(id):n.add(id); return n; });
+
+  const results = res ? res.results : [];
+  const restricted = res ? res.restricted : [];
+  const facets = res ? res.facets : { type:[], department:[], clearance:[] };
+  const scope = results.filter(r=>selected.has(r.doc_id));
+
+  return (
+    <div className="content-pad fade-up">
+      <div style={{ marginBottom:22 }}>
+        <h1 className="h1">Search the library</h1>
+        <p className="muted" style={{ margin:'6px 0 0', fontSize:15 }}>Keyword retrieval across every document your access attributes permit.</p>
+      </div>
+
+      <div className="row" style={{ gap:12, marginBottom:8 }}>
+        <div className="search-box grow">
+          <Icon name="search" className="lead" />
+          <input ref={inputRef} className="input" value={q} onChange={e=>setQ(e.target.value)}
+            onKeyDown={e=>{ if(e.key==='Enter') run(); }}
+            placeholder="Search documents, ask a question, or paste a reference…" />
+        </div>
+        <span className="badge" title="Full-text keyword retrieval (SQLite FTS5, BM25 ranking)" style={{ padding:'0 12px', height:42, fontSize:12.5 }}><Icon name="zap" size={13} />Keyword · BM25</span>
+        <button className="btn btn-primary btn-lg" onClick={()=>run()} disabled={busy}><Icon name="search" size={17} />Search</button>
+      </div>
+      <div className="row wrap" style={{ gap:14, marginBottom:24, paddingLeft:2 }}>
+        <Hint icon="zap">FTS5 · BM25 ranking</Hint><span className="dim">·</span>
+        <Hint icon="shieldCheck">ABAC-filtered at retrieval (clearance · department · type · project)</Hint>
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'240px minmax(0,1fr)', gap:28, alignItems:'start' }}>
+        <aside className="col" style={{ gap:22, position:'sticky', top:12 }}>
+          {res && (results.length>0) && <>
+            <FacetGroup title="Document type" icon="file" items={facets.type} sel={filters.type} onToggle={v=>toggleFacet('type',v)} />
+            <FacetGroup title="Department" icon="building" items={facets.department} sel={filters.department} onToggle={v=>toggleFacet('department',v)} />
+            <FacetGroup title="Clearance" icon="shield" items={facets.clearance} sel={filters.clearance} onToggle={v=>toggleFacet('clearance',v)} clearance />
+          </>}
+          {res && <div className="card card-pad">
+            <div className="lbl" style={{ marginBottom:10 }}>This search</div>
+            <div className="col" style={{ gap:8 }}>
+              <div className="spread"><span className="row" style={{ gap:6, fontSize:13 }}><Icon name="doc" size={14} style={{ color:'var(--ink-400)' }} />Accessible</span><span className="badge green">{results.length}</span></div>
+              <div className="spread"><span className="row" style={{ gap:6, fontSize:13 }}><Icon name="lock" size={14} style={{ color:'var(--ink-400)' }} />Restricted</span><span className="badge amber">{restricted.length}</span></div>
+            </div>
+          </div>}
+          <div className="card card-pad" style={{ background:'var(--surface-2)' }}>
+            <Hint icon="info">Facet counts exclude documents outside your access — restricted docs never inflate counts.</Hint>
+          </div>
+        </aside>
+
+        <div className="col" style={{ gap:14 }}>
+          {!res && !busy && (
+            <div className="panel" style={{ padding:48, textAlign:'center' }}>
+              <div style={{ width:56, height:56, borderRadius:14, background:'var(--blue-50)', display:'grid', placeItems:'center', margin:'0 auto 16px' }}><Icon name="search" size={26} style={{ color:'var(--blue-600)' }} /></div>
+              <div className="h3" style={{ marginBottom:6 }}>Search your accessible corpus</div>
+              <p className="dim" style={{ margin:0, fontSize:13.5 }}>Try a topic, a phrase, or a question. Documents outside your access appear as redacted, request-to-unlock cards.</p>
+            </div>
+          )}
+          {busy && <Spinner label="Searching the index…" />}
+
+          {res && <>
+            <div className="spread" style={{ marginBottom:2 }}>
+              <div className="row" style={{ gap:10 }}>
+                <span style={{ fontWeight:600, color:'var(--ink-900)' }}>{results.length} result{results.length===1?'':'s'}</span>
+                {restricted.length>0 && <span className="badge amber"><Icon name="lock" size={12} />{restricted.length} restricted</span>}
+              </div>
+            </div>
+
+            {results.length>0 && (
+              <div className="panel" style={{ padding:'16px 18px', background:'linear-gradient(100deg, var(--navy-900), #16335c)', border:'none', display:'flex', alignItems:'center', gap:16 }}>
+                <div style={{ width:40, height:40, borderRadius:11, background:'rgba(30,111,217,.25)', display:'grid', placeItems:'center', flex:'0 0 auto' }}><Icon name="sparkle" size={22} style={{ color:'#7FB2FF' }} /></div>
+                <div className="grow">
+                  <div style={{ color:'#fff', fontWeight:600, fontSize:15 }}>Ask AI across these results</div>
+                  <div style={{ color:'#9DB2CE', fontSize:13 }}>{scope.length} of {results.length} document{results.length===1?'':'s'} selected{restricted.length>0 && <span> · {restricted.length} restricted silently excluded</span>}</div>
+                </div>
+                <button className="btn" style={{ background:'var(--blue-600)', color:'#fff' }} disabled={!scope.length}
+                  onClick={()=>go('chat',{ scope: scope.map(r=>({doc_id:r.doc_id, title:r.title})), query:q.trim() })}>
+                  <Icon name="chat" size={17} />Start conversation
+                </button>
+              </div>
+            )}
+
+            {results.map(d=>{ const on = selected.has(d.doc_id); return (
+              <div key={d.doc_id} className="card card-hover" style={{ padding:18, display:'flex', gap:16 }}>
+                <label className="row" title="Include in AI conversation" style={{ cursor:'pointer', alignSelf:'flex-start', marginTop:2 }}>
+                  <input type="checkbox" checked={on} onChange={()=>toggleSel(d.doc_id)} style={{ display:'none' }} />
+                  <span style={{ width:19, height:19, borderRadius:6, border:'1.5px solid '+(on?'var(--blue-600)':'var(--line-200)'), background:on?'var(--blue-600)':'#fff', display:'grid', placeItems:'center', flex:'0 0 auto' }}>{on && <Icon name="check" size={13} style={{ color:'#fff' }} strokeWidth={3} />}</span>
+                </label>
+                <FileGlyph type={d.file_type||extOf(d.title)} />
+                <div className="grow" style={{ minWidth:0 }}>
+                  <div className="spread" style={{ alignItems:'flex-start' }}>
+                    <button onClick={()=>openFile(d.doc_id,0,m=>toast(m,{danger:true}))} style={{ border:'none', background:'none', padding:0, textAlign:'left', cursor:'pointer' }}>
+                      <span className="h3" style={{ display:'block' }}>{d.title}</span>
+                    </button>
+                    <div className="row" style={{ gap:8, flex:'0 0 auto' }}><Clearance level={d.clearance} size="sm" /><span className="badge"><Icon name="file" size={11} />p.{d.page_no}</span></div>
+                  </div>
+                  <p style={{ margin:'7px 0 11px', color:'var(--ink-500)', fontSize:14, lineHeight:1.55 }}>{d.snippet}…</p>
+                  <div className="row wrap" style={{ gap:10, fontSize:12.5, color:'var(--ink-400)' }}>
+                    <span className="row" style={{ gap:5 }}><Icon name="hash" size={14} />{d.section}</span>
+                    {(d.departments||[]).map(dep=><span key={dep} className="badge blue"><Icon name="users" size={11} />{dep}</span>)}
+                    <button className="btn-quiet btn btn-sm" style={{ height:26 }} onClick={()=>go('chat',{ scope:[{doc_id:d.doc_id, title:d.title}], query:q.trim() })}><Icon name="sparkle" size={13} />Ask about this</button>
+                    <button className="btn-quiet btn btn-sm" style={{ height:26 }} onClick={()=>openFile(d.doc_id,0,m=>toast(m,{danger:true}))}><Icon name="eye" size={13} />Open</button>
+                  </div>
+                </div>
+              </div>
+            ); })}
+
+            {restricted.map(d=>(
+              <div key={d.doc_id} className="card" style={{ padding:18, display:'flex', gap:16, borderColor:'#EFD9B8', background:'linear-gradient(180deg,#fff, #FFFBF4)' }}>
+                <div style={{ width:38, height:38, borderRadius:9, background:'var(--amber-50)', border:'1px solid var(--amber-100)', display:'grid', placeItems:'center', flex:'0 0 auto' }}><Icon name="lock" size={19} style={{ color:'var(--amber-600)' }} /></div>
+                <div className="grow" style={{ minWidth:0 }}>
+                  <div className="spread" style={{ alignItems:'flex-start' }}>
+                    <span className="h3" style={{ display:'block' }}>{d.title}</span>
+                    <Clearance level={d.clearance} size="sm" />
+                  </div>
+                  <p style={{ margin:'8px 0 10px', color:'var(--ink-500)', fontSize:14, lineHeight:1.55, fontStyle:'italic' }}>{d.redacted}</p>
+                  <div className="spread wrap" style={{ gap:10 }}>
+                    <span className="badge amber"><Icon name="lock" size={11} />{d.reason}</span>
+                    <button className="btn btn-amber btn-sm" onClick={()=>go('access',{ request:{ doc:d.title, docId:d.doc_id } })}><Icon name="unlock" size={15} />Request access</button>
+                  </div>
+                  <div className="row" style={{ gap:6, marginTop:10, color:'var(--ink-400)', fontSize:11.5 }}><Icon name="shield" size={13} /><span>Preview redacted server-side (first words only) — full content is never delivered.</span></div>
+                </div>
+              </div>
+            ))}
+
+            {results.length===0 && restricted.length===0 && <div className="panel" style={{ padding:32, textAlign:'center' }}><Hint icon="info">No matches. Try different keywords, or upload a document.</Hint></div>}
+          </>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   LIBRARY (real: GET /api/documents, /api/groups, share)
+   ============================================================ */
+function ScreenLibrary({ go, me }) {
+  const toast = useToast();
+  const [docs, setDocs] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [folders, setFolders] = useState([]);
+  const [view, setView] = useState('list');
+  const [filter, setFilter] = useState('all');   // 'all' | 'mine' | 'dept:<name>' | 'folder:<id>'
+  const [tag, setTag] = useState(null);
+  const [share, setShare] = useState(null);       // doc being shared
+
+  const load = async () => {
+    try {
+      const [d,g,f] = await Promise.all([api('/documents'), api('/groups'), api('/folders').catch(()=>[])]);
+      setDocs(d); setGroups(g); setFolders(f);
+    } catch(e){ toast('Load failed: '+e.message, {danger:true}); setDocs([]); }
+  };
+  useEffect(()=>{ load(); }, []);
+
+  if(docs===null) return <div className="content-pad"><Spinner label="Loading your library…" /></div>;
+
+  const inFilter = d => filter==='all' ? true
+    : filter==='mine' ? d.owner_id===me.id
+    : filter.startsWith('folder:') ? d.folder_id===filter.slice(7)
+    : filter.startsWith('dept:') ? (d.shared_with||'').split(',').map(s=>s.trim()).includes(filter.slice(5))
+    : true;
+  const shown = docs.filter(d=>inFilter(d) && (!tag || (d.tags||[]).includes(tag)));
+  const allTags = [...new Set(docs.flatMap(d=>d.tags||[]))].sort();
+  const filterLabel = filter==='all'?'All accessible':filter==='mine'?'Owned by me'
+    : filter.startsWith('folder:') ? ((folders.find(f=>f.id===filter.slice(7))||{}).name || 'Folder')
+    : filter.slice(5);
+
+  return (
+    <div className="content-pad fade-up">
+      <div className="spread" style={{ marginBottom:22 }}>
+        <div>
+          <h1 className="h1">Library</h1>
+          <p className="muted" style={{ margin:'6px 0 0', fontSize:15 }}>You only see documents you own, that are shared with your groups, or (as admin) everything.</p>
+        </div>
+        <button className="btn btn-primary" onClick={()=>go('upload')}><Icon name="upload" size={17} />Upload document</button>
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'262px minmax(0,1fr)', gap:28, alignItems:'start' }}>
+        <aside className="col" style={{ gap:20, position:'sticky', top:12 }}>
+          <div className="panel" style={{ padding:12 }}>
+            <div className="lbl" style={{ padding:'4px 8px 8px' }}>Access scope</div>
+            <div className="col" style={{ gap:1 }}>
+              <FilterRow icon="library" label="All accessible" on={filter==='all'} count={docs.length} onClick={()=>setFilter('all')} />
+              <FilterRow icon="user" label="Owned by me" on={filter==='mine'} count={docs.filter(d=>d.owner_id===me.id).length} onClick={()=>setFilter('mine')} />
+            </div>
+            <div className="lbl" style={{ padding:'12px 8px 8px' }}>Folders</div>
+            <div className="col" style={{ gap:1 }}>
+              {folders.length===0 && <span className="dim" style={{ fontSize:12.5, padding:'4px 9px' }}>No folders visible</span>}
+              {folders.map(f=>(
+                <FilterRow key={f.id} icon="folder" label={f.name} on={filter==='folder:'+f.id} count={f.count} onClick={()=>setFilter('folder:'+f.id)} />
+              ))}
+            </div>
+            <div className="lbl" style={{ padding:'12px 8px 8px' }}>Shared with department</div>
+            <div className="col" style={{ gap:1 }}>
+              {groups.map(g=>{
+                const c = docs.filter(d=>(d.shared_with||'').split(',').map(s=>s.trim()).includes(g.name)).length;
+                return <FilterRow key={g.id} icon="users" label={g.name} on={filter==='dept:'+g.name} count={c} onClick={()=>setFilter('dept:'+g.name)} />;
+              })}
+            </div>
+          </div>
+          {allTags.length>0 && <div className="panel" style={{ padding:14 }}>
+            <div className="lbl" style={{ marginBottom:10 }}>Filter by tag</div>
+            <div className="row wrap" style={{ gap:6 }}>
+              {allTags.map(t=>(
+                <button key={t} onClick={()=>setTag(tag===t?null:t)} className={'badge'+(tag===t?' solid-blue':'')} style={{ cursor:'pointer', border:tag===t?'none':'1px solid var(--line-200)' }}><Icon name="tag" size={11} />{t}</button>
+              ))}
+            </div>
+          </div>}
+          <div className="card card-pad" style={{ background:'var(--surface-2)' }}>
+            <Hint icon="shield">Folders are ABAC-governed — you only see folders your departments permit. New uploads are owner-only until shared.</Hint>
+          </div>
+        </aside>
+
+        <div className="col" style={{ gap:16 }}>
+          <div className="spread">
+            <div className="row" style={{ gap:10 }}>
+              <Icon name="folder" size={18} style={{ color:'var(--blue-600)' }} />
+              <span className="h3">{filterLabel}</span>
+              <span className="badge">{shown.length} document{shown.length===1?'':'s'}</span>
+              {tag && <span className="badge blue"><Icon name="tag" size={11} />{tag}<button onClick={()=>setTag(null)} style={{ border:'none', background:'none', padding:0, marginLeft:2, display:'flex' }}><Icon name="x" size={12} /></button></span>}
+            </div>
+            <div className="seg">
+              <button className={view==='list'?'on':''} onClick={()=>setView('list')}><Icon name="list" size={15} /></button>
+              <button className={view==='grid'?'on':''} onClick={()=>setView('grid')}><Icon name="grid" size={15} /></button>
+            </div>
+          </div>
+
+          {shown.length===0 && <div className="panel" style={{ padding:40, textAlign:'center' }}><Hint icon="info">No documents here yet. Upload one, or switch scope.</Hint></div>}
+
+          {shown.length>0 && view==='list' ? (
+            <div className="panel" style={{ overflow:'hidden' }}>
+              <table className="tbl">
+                <thead><tr><th>Document</th><th>Access</th><th>Owner</th><th>Pages</th><th>Updated</th><th></th></tr></thead>
+                <tbody>
+                  {shown.map(d=>(
+                    <tr key={d.id} style={{ cursor:'pointer' }} onClick={()=>go('document',{ id:d.id })}>
+                      <td>
+                        <div className="row" style={{ gap:11 }}>
+                          <FileGlyph type={d.file_type} size={32} />
+                          <div className="col" style={{ lineHeight:1.3 }}>
+                            <span style={{ fontWeight:600, color:'var(--ink-900)', fontSize:14 }}>{d.title}</span>
+                            <span className="dim" style={{ fontSize:12 }}>{d.file_type.toUpperCase()} · {d.pages} page{d.pages===1?'':'s'}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td onClick={e=>e.stopPropagation()}><AccessChips d={d} me={me} /></td>
+                      <td><div className="row" style={{ gap:7 }}><Avatar name={d.owner_name} size={24} /><span style={{ fontSize:13 }}>{d.owner_name}</span></div></td>
+                      <td className="dim mono" style={{ fontSize:12.5 }}>{d.pages}</td>
+                      <td className="dim" style={{ fontSize:13 }}>{relTime(d.created_at)}</td>
+                      <td onClick={e=>e.stopPropagation()}>
+                        <div className="row" style={{ gap:6, justifyContent:'flex-end' }}>
+                          <button className="icon-btn" style={{ width:30, height:30 }} title="View" onClick={()=>openFile(d.id,0,m=>toast(m,{danger:true}))}><Icon name="eye" size={15} /></button>
+                          <button className="icon-btn" style={{ width:30, height:30 }} title="Chat" onClick={()=>go('chat',{ scope:[{doc_id:d.id, title:d.title}] })}><Icon name="chat" size={15} /></button>
+                          {(d.owner_id===me.id||me.is_admin) && <button className="icon-btn" style={{ width:30, height:30 }} title="Share" onClick={()=>setShare(d)}><Icon name="users" size={15} /></button>}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : shown.length>0 && (
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(250px, 1fr))', gap:14 }}>
+              {shown.map(d=>(
+                <div key={d.id} className="card card-hover card-pad" style={{ cursor:'pointer' }} onClick={()=>go('document',{ id:d.id })}>
+                  <div className="spread" style={{ marginBottom:14 }}><FileGlyph type={d.file_type} size={40} /><span className="badge"><Icon name="file" size={11} />{d.pages}p</span></div>
+                  <div style={{ fontWeight:600, color:'var(--ink-900)', fontSize:14.5, lineHeight:1.35, marginBottom:8 }}>{d.title}</div>
+                  <div style={{ marginBottom:12 }} onClick={e=>e.stopPropagation()}><AccessChips d={d} me={me} /></div>
+                  <div className="spread" style={{ paddingTop:12, borderTop:'1px solid var(--line-100)' }}>
+                    <div className="row" style={{ gap:7 }}><Avatar name={d.owner_name} size={22} /><span className="dim" style={{ fontSize:12 }}>{relTime(d.created_at)}</span></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {share && <ShareModal d={share} groups={groups} onClose={()=>setShare(null)} onSaved={()=>{ setShare(null); load(); toast('Access updated'); }} />}
+    </div>
+  );
+}
+function FilterRow({ icon, label, on, count, onClick }) {
+  return (
+    <button className={'nav-item'+(on?' active':'')} style={{ padding:'7px 9px' }} onClick={onClick}>
+      <Icon name={icon} size={17} /><span className="grow" style={{ fontSize:14 }}>{label}</span><span className="count">{count}</span>
+    </button>
+  );
+}
+function ShareModal({ d, groups, onClose, onSaved }) {
+  const toast = useToast();
+  const cur = new Set((d.shared_with||'').split(',').map(s=>s.trim()).filter(Boolean));
+  const [sel, setSel] = useState(()=> new Set(groups.filter(g=>cur.has(g.name)).map(g=>g.id)));
+  const toggle = id => setSel(s=>{ const n=new Set(s); n.has(id)?n.delete(id):n.add(id); return n; });
+  const save = async () => {
+    try { await api(`/documents/${d.id}/share`,{method:'POST',body:JSON.stringify({group_ids:[...sel]})}); onSaved(); }
+    catch(e){ toast('Share failed: '+e.message, {danger:true}); }
+  };
+  return (
+    <Modal onClose={onClose} width={520}>
+      <div className="modal-head">
+        <div className="row" style={{ gap:11 }}>
+          <div style={{ width:38, height:38, borderRadius:10, background:'var(--blue-50)', display:'grid', placeItems:'center' }}><Icon name="users" size={19} style={{ color:'var(--blue-600)' }} /></div>
+          <div><div className="h3">Share access</div><div className="dim" style={{ fontSize:12.5 }}>{d.title}</div></div>
+        </div>
+      </div>
+      <div className="modal-body">
+        <p className="dim" style={{ margin:'0 0 14px', fontSize:13 }}>Grant access to whole groups. Members of a selected group can search, read, download, and chat with this document.</p>
+        <div className="col" style={{ gap:8 }}>
+          {groups.map(g=>{
+            const on = sel.has(g.id);
+            return (
+              <button key={g.id} onClick={()=>toggle(g.id)} className="row" style={{ gap:11, padding:'10px 12px', borderRadius:'var(--r-sm)', border:'1px solid '+(on?'var(--blue-500)':'var(--line-200)'), background:on?'var(--blue-50)':'#fff', cursor:'pointer', textAlign:'left', width:'100%' }}>
+                <span style={{ width:18, height:18, borderRadius:5, border:'1.5px solid '+(on?'var(--blue-600)':'var(--line-200)'), background:on?'var(--blue-600)':'#fff', display:'grid', placeItems:'center', flex:'0 0 auto' }}>{on && <Icon name="check" size={12} style={{ color:'#fff' }} strokeWidth={3} />}</span>
+                <Icon name="users" size={16} style={{ color:on?'var(--blue-600)':'var(--ink-400)' }} />
+                <span className="grow" style={{ fontSize:14, fontWeight:on?600:500, color:on?'var(--blue-700)':'var(--ink-700)' }}>{g.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div className="modal-foot">
+        <button className="btn btn-quiet" onClick={onClose}>Cancel</button>
+        <button className="btn btn-primary" onClick={save}><Icon name="check" size={16} />Save access</button>
+      </div>
+    </Modal>
+  );
+}
+
+/* ============================================================
+   DOCUMENT detail (real metadata, access editing, version history, and source preview)
+   ============================================================ */
+function ScreenDocument({ go, me, route }) {
+  const toast = useToast();
+  const [d, setD] = useState(null);
+  const [vocab, setVocab] = useState(null);
+  const [folders, setFolders] = useState([]);
+  const [versions, setVersions] = useState([]);
+  const [tab, setTab] = useState('overview');
+  const [edit, setEdit] = useState(false);
+  const load = async () => {
+    try {
+      const [doc, vv, ff, vs] = await Promise.all([
+        api('/documents/'+route.params.id), api('/vocab').catch(()=>null),
+        api('/folders').catch(()=>[]), api('/documents/'+route.params.id+'/versions').catch(()=>[])]);
+      setD(doc); setVocab(vv); setFolders(ff); setVersions(vs);
+    } catch(e){ toast('Load failed: '+e.message, {danger:true}); setD(false); }
+  };
+  useEffect(()=>{ load(); }, [route.params.id]);
+  if(d===null) return <div className="content-pad"><Spinner label="Loading document…" /></div>;
+  if(d===false) return <div className="content-pad"><div className="panel" style={{ padding:32, textAlign:'center' }}><Hint icon="lock">Document not found or outside your access.</Hint></div></div>;
+  const isOwner = d.owner_id===me.id || me.is_admin;
+  const depts = (d.shared_with||'').split(',').map(s=>s.trim()).filter(Boolean);
+
+  return (
+    <div className="content-pad fade-up">
+      <button className="btn-quiet btn btn-sm" style={{ marginBottom:16, paddingLeft:8 }} onClick={()=>go('library')}><Icon name="chevLeft" size={16} />Library</button>
+
+      <div className="panel" style={{ padding:24, marginBottom:20 }}>
+        <div className="spread" style={{ alignItems:'flex-start', gap:20 }}>
+          <div className="row" style={{ gap:18, alignItems:'flex-start' }}>
+            <FileGlyph type={d.file_type} size={56} />
+            <div>
+              <h1 className="h2" style={{ marginBottom:8 }}>{d.title}</h1>
+              <div className="row wrap" style={{ gap:9, marginBottom:12 }}>
+                <Clearance level={d.clearance} />
+                <span className="badge outline mono">v{d.current_version||1}</span>
+                <span className="badge"><Icon name="file" size={11} />{d.file_type.toUpperCase()} · {d.pages} page{d.pages===1?'':'s'}</span>
+                {d.status!=='published' && <span className="badge amber"><Icon name="clock" size={11} />{d.status}</span>}
+              </div>
+              <div className="row wrap" style={{ gap:12, fontSize:13, color:'var(--ink-400)' }}>
+                {d.folder_name && <><span className="row" style={{ gap:6 }}><Icon name="folder" size={14} />{d.folder_name}</span><span className="dim">·</span></>}
+                <span className="row" style={{ gap:6 }}><Avatar name={d.owner_name} size={20} />Owned by {d.owner_name}</span>
+                <span className="dim">·</span>
+                <span className="row" style={{ gap:6 }}><Icon name="clock" size={14} />Added {relTime(d.created_at)}</span>
+              </div>
+            </div>
+          </div>
+          <div className="row" style={{ gap:10, flex:'0 0 auto' }}>
+            <button className="btn btn-ghost" onClick={()=>go('chat',{ scope:[{doc_id:d.id, title:d.title}] })}><Icon name="sparkle" size={17} />Ask AI</button>
+            <button className="btn btn-primary" onClick={()=>openFile(d.id,1,m=>toast(m,{danger:true}))}><Icon name="download" size={17} />Download</button>
+            <button className="icon-btn" title="View" onClick={()=>openFile(d.id,0,m=>toast(m,{danger:true}))}><Icon name="eye" size={18} /></button>
+          </div>
+        </div>
+      </div>
+
+      <div className="tabs" style={{ marginBottom:22 }}>
+        {[['overview','Overview'],['access','Access & ABAC'],['versions','Version history']].map(([k,l])=>(
+          <button key={k} className={'tab'+(tab===k?' on':'')} onClick={()=>setTab(k)}>{l}{k==='versions' && <span className="badge" style={{ marginLeft:7 }}>{versions.length}</span>}</button>
+        ))}
+      </div>
+
+      {tab==='overview' && (
+        <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) 320px', gap:24, alignItems:'start' }}>
+          <div className="panel" style={{ padding:0, overflow:'hidden' }}>
+            <div className="spread" style={{ padding:'14px 18px', borderBottom:'1px solid var(--line-200)' }}><span className="h3">Preview</span><button className="btn btn-ghost btn-sm" onClick={()=>openFile(d.id,0,m=>toast(m,{danger:true}))}><Icon name="eye" size={14} />Open original</button></div>
+            <div style={{ maxHeight:420, overflowY:'auto', padding:'8px 10px' }}><ChunkDocView docId={d.id} /></div>
+          </div>
+          <div className="panel" style={{ padding:18 }}>
+            <div className="lbl" style={{ marginBottom:14 }}>Metadata</div>
+            {[['Owner', d.owner_name],['Approver', d.approver_name||'—'],['File type', d.file_type.toUpperCase()],['Pages', d.pages],['Status', d.status],['Version', 'v'+(d.current_version||1)],['Added', relTime(d.created_at)],['SHA-256', (d.file_hash||'')+'…']].map(([k,v])=>(
+              <div key={k} className="spread" style={{ padding:'8px 0', borderBottom:'1px solid var(--line-100)' }}>
+                <span className="dim" style={{ fontSize:13 }}>{k}</span>
+                <span style={{ fontSize:13, fontWeight:500, color:'var(--ink-900)', fontFamily:k==='SHA-256'?'var(--font-mono)':undefined, maxWidth:160, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{v}</span>
+              </div>
+            ))}
+            {d.tags.length>0 && <div style={{ paddingTop:12 }}><div className="row wrap" style={{ gap:6 }}>{d.tags.map(t=><span key={t} className="badge"><Icon name="tag" size={11} />{t}</span>)}</div></div>}
+          </div>
+        </div>
+      )}
+
+      {tab==='access' && (
+        <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) 300px', gap:24, alignItems:'start' }}>
+          <div className="panel" style={{ padding:24 }}>
+            <div className="spread" style={{ marginBottom:6 }}><span className="h3">Access attributes</span>{isOwner && <button className="btn btn-ghost btn-sm" onClick={()=>setEdit(true)}><Icon name="sliders" size={15} />Edit attributes</button>}</div>
+            {[['Allowed departments', depts, 'building'],
+              ['Minimum clearance', [d.clearance], 'shield'],
+              ['Allowed user types', d.user_types.length?d.user_types:['(all)'], 'users'],
+              ['Project tags', d.projects.length?d.projects:['(none — open to all projects)'], 'hash']].map(([label,vals,icon])=>(
+              <div key={label} style={{ padding:'14px 0', borderBottom:'1px solid var(--line-100)' }}>
+                <div className="row" style={{ gap:7, marginBottom:9 }}><Icon name={icon} size={15} style={{ color:'var(--ink-400)' }} /><span style={{ fontSize:13, fontWeight:600, color:'var(--ink-700)' }}>{label}</span></div>
+                <div className="row wrap" style={{ gap:6 }}>{label==='Minimum clearance' ? <Clearance level={d.clearance} /> : vals.map(v=><Attr key={v} v={v} blue={!v.startsWith('(')} />)}</div>
+              </div>
+            ))}
+            <div style={{ padding:'14px 0 0' }}>
+              <div className="row" style={{ gap:7, marginBottom:9 }}><Icon name="user" size={15} style={{ color:'var(--ink-400)' }} /><span style={{ fontSize:13, fontWeight:600, color:'var(--ink-700)' }}>Owner / Approver</span></div>
+              <div className="row" style={{ gap:8 }}><Avatar name={d.owner_name} size={24} /><span style={{ fontSize:13 }}>{d.owner_name}</span><span className="dim">→ approver</span><Avatar name={d.approver_name||d.owner_name} size={24} /><span style={{ fontSize:13 }}>{d.approver_name||d.owner_name}</span></div>
+            </div>
+          </div>
+          <div className="panel" style={{ padding:18 }}>
+            <div className="lbl" style={{ marginBottom:10 }}>ABAC grant rule</div>
+            <pre style={{ margin:0, fontFamily:'var(--font-mono)', fontSize:11.5, lineHeight:1.7, color:'var(--ink-700)', whiteSpace:'pre-wrap' }}>{`GRANT if  admin
+  OR owner
+  OR doc-scoped grant
+  OR ( clearance ≥ min
+       AND dept ∩ allowed ≠ ∅
+       AND type ∈ allowed
+       AND (proj=∅ OR proj∩user≠∅) )`}</pre>
+            <p className="dim" style={{ fontSize:12, margin:'12px 0 0', lineHeight:1.5 }}>Evaluated server-side on every list, search, retrieval, and download — never in the browser.</p>
+          </div>
+        </div>
+      )}
+
+      {tab==='versions' && (
+        <div className="panel" style={{ padding:8 }}>
+          {isOwner && <div className="spread" style={{ padding:'12px 16px' }}>
+            <Hint icon="info">Every upload creates a new immutable version. Older versions remain downloadable.</Hint>
+            <VersionUploader docId={d.id} onDone={()=>{ load(); toast('New version published'); }} />
+          </div>}
+          <div style={{ padding:'8px 16px 16px' }}>
+            {versions.map((v,i)=>(
+              <div key={v.id} className="row" style={{ gap:16, alignItems:'flex-start', paddingBottom:i===versions.length-1?0:22 }}>
+                <div className="col" style={{ alignItems:'center', flex:'0 0 auto' }}>
+                  <div style={{ width:36, height:36, borderRadius:10, background:i===0?'var(--blue-600)':'var(--surface)', border:'1px solid '+(i===0?'var(--blue-600)':'var(--line-200)'), color:i===0?'#fff':'var(--ink-500)', display:'grid', placeItems:'center', fontWeight:700, fontFamily:'var(--font-mono)', fontSize:13 }}>v{v.version_no}</div>
+                  {i<versions.length-1 && <div style={{ width:2, flex:1, minHeight:40, background:'var(--line-200)', marginTop:4 }} />}
+                </div>
+                <div className="card grow" style={{ padding:16, borderColor:i===0?'var(--blue-100)':'var(--line-200)' }}>
+                  <div className="spread" style={{ marginBottom:8 }}>
+                    <div className="row" style={{ gap:9 }}><Avatar name={v.uploader_name||'?'} size={26} /><div className="col" style={{ lineHeight:1.3 }}><span style={{ fontWeight:600, fontSize:13.5 }}>{v.uploader_name||v.uploader_id}</span><span className="dim" style={{ fontSize:12 }}>{relTime(v.created_at)}</span></div>{i===0 && <span className="badge green">Current</span>}</div>
+                    <div className="row" style={{ gap:8 }}><span className="attr"><span className="k">sha</span>{(v.file_hash||'').slice(0,8)}…</span><button className="icon-btn" style={{ width:30, height:30 }} title="Download this version" onClick={()=>openVersionFile(d.id, v.version_no, m=>toast(m,{danger:true})) }><Icon name="download" size={15} /></button></div>
+                  </div>
+                  <p style={{ margin:0, fontSize:13.5, color:'var(--ink-700)' }}>{v.change_notes||'(no notes)'}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {edit && vocab && <EditAccessModal d={d} vocab={vocab} folders={folders} onClose={()=>setEdit(false)} onSaved={()=>{ setEdit(false); load(); toast('Access updated'); }} />}
+    </div>
+  );
+}
+function VersionUploader({ docId, onDone }) {
+  const toast = useToast(); const ref = useRef(); const [busy, setBusy] = useState(false);
+  const up = async (f) => { if(!f) return; setBusy(true);
+    const fd = new FormData(); fd.append('file', f); fd.append('change_notes', 'New version via UI');
+    try { await api(`/documents/${docId}/versions`,{method:'POST',body:fd}); onDone(); }
+    catch(e){ toast('Version upload failed: '+e.message, {danger:true}); } setBusy(false);
+  };
+  return (<><input ref={ref} type="file" accept=".pdf,.txt,.md,.csv" style={{ display:'none' }} onChange={e=>up(e.target.files[0])} />
+    <button className="btn btn-ghost btn-sm" onClick={()=>ref.current.click()} disabled={busy}><Icon name="upload" size={15} />{busy?'Uploading…':'Upload new version'}</button></>);
+}
+function EditAccessModal({ d, vocab, folders, onClose, onSaved }) {
+  const toast = useToast();
+  const curDeptIds = vocab.departments.filter(g=>(d.shared_with||'').split(',').map(s=>s.trim()).includes(g.name)).map(g=>g.id);
+  const [departments, setDepartments] = useState(()=>new Set(curDeptIds));
+  const [clearance, setClearance] = useState(d.clearance);
+  const [userTypes, setUserTypes] = useState(()=>new Set(d.user_types));
+  const [projects, setProjects] = useState(()=>new Set(d.projects));
+  const [approver, setApprover] = useState(d.approver_id||d.owner_id);
+  const tog = (setter, v) => setter(s=>{ const n=new Set(s); n.has(v)?n.delete(v):n.add(v); return n; });
+  const save = async () => {
+    try {
+      await api(`/documents/${d.id}`,{method:'PATCH',body:JSON.stringify({
+        departments:[...departments], min_clearance:clearance, user_types:[...userTypes],
+        projects:[...projects], approver_id:approver })});
+      onSaved();
+    } catch(e){ toast('Save failed: '+e.message, {danger:true}); }
+  };
+  const Chip = ({on, onClick, children}) => (<button onClick={onClick} className="attr" style={{ cursor:'pointer', borderColor:on?'var(--blue-500)':'var(--line-200)', background:on?'var(--blue-50)':'var(--surface-2)', color:on?'var(--blue-700)':'var(--ink-700)', fontWeight:on?600:500 }}>{on && <Icon name="check" size={12} />}{children}</button>);
+  return (
+    <Modal onClose={onClose} width={560}>
+      <div className="modal-head"><div className="h3">Edit access attributes</div></div>
+      <div className="modal-body">
+        <div className="field" style={{ marginBottom:16 }}><label>Allowed departments</label><div className="row wrap" style={{ gap:7 }}>{vocab.departments.map(g=><Chip key={g.id} on={departments.has(g.id)} onClick={()=>tog(setDepartments,g.id)}>{g.name}</Chip>)}</div></div>
+        <div className="field" style={{ marginBottom:16 }}><label>Minimum clearance</label><div className="row wrap" style={{ gap:7 }}>{vocab.clearances.map(c=><button key={c} onClick={()=>setClearance(c)} style={{ border:'none', background:'none', padding:0, cursor:'pointer', opacity:clearance===c?1:.5, outline:clearance===c?'2px solid var(--blue-500)':'none', borderRadius:999 }}><Clearance level={c} /></button>)}</div></div>
+        <div className="field" style={{ marginBottom:16 }}><label>Allowed user types</label><div className="row wrap" style={{ gap:7 }}>{vocab.user_types.map(t=><Chip key={t} on={userTypes.has(t)} onClick={()=>tog(setUserTypes,t)}>{t}</Chip>)}</div></div>
+        <div className="field" style={{ marginBottom:16 }}><label>Project tags</label><div className="row wrap" style={{ gap:7 }}>{vocab.projects.map(p=><Chip key={p} on={projects.has(p)} onClick={()=>tog(setProjects,p)}>{p}</Chip>)}</div></div>
+        <div className="field"><label>Approver</label><select className="select" value={approver} onChange={e=>setApprover(e.target.value)}>{vocab.approvers.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
+      </div>
+      <div className="modal-foot"><button className="btn btn-quiet" onClick={onClose}>Cancel</button><button className="btn btn-primary" onClick={save}><Icon name="check" size={16} />Save attributes</button></div>
+    </Modal>
+  );
+}
+
+/* ============================================================
+   UPLOAD (real: POST /api/documents, then optional /share)
+   ============================================================ */
+function ScreenUpload({ go, me }) {
+  const toast = useToast();
+  const [step, setStep] = useState(0);     // 0 drop, 1 processing, 2 attributes, 3 done
+  const [drag, setDrag] = useState(false);
+  const [fileName, setFileName] = useState('');
+  const [result, setResult] = useState(null);  // {doc_id,title,pages,chunks}
+  const [vocab, setVocab] = useState({ departments:[], clearances:[], user_types:[], approvers:[], projects:[] });
+  const [folders, setFolders] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [form, setForm] = useState({ title:'', departments:new Set(), min_clearance:'Internal',
+    user_types:new Set(['employee']), projects:new Set(), tags:'', approver_id:me.id, folder_id:'' });
+  const inpRef = useRef();
+  const STEPS = ['Upload','Process','Access attributes','Publish'];
+
+  useEffect(()=>{ api('/vocab').then(setVocab).catch(()=>{}); api('/folders').then(setFolders).catch(()=>{}); }, []);
+  const set = (k,v) => setForm(f=>({ ...f, [k]:v }));
+  const tog = (k,v) => setForm(f=>{ const n=new Set(f[k]); n.has(v)?n.delete(v):n.add(v); return { ...f, [k]:n }; });
+
+  const doUpload = async (file) => {
+    if(!file) return; setFileName(file.name); setStep(1);
+    const fd = new FormData(); fd.append('file', file); fd.append('attrs', JSON.stringify({ status:'draft' }));
+    try { const r = await api('/documents',{method:'POST',body:fd}); setResult(r); set('title', r.title); setStep(2); }
+    catch(e){ toast('Upload failed: '+e.message, {danger:true, icon:'xCircle'}); setStep(0); }
+  };
+  const publish = async () => {
+    setBusy(true);
+    try {
+      await api(`/documents/${result.doc_id}`,{method:'PATCH',body:JSON.stringify({
+        title:form.title, departments:[...form.departments], min_clearance:form.min_clearance,
+        user_types:[...form.user_types], projects:[...form.projects],
+        tags:form.tags.split(',').map(s=>s.trim()).filter(Boolean), approver_id:form.approver_id,
+        folder_id:form.folder_id||null, status:'published' })});
+      setStep(3);
+    } catch(e){ toast('Publish failed: '+e.message,{danger:true}); }
+    setBusy(false);
+  };
+
+  const Chip = ({on, onClick, children}) => (
+    <button onClick={onClick} className="attr" style={{ cursor:'pointer', borderColor:on?'var(--blue-500)':'var(--line-200)', background:on?'var(--blue-50)':'var(--surface-2)', color:on?'var(--blue-700)':'var(--ink-700)', fontWeight:on?600:500 }}>{on && <Icon name="check" size={12} />}{children}</button>
+  );
+
+  return (
+    <div className="content-pad fade-up" style={{ maxWidth:920 }}>
+      <div style={{ marginBottom:8 }}>
+        <h1 className="h1">Upload document</h1>
+        <p className="muted" style={{ margin:'6px 0 0', fontSize:15 }}>The file is extracted, chunked, and indexed. It is a draft (not searchable) until you assign access attributes and publish.</p>
+      </div>
+
+      <div className="row" style={{ gap:0, margin:'24px 0 28px' }}>
+        {STEPS.map((s,i)=>(
+          <React.Fragment key={s}>
+            <div className="row" style={{ gap:9 }}>
+              <span style={{ width:28, height:28, borderRadius:8, display:'grid', placeItems:'center', fontWeight:700, fontSize:13, fontFamily:'var(--font-mono)',
+                background:i<step?'var(--green-50)':i===step?'var(--blue-600)':'var(--surface)', color:i<step?'var(--green-700)':i===step?'#fff':'var(--ink-400)',
+                border:'1px solid '+(i<step?'var(--green-100)':i===step?'var(--blue-600)':'var(--line-200)') }}>{i<step?<Icon name="check" size={15} strokeWidth={3} />:i+1}</span>
+              <span style={{ fontSize:13.5, fontWeight:i===step?600:500, color:i<=step?'var(--ink-900)':'var(--ink-400)' }}>{s}</span>
+            </div>
+            {i<STEPS.length-1 && <div style={{ flex:1, height:1, background:i<step?'var(--green-100)':'var(--line-200)', margin:'0 14px' }} />}
+          </React.Fragment>
+        ))}
+      </div>
+
+      {step===0 && (
+        <div onDragOver={e=>{ e.preventDefault(); setDrag(true); }} onDragLeave={()=>setDrag(false)}
+          onDrop={e=>{ e.preventDefault(); setDrag(false); doUpload(e.dataTransfer.files[0]); }} onClick={()=>inpRef.current.click()}
+          className="panel" style={{ padding:56, textAlign:'center', cursor:'pointer', borderStyle:'dashed', borderWidth:2, borderColor:drag?'var(--blue-500)':'var(--line-200)', background:drag?'var(--blue-50)':'var(--surface-2)', transition:'all .15s' }}>
+          <input ref={inpRef} type="file" accept=".pdf,.txt,.md,.csv" style={{ display:'none' }} onChange={e=>doUpload(e.target.files[0])} />
+          <div style={{ width:64, height:64, borderRadius:16, background:'var(--blue-50)', display:'grid', placeItems:'center', margin:'0 auto 18px' }}><Icon name="upload" size={30} style={{ color:'var(--blue-600)' }} /></div>
+          <div className="h3" style={{ marginBottom:6 }}>Drag &amp; drop a file, or click to browse</div>
+          <p className="dim" style={{ margin:'0 0 18px', fontSize:13.5 }}>PDF, TXT, MD, or CSV</p>
+          <div className="row" style={{ gap:7, justifyContent:'center', flexWrap:'wrap' }}>{['PDF','TXT','MD','CSV'].map(t=><span key={t} className="badge outline mono" style={{ fontSize:11 }}>{t}</span>)}</div>
+        </div>
+      )}
+
+      {step===1 && (
+        <div className="panel" style={{ padding:28 }}>
+          <div className="row" style={{ gap:14 }}>
+            <FileGlyph type={(fileName.split('.').pop()||'txt')} size={44} />
+            <div className="grow"><div style={{ fontWeight:600, color:'var(--ink-900)' }}>{fileName}</div><div className="dim" style={{ fontSize:13 }}>Extracting text, chunking, and indexing…</div></div>
+            <span className="think-dot" /><span className="think-dot" style={{ animationDelay:'.16s' }} /><span className="think-dot" style={{ animationDelay:'.32s' }} />
+          </div>
+        </div>
+      )}
+
+      {step===2 && result && (
+        <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) 300px', gap:24, alignItems:'start' }}>
+          <div className="col" style={{ gap:18 }}>
+            <div className="panel" style={{ padding:22 }}>
+              <div className="lbl" style={{ marginBottom:16 }}>Document details</div>
+              <div className="col gap16">
+                <div className="field"><label>Title</label><input className="input" value={form.title} onChange={e=>set('title', e.target.value)} /></div>
+                <div className="field"><label>Folder</label>
+                  <select className="select" value={form.folder_id} onChange={e=>set('folder_id', e.target.value)}>
+                    <option value="">— none —</option>
+                    {folders.map(f=><option key={f.id} value={f.id}>{f.name}</option>)}
+                  </select>
+                </div>
+                <div className="field"><label>Tags <span className="dim" style={{ fontWeight:400 }}>(comma-separated)</span></label><input className="input" value={form.tags} onChange={e=>set('tags', e.target.value)} placeholder="SOX, Quarterly, EMEA" /></div>
+              </div>
+            </div>
+            <div className="panel" style={{ padding:22 }}>
+              <div className="spread" style={{ marginBottom:6 }}><div className="lbl">Access attributes (ABAC)</div><span className="badge amber"><Icon name="lock" size={11} />Required to publish</span></div>
+              <p className="dim" style={{ fontSize:12.5, margin:'0 0 16px' }}>Evaluated server-side on every access, search, and AI retrieval.</p>
+              <div className="field" style={{ marginBottom:16 }}><label>Allowed departments</label>
+                <div className="row wrap" style={{ gap:7 }}>{vocab.departments.map(g=><Chip key={g.id} on={form.departments.has(g.id)} onClick={()=>tog('departments',g.id)}>{g.name}</Chip>)}</div>
+              </div>
+              <div className="field" style={{ marginBottom:16 }}><label>Minimum clearance</label>
+                <div className="row wrap" style={{ gap:7 }}>{vocab.clearances.map(c=>(
+                  <button key={c} onClick={()=>set('min_clearance',c)} style={{ border:'none', background:'none', padding:0, cursor:'pointer', opacity:form.min_clearance===c?1:.5, outline:form.min_clearance===c?'2px solid var(--blue-500)':'none', borderRadius:999 }}><Clearance level={c} /></button>
+                ))}</div>
+              </div>
+              <div className="field" style={{ marginBottom:16 }}><label>Allowed user types</label>
+                <div className="row wrap" style={{ gap:7 }}>{vocab.user_types.map(t=><Chip key={t} on={form.user_types.has(t)} onClick={()=>tog('user_types',t)}>{t}</Chip>)}</div>
+              </div>
+              <div className="field"><label>Project / engagement tags <span className="dim" style={{ fontWeight:400 }}>(optional)</span></label>
+                <div className="row wrap" style={{ gap:7 }}>{vocab.projects.map(p=><Chip key={p} on={form.projects.has(p)} onClick={()=>tog('projects',p)}>{p}</Chip>)}</div>
+              </div>
+            </div>
+            <div className="panel" style={{ padding:22 }}>
+              <div className="lbl" style={{ marginBottom:12 }}>Approver</div>
+              <p className="dim" style={{ fontSize:12.5, margin:'0 0 12px' }}>Receives and decides access requests for this document.</p>
+              <select className="select" value={form.approver_id} onChange={e=>set('approver_id', e.target.value)}>
+                {vocab.approvers.map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="col" style={{ gap:16, position:'sticky', top:12 }}>
+            <div className="panel" style={{ padding:18 }}>
+              <div className="lbl" style={{ marginBottom:12 }}>Who can access this?</div>
+              <div className="card" style={{ padding:14, background:'var(--navy-900)', border:'none' }}>
+                <pre style={{ margin:0, fontFamily:'var(--font-mono)', fontSize:11, lineHeight:1.7, color:'#C7D6EC', whiteSpace:'pre-wrap' }}>{`GRANT if
+  dept ∈ {${vocab.departments.filter(g=>form.departments.has(g.id)).map(g=>g.name).join(', ') || '—'}}
+  clearance ≥ ${form.min_clearance}
+  type ∈ {${[...form.user_types].join(', ') || '—'}}${form.projects.size?'\n  proj ∩ {'+[...form.projects].join(', ')+'}':''}`}</pre>
+              </div>
+            </div>
+            <button className="btn btn-primary btn-block btn-lg" onClick={publish} disabled={busy || !form.departments.size}><Icon name="check" size={17} />{busy?'Publishing…':'Publish & make searchable'}</button>
+            {!form.departments.size && <Hint icon="info">Select at least one department to publish.</Hint>}
+            <button className="btn btn-quiet btn-block" onClick={()=>go('library')}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {step===3 && result && (
+        <div className="panel" style={{ padding:40, textAlign:'center', maxWidth:560, margin:'0 auto' }}>
+          <div style={{ width:64, height:64, borderRadius:18, background:'var(--green-50)', display:'grid', placeItems:'center', margin:'0 auto 20px' }}><Icon name="checkCircle" size={32} style={{ color:'var(--green-700)' }} /></div>
+          <h2 className="h2" style={{ marginBottom:8 }}>Document published</h2>
+          <p className="muted" style={{ margin:'0 0 22px', fontSize:14.5, lineHeight:1.5 }}><b style={{ color:'var(--ink-900)' }}>{result.title}</b> is indexed and searchable for everyone whose access allows it.</p>
+          <div className="row" style={{ gap:10, justifyContent:'center' }}>
+            <button className="btn btn-ghost" onClick={()=>go('library')}><Icon name="library" size={16} />Go to library</button>
+            <button className="btn btn-primary" onClick={()=>go('chat',{ scope:[{doc_id:result.doc_id, title:result.title}] })}><Icon name="sparkle" size={16} />Chat with it</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
+   CONVERSATIONS — multi-doc RAG with [n] citations (real)
+   ============================================================ */
+/* Renders a document's extracted chunks as readable text and highlights the cited chunk by id
+   (exact, no fuzzy matching). Reused by the chat source viewer and the doc-detail preview. */
+function ChunkDocView({ docId, chunkId }) {
+  const [data, setData] = useState(null);
+  const refs = useRef({});
+  useEffect(()=>{ setData(null); api('/documents/'+docId+'/chunks').then(setData).catch(()=>setData({doc:null,chunks:[]})); }, [docId]);
+  useEffect(()=>{
+    if(data && chunkId!=null && refs.current[chunkId]){
+      refs.current[chunkId].scrollIntoView({ block:'center', behavior:'smooth' });
+      if(refs.current[chunkId].animate) refs.current[chunkId].animate([{background:'#FBEBCF'},{background:'var(--amber-50)'}], {duration:700});
+    }
+  }, [data, chunkId]);
+  if(!data) return <Spinner label="Loading document…" />;
+  if(!data.chunks || !data.chunks.length) return <div style={{ padding:8 }}><Hint icon="info">No extracted text is available for this document.</Hint></div>;
+  const isPdf = data.doc && data.doc.file_type==='pdf';
+  const dangling = chunkId!=null && !data.chunks.some(c=>c.id===chunkId);
+  const renderContent = (txt) => (txt||'').split('\n').map((ln,i)=>{
+    if(ln.startsWith('## ')) return <div key={i} style={{ fontWeight:600, color:'var(--ink-900)', margin:'6px 0 2px' }}>{ln.slice(3)}</div>;
+    if(!ln.trim()) return <div key={i} style={{ height:6 }} />;
+    return <div key={i}>{ln}</div>;
+  });
+  return (
+    <div className="col" style={{ gap:2 }}>
+      {dangling && <div style={{ marginBottom:8 }}><Hint icon="info">The cited passage is from an earlier version; showing the current document text.</Hint></div>}
+      {data.chunks.map(ch=>{ const on = ch.id===chunkId; return (
+        <div key={ch.id} ref={el=>refs.current[ch.id]=el}
+          style={{ padding:on?'10px 12px':'2px 12px', borderRadius:8, fontSize:13.5, lineHeight:1.6, color:'var(--ink-700)',
+            background:on?'var(--amber-50)':'transparent', borderLeft:'3px solid '+(on?'var(--amber-600)':'transparent'), transition:'background .2s' }}>
+          {on && <div style={{ marginBottom:6 }}><span className="badge amber" style={{ fontSize:10.5 }}><Icon name="quote" size={10} />Cited passage{isPdf?` · p.${ch.page_no}`:''}</span></div>}
+          {renderContent(ch.content)}
+        </div>
+      ); })}
+    </div>
+  );
+}
+function RichText({ text, cites, active, onCite, onOpen }) {
+  const paras = (text||'').split('\n\n');
+  return (
+    <>
+      {paras.map((p,pi)=>{
+        const tokens = p.split(/(\[\d+\]|\*\*[^*]+\*\*)/g).filter(Boolean);
+        return (
+          <p key={pi} style={{ margin:'0 0 12px', lineHeight:1.62, color:'var(--ink-700)', fontSize:14.5 }}>
+            {tokens.map((t,ti)=>{
+              const cm = t.match(/^\[(\d+)\]$/);
+              if(cm){ const n=+cm[1]; const c=(cites||[]).find(c=>c.n===n); if(!c) return t;
+                return <button key={ti} onClick={()=>{ onCite(n); onOpen && onOpen(c); }} onMouseEnter={()=>onCite(n,true)} className="cite-chip" data-on={active===n} title={'Open source: '+c.title+' · p.'+c.page}>{n}</button>; }
+              if(t.startsWith('**')) return <strong key={ti} style={{ color:'var(--ink-900)', fontWeight:600 }}>{t.slice(2,-2)}</strong>;
+              return <span key={ti}>{t}</span>;
+            })}
+          </p>
+        );
+      })}
+    </>
+  );
+}
+function ScreenChat({ go, me, persona, route, chat, setChat }) {
+  const toast = useToast();
+  const scope = (route.params && route.params.scope) || chat.scope || [];
+  const query = (route.params && route.params.query) || chat.query || '';
+  const [convId, setConvId] = useState(chat.convId || null);
+  const [turns, setTurns] = useState(chat.turns || []);
+  const [input, setInput] = useState('');
+  const [thinking, setThinking] = useState(false);
+  const [active, setActive] = useState(null);
+  const threadRef = useRef(); const refRefs = useRef({});
+
+  // Persist conversation state across navigation
+  useEffect(()=>{ setChat({ scope, query, convId, turns }); }, [convId, turns]);
+  useEffect(()=>{ if(threadRef.current) threadRef.current.scrollTop = threadRef.current.scrollHeight; }, [turns, thinking]);
+
+  const lastAi = [...turns].reverse().find(t=>t.role==='assistant' && t.cites && t.cites.length);
+  const panelCites = lastAi ? lastAi.cites : [];
+  const [source, setSource] = useState(null);   // {docId, chunkId, title} -> source-viewer slide-over
+  const onCite = (n, hoverOnly) => { setActive(n); const el=refRefs.current[n]; if(el && !hoverOnly) el.animate([{background:'var(--blue-50)'},{background:'#fff'}], {duration:900}); };
+  const openSource = (c) => { if(!c || !c.doc_id) return; setActive(c.n); setSource({ docId:c.doc_id, chunkId:c.chunk_id, title:c.title }); };
+
+  const send = async () => {
+    const msg = input.trim(); if(!msg || thinking) return;
+    setInput(''); setTurns(t=>[...t,{role:'user',content:msg}]); setThinking(true);
+    try {
+      let cid = convId;
+      if(!cid){ const r = await api('/conversations',{method:'POST',body:JSON.stringify({doc_ids:scope.map(s=>s.doc_id)})}); cid=r.conv_id; setConvId(cid); }
+      const r = await api(`/conversations/${cid}/messages`,{method:'POST',body:JSON.stringify({content:msg})});
+      setTurns(t=>[...t,{role:'assistant',content:r.answer,cites:r.cites}]);
+    } catch(e){ setTurns(t=>[...t,{role:'assistant',content:'⚠️ '+e.message}]); }
+    setThinking(false);
+  };
+
+  return (
+    <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) 360px', height:'100%', overflow:'hidden', position:'relative' }}>
+      <div className="col" style={{ height:'100%', overflow:'hidden', borderRight:'1px solid var(--line-200)' }}>
+        <div style={{ padding:'16px 28px', borderBottom:'1px solid var(--line-200)', background:'var(--surface)' }}>
+          <div className="spread">
+            <div className="row" style={{ gap:10 }}>
+              <Icon name="sparkle" size={18} style={{ color:'var(--blue-600)' }} />
+              <div><div style={{ fontWeight:600, color:'var(--ink-900)', fontSize:15 }}>Conversation</div><div className="dim" style={{ fontSize:12.5 }}>{query?`Grounded in your search: "${query}"`:'Grounded in your accessible documents'}</div></div>
+            </div>
+            <button className="btn btn-ghost btn-sm" onClick={()=>{ setChat({}); go('search'); }}><Icon name="refresh" size={15} />New scope</button>
+          </div>
+          <div className="row wrap" style={{ gap:8, marginTop:14 }}>
+            <span className="lbl" style={{ marginRight:2 }}>In context</span>
+            {scope.length ? scope.map(d=>(
+              <span key={d.doc_id} className="badge blue" style={{ paddingLeft:7 }}><Icon name="doc" size={11} />{d.title.length>30?d.title.slice(0,30)+'…':d.title}</span>
+            )) : <span className="badge"><Icon name="library" size={11} />All accessible documents</span>}
+          </div>
+        </div>
+
+        <div ref={threadRef} className="grow" style={{ overflowY:'auto', padding:'24px 28px 12px' }}>
+          <div style={{ maxWidth:720, margin:'0 auto' }}>
+            {turns.length===0 && !thinking && (
+              <div className="col" style={{ alignItems:'center', gap:10, padding:'48px 0', textAlign:'center' }}>
+                <div style={{ width:48, height:48, borderRadius:12, background:'linear-gradient(135deg, var(--blue-600), var(--navy-700))', display:'grid', placeItems:'center' }}><Icon name="sparkle" size={24} style={{ color:'#fff' }} /></div>
+                <div className="h3">Ask across your documents</div>
+                <p className="dim" style={{ maxWidth:380, fontSize:13.5, margin:0 }}>Every answer is grounded in retrieved excerpts and cites its sources. Only content you can access is ever used.</p>
+              </div>
+            )}
+            {turns.map((t,i)=> t.role==='user'
+              ? <div key={i} className="row" style={{ gap:12, justifyContent:'flex-end', marginBottom:22, alignItems:'flex-start' }}><div style={{ background:'var(--navy-900)', color:'#fff', padding:'11px 15px', borderRadius:'14px 14px 4px 14px', maxWidth:520, fontSize:14.5, lineHeight:1.55, whiteSpace:'pre-wrap' }}>{t.content}</div><Avatar name={persona.name} size={30} /></div>
+              : <AiTurn key={i} turn={t} active={active} onCite={onCite} onOpen={openSource} />
+            )}
+            {thinking && (
+              <div className="row" style={{ gap:12, marginBottom:26, alignItems:'flex-start' }}>
+                <div style={{ width:30, height:30, borderRadius:9, background:'linear-gradient(135deg, var(--blue-600), var(--navy-700))', display:'grid', placeItems:'center', flex:'0 0 auto' }}><Icon name="sparkle" size={17} style={{ color:'#fff' }} /></div>
+                <div className="col" style={{ gap:9, paddingTop:4 }}><div className="row" style={{ gap:6 }}>{[0,1,2].map(i=><span key={i} className="think-dot" style={{ animationDelay:i*0.16+'s' }} />)}</div><span className="dim" style={{ fontSize:12.5 }}>Retrieving ACL-filtered excerpts…</span></div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div style={{ padding:'14px 28px 20px', borderTop:'1px solid var(--line-200)', background:'var(--surface)' }}>
+          <div style={{ maxWidth:720, margin:'0 auto' }}>
+            <div className="row" style={{ gap:10, background:'var(--surface)', border:'1px solid var(--line-200)', borderRadius:'var(--r-md)', padding:'8px 8px 8px 14px', boxShadow:'var(--sh-xs)' }}>
+              <textarea className="textarea" value={input} onChange={e=>setInput(e.target.value)}
+                onKeyDown={e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } }}
+                placeholder="Ask across the documents in scope…" style={{ border:'none', boxShadow:'none', minHeight:24, maxHeight:120, padding:'6px 0', resize:'none' }} rows={1} />
+              <button className="btn btn-primary" style={{ alignSelf:'flex-end', width:38, padding:0 }} onClick={send} disabled={!input.trim()||thinking}><Icon name="send" size={17} /></button>
+            </div>
+            <div className="row" style={{ gap:10, marginTop:9, justifyContent:'space-between' }}>
+              <Hint icon="shieldCheck">Answers cite sources · grounded only in your accessible corpus</Hint>
+              <span className="dim" style={{ fontSize:12 }}><kbd>Enter</kbd> to send · <kbd>Shift</kbd>+<kbd>Enter</kbd> newline</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside className="col" style={{ height:'100%', overflow:'hidden', background:'var(--surface-2)' }}>
+        <div style={{ padding:'18px 20px 14px', borderBottom:'1px solid var(--line-200)' }}>
+          <div className="row" style={{ gap:8 }}><Icon name="quote" size={17} style={{ color:'var(--ink-400)' }} /><span className="h3">References</span><span className="badge" style={{ marginLeft:'auto' }}>{panelCites.length}</span></div>
+          <p className="dim" style={{ fontSize:12.5, margin:'8px 0 0' }}>Click any citation to open the source document with the cited passage highlighted.</p>
+        </div>
+        <div className="grow" style={{ overflowY:'auto', padding:16 }}>
+          {panelCites.length===0 && <Hint icon="info">No citations yet — ask a question to see grounded sources.</Hint>}
+          <div className="col" style={{ gap:12 }}>
+            {panelCites.map(c=>(
+              <div key={c.n} ref={el=>refRefs.current[c.n]=el} className="card card-hover" onClick={()=>openSource(c)}
+                style={{ padding:14, cursor:'pointer', borderColor:active===c.n?'var(--blue-500)':'var(--line-200)', boxShadow:active===c.n?'var(--sh-focus)':'none', transition:'box-shadow .15s, border-color .15s' }}>
+                <div className="row" style={{ gap:9, marginBottom:9 }}>
+                  <span style={{ width:22, height:22, borderRadius:6, background:'var(--blue-600)', color:'#fff', fontSize:12, fontWeight:700, display:'grid', placeItems:'center', flex:'0 0 auto', fontFamily:'var(--font-mono)' }}>{c.n}</span>
+                  <span className="grow" style={{ fontWeight:600, fontSize:13, color:'var(--ink-900)', lineHeight:1.3 }}>{c.title}</span>
+                  <Icon name="chevRight" size={15} style={{ color:'var(--ink-300)', flex:'0 0 auto' }} />
+                </div>
+                <div className="spread"><span className="attr"><span className="k">loc</span> p.{c.page}{c.section?` · ${c.section}`:''}</span><span className="dim" style={{ fontSize:11 }}>open source</span></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ padding:16, borderTop:'1px solid var(--line-200)' }}>
+          <div className="card" style={{ padding:12, background:'var(--surface)' }}><Hint icon="layers">RAG · top-K 8 chunks · ±1 adjacent-chunk continuation</Hint></div>
+        </div>
+      </aside>
+
+      {source && (
+        <div style={{ position:'absolute', top:0, right:0, bottom:0, width:'min(520px, 92%)', background:'var(--surface)', borderLeft:'1px solid var(--line-200)', boxShadow:'var(--sh-lg)', zIndex:30, display:'flex', flexDirection:'column', animation:'slideInRight .18s ease' }}>
+          <div className="spread" style={{ padding:'13px 16px', borderBottom:'1px solid var(--line-200)', flex:'0 0 auto' }}>
+            <div className="row" style={{ gap:9, minWidth:0 }}>
+              <Icon name="quote" size={16} style={{ color:'var(--blue-600)', flex:'0 0 auto' }} />
+              <div className="col" style={{ minWidth:0, lineHeight:1.25 }}>
+                <span style={{ fontWeight:600, fontSize:13.5, color:'var(--ink-900)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{source.title}</span>
+                <span className="dim" style={{ fontSize:11.5 }}>Source document · cited passage highlighted</span>
+              </div>
+            </div>
+            <div className="row" style={{ gap:8, flex:'0 0 auto' }}>
+              <button className="btn btn-ghost btn-sm" onClick={()=>openFile(source.docId,0,m=>toast(m,{danger:true}))}><Icon name="eye" size={14} />Open original</button>
+              <button className="icon-btn" style={{ width:32, height:32 }} title="Close" onClick={()=>setSource(null)}><Icon name="x" size={16} /></button>
+            </div>
+          </div>
+          <div className="grow" style={{ overflowY:'auto', padding:18 }}><ChunkDocView docId={source.docId} chunkId={source.chunkId} /></div>
+        </div>
+      )}
+    </div>
+  );
+}
+function AiTurn({ turn, active, onCite, onOpen }) {
+  return (
+    <div className="row" style={{ gap:12, marginBottom:26, alignItems:'flex-start' }}>
+      <div style={{ width:30, height:30, borderRadius:9, background:'linear-gradient(135deg, var(--blue-600), var(--navy-700))', display:'grid', placeItems:'center', flex:'0 0 auto', marginTop:2 }}><Icon name="sparkle" size={17} style={{ color:'#fff' }} /></div>
+      <div style={{ flex:1, minWidth:0 }}>
+        <RichText text={turn.content} cites={turn.cites} active={active} onCite={onCite} onOpen={onOpen} />
+        {turn.cites && turn.cites.length>0 && (
+          <div className="row wrap" style={{ gap:7, marginTop:12, paddingTop:12, borderTop:'1px dashed var(--line-200)' }}>
+            <span className="lbl" style={{ marginRight:2 }}>Sources</span>
+            {[...new Map(turn.cites.map(c=>[c.title+c.page,c])).values()].map(c=>(
+              <button key={c.n} className="badge" onClick={()=>{ onCite(c.n); onOpen && onOpen(c); }} title="Open source" style={{ cursor:'pointer', border:'1px solid var(--line-200)' }}><span style={{ fontFamily:'var(--font-mono)', color:'var(--blue-600)', fontWeight:700 }}>{c.n}</span>{c.title.length>28?c.title.slice(0,28)+'…':c.title}</button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   ACCESS REQUESTS — Demo (no backend workflow)
+   ============================================================ */
+function ScreenAccess({ go, persona, route }) {
+  const toast = useToast();
+  const req = route.params && route.params.request;
+  const [data, setData] = useState(null);   // {incoming, mine}
+  const [tab, setTab] = useState(persona.isApprover || persona.isAdmin ? 'incoming' : 'mine');
+  const [deny, setDeny] = useState(null);
+  const load = () => api('/access-requests').then(setData).catch(e=>{ toast('Load failed: '+e.message,{danger:true}); setData({incoming:[],mine:[]}); });
+  useEffect(()=>{ if(!req) load(); }, [req]);
+
+  if(req) return <RequestForm req={req} persona={persona}
+    onClose={()=>go('search')}
+    onSubmit={async (justification)=>{
+      try { await api('/access-requests',{method:'POST',body:JSON.stringify({doc_id:req.docId, justification})});
+        toast('Access request sent to the approver · email dispatched', {icon:'mail'}); go('access'); }
+      catch(e){ toast(e.message, {danger:true, icon:'xCircle'}); }
+    }} />;
+
+  const decide = async (id, decision, note) => {
+    try { await api(`/access-requests/${id}/decide`,{method:'POST',body:JSON.stringify({decision, note})});
+      setDeny(null);
+      toast(decision==='approve'?'Access granted · requester notified':'Request denied · requester notified',
+            {icon:decision==='approve'?'checkCircle':'xCircle', danger:decision!=='approve'});
+      load();
+    } catch(e){ toast(e.message, {danger:true}); }
+  };
+
+  if(data===null) return <div className="content-pad"><Spinner label="Loading access requests…" /></div>;
+  const pending = data.incoming.filter(r=>r.status==='pending').length;
+  const rows = tab==='incoming' ? data.incoming : data.mine;
+
+  return (
+    <div className="content-pad fade-up">
+      <div className="spread" style={{ marginBottom:8 }}>
+        <div><h1 className="h1">Access requests</h1><p className="muted" style={{ margin:'6px 0 0', fontSize:15 }}>Request-to-unlock workflow. Approving issues a time-limited, document-scoped grant.</p></div>
+      </div>
+      <div className="card card-pad" style={{ background:'var(--surface-2)', margin:'16px 0 22px', maxWidth:880 }}><Hint icon="key">Approve/deny links are HMAC-signed, single-use, and expire — approvers can act from email without logging in.</Hint></div>
+
+      <div className="tabs" style={{ marginBottom:22 }}>
+        {(persona.isApprover || persona.isAdmin) && <button className={'tab'+(tab==='incoming'?' on':'')} onClick={()=>setTab('incoming')}>Incoming{pending>0 && <span className="badge amber" style={{ marginLeft:7 }}>{pending} pending</span>}</button>}
+        <button className={'tab'+(tab==='mine'?' on':'')} onClick={()=>setTab('mine')}>My requests</button>
+      </div>
+
+      <div className="col" style={{ gap:14, maxWidth:880 }}>
+        {rows.length===0 && <div className="panel" style={{ padding:32, textAlign:'center' }}><Hint icon="info">{tab==='incoming'?'No incoming requests.':'You have no access requests.'}</Hint></div>}
+        {rows.map(r=><RequestCard key={r.id} r={r} approver={tab==='incoming'} onDecide={d=>d==='deny'?setDeny(r):decide(r.id,'approve')} />)}
+      </div>
+
+      {deny && <DenyModal r={deny} onClose={()=>setDeny(null)} onConfirm={note=>decide(deny.id,'deny',note)} />}
+    </div>
+  );
+}
+function RequestCard({ r, approver, onDecide }) {
+  const st = { pending:{cls:'amber',icon:'clock',label:'Pending'}, approved:{cls:'green',icon:'checkCircle',label:'Approved'}, denied:{cls:'red',icon:'xCircle',label:'Denied'} }[r.status] || {cls:'',icon:'clock',label:r.status};
+  return (
+    <div className="card" style={{ padding:20 }}>
+      <div className="spread" style={{ alignItems:'flex-start', marginBottom:14 }}>
+        <div className="row" style={{ gap:14, alignItems:'flex-start' }}>
+          <div style={{ width:40, height:40, borderRadius:11, background:'var(--amber-50)', border:'1px solid var(--amber-100)', display:'grid', placeItems:'center', flex:'0 0 auto' }}><Icon name="lock" size={19} style={{ color:'var(--amber-600)' }} /></div>
+          <div><span className="h3" style={{ display:'block' }}>{r.doc_title}</span><div className="row wrap" style={{ gap:9, marginTop:7 }}><span className="row dim" style={{ gap:5, fontSize:12.5 }}><Icon name="clock" size={13} />{relTime(r.created_at)}</span>{!approver && <><span className="dim">·</span><span className="dim" style={{ fontSize:12.5 }}>approver {r.approver_name}</span></>}</div></div>
+        </div>
+        <span className={'badge '+st.cls}><Icon name={st.icon} size={12} />{st.label}</span>
+      </div>
+      <div className="card" style={{ padding:14, background:'var(--surface-2)', marginBottom:approver && r.status==='pending'?16:0 }}>
+        <div className="row" style={{ gap:9, marginBottom:r.justification?9:0 }}><Avatar name={r.requester_name} size={28} /><div className="col" style={{ lineHeight:1.3 }}><span style={{ fontSize:13.5, fontWeight:600, color:'var(--ink-900)' }}>{r.requester_name}</span><span className="dim" style={{ fontSize:12 }}>{r.requester_role||'Requester'}</span></div></div>
+        {r.justification && <p style={{ margin:0, fontSize:13.5, color:'var(--ink-700)', lineHeight:1.55, fontStyle:'italic' }}>"{r.justification}"</p>}
+      </div>
+      {approver && r.status==='pending' && (
+        <div className="spread"><Hint icon="shieldCheck">Approving issues a 30-day document-scoped grant</Hint>
+          <div className="row" style={{ gap:10 }}><button className="btn btn-danger" onClick={()=>onDecide('deny')}><Icon name="x" size={16} />Deny</button><button className="btn btn-primary" onClick={()=>onDecide('approve')}><Icon name="check" size={16} />Approve</button></div>
+        </div>
+      )}
+      {r.status!=='pending' && <div className="row" style={{ gap:8, marginTop:14, paddingTop:14, borderTop:'1px solid var(--line-100)' }}><Icon name={r.status==='approved'?'checkCircle':'xCircle'} size={16} style={{ color:r.status==='approved'?'var(--green-700)':'var(--red-600)' }} /><span style={{ fontSize:13, fontWeight:500, color:'var(--ink-700)' }}>{r.status==='approved'?'Approved · 30-day grant':'Denied'}{r.approver_note?' · '+r.approver_note:''}</span></div>}
+    </div>
+  );
+}
+function RequestForm({ req, persona, onClose, onSubmit }) {
+  const [note, setNote] = useState(''); const [busy, setBusy] = useState(false);
+  const submit = async () => { setBusy(true); await onSubmit(note); setBusy(false); };
+  return (
+    <Modal onClose={onClose} width={560}>
+      <div className="modal-head"><div className="row" style={{ gap:11 }}><div style={{ width:38, height:38, borderRadius:10, background:'var(--amber-50)', display:'grid', placeItems:'center' }}><Icon name="unlock" size={19} style={{ color:'var(--amber-600)' }} /></div><div><div className="h3">Request access</div><div className="dim" style={{ fontSize:12.5 }}>Routed to the document's approver</div></div></div></div>
+      <div className="modal-body">
+        <div className="card" style={{ padding:14, marginBottom:18, background:'var(--surface-2)' }}><div className="row" style={{ gap:12 }}><Icon name="lock" size={20} style={{ color:'var(--amber-600)' }} /><div className="grow"><div style={{ fontWeight:600, color:'var(--ink-900)', fontSize:14 }}>{req.doc}</div><div className="dim" style={{ fontSize:12.5 }}>Restricted — outside your access</div></div></div></div>
+        <div className="lbl" style={{ marginBottom:10 }}>Pre-filled by the system</div>
+        <div className="col" style={{ gap:8, marginBottom:18 }}>{[['Requester',persona.name],['Identity',persona.email||persona.role]].map(([k,v])=><div key={k} className="spread"><span className="dim" style={{ fontSize:13 }}>{k}</span><span style={{ fontSize:13, fontWeight:500, color:'var(--ink-900)' }}>{v}</span></div>)}</div>
+        <div className="field"><label>Justification <span className="dim" style={{ fontWeight:400 }}>(optional, recommended)</span></label><textarea className="textarea" value={note} onChange={e=>setNote(e.target.value)} placeholder="Why do you need access to this document?" /></div>
+      </div>
+      <div className="modal-foot"><button className="btn btn-quiet" onClick={onClose}>Cancel</button><button className="btn btn-primary" onClick={submit} disabled={busy}><Icon name="send" size={16} />Send request</button></div>
+    </Modal>
+  );
+}
+function DenyModal({ r, onClose, onConfirm }) {
+  const [note, setNote] = useState('');
+  return (
+    <Modal onClose={onClose} width={480}>
+      <div className="modal-head"><div className="h3">Deny access request</div></div>
+      <div className="modal-body"><p className="muted" style={{ margin:'0 0 16px', fontSize:14 }}>Denying <b style={{ color:'var(--ink-900)' }}>{r.requester_name}</b>'s request for "{r.doc_title}".</p><div className="field"><label>Reason <span className="dim" style={{ fontWeight:400 }}>(optional)</span></label><textarea className="textarea" value={note} onChange={e=>setNote(e.target.value)} placeholder="e.g. Out of project scope." /></div></div>
+      <div className="modal-foot"><button className="btn btn-quiet" onClick={onClose}>Cancel</button><button className="btn btn-danger" onClick={()=>onConfirm(note)} style={{ background:'var(--red-600)', color:'#fff', borderColor:'var(--red-600)' }}><Icon name="x" size={16} />Confirm denial</button></div>
+    </Modal>
+  );
+}
+
+/* ============================================================
+   ADMIN — Users & taxonomy (Demo) + Audit log (real)
+   ============================================================ */
+function ScreenAdmin({ go }) {
+  const toast = useToast();
+  const [tab, setTab] = useState('users');
+  const [users, setUsers] = useState(null);
+  const [vocab, setVocab] = useState({ departments:[], clearances:[], user_types:[], projects:[] });
+  const [sel, setSel] = useState(null);
+  const load = () => api('/admin/users').then(setUsers).catch(e=>{ toast('Load failed: '+e.message,{danger:true}); setUsers([]); });
+  useEffect(()=>{ load(); api('/vocab').then(setVocab).catch(()=>{}); }, []);
+  const save = async (uid, patch) => {
+    try { await api('/admin/users/'+uid,{method:'PATCH',body:JSON.stringify(patch)}); toast('User updated'); load(); }
+    catch(e){ toast('Update failed: '+e.message,{danger:true}); }
+  };
+  return (
+    <div className="content-pad fade-up">
+      <div className="spread" style={{ marginBottom:8 }}>
+        <div><h1 className="h1">Users &amp; attributes</h1><p className="muted" style={{ margin:'6px 0 0', fontSize:15 }}>Manage identities and assign the ABAC attributes evaluated on every request.</p></div>
+      </div>
+      <div className="tabs" style={{ margin:'18px 0 22px' }}>{[['users','Users'],['taxonomy','Attribute taxonomy'],['auth','Authentication']].map(([k,l])=><button key={k} className={'tab'+(tab===k?' on':'')} onClick={()=>setTab(k)}>{l}</button>)}</div>
+
+      {tab==='users' && (users===null ? <Spinner label="Loading users…" /> : (
+        <div style={{ display:'grid', gridTemplateColumns: sel?'minmax(0,1fr) 340px':'minmax(0,1fr)', gap:24, alignItems:'start' }}>
+          <div className="panel" style={{ overflow:'hidden' }}>
+            <table className="tbl">
+              <thead><tr><th>User</th><th>Type</th><th>Departments</th><th>Clearance</th><th>Status</th></tr></thead>
+              <tbody>{users.map(u=>(
+                <tr key={u.id} onClick={()=>setSel(u)} style={{ cursor:'pointer', background:sel&&sel.id===u.id?'var(--blue-50)':undefined }}>
+                  <td><div className="row" style={{ gap:10 }}><Avatar name={u.name} size={30} /><div className="col" style={{ lineHeight:1.3 }}><span style={{ fontWeight:600, color:'var(--ink-900)', fontSize:13.5 }}>{u.name}</span><span className="dim" style={{ fontSize:12 }}>{u.email}</span></div></div></td>
+                  <td><span className="badge outline">{u.user_type}</span></td>
+                  <td style={{ fontSize:12.5 }}>{u.departments.join(', ')||'—'}</td>
+                  <td><Clearance level={u.clearance} size="sm" /></td>
+                  <td>{u.is_active?<span className="badge green"><span style={{ width:6, height:6, borderRadius:9, background:'var(--green-700)' }} />Active</span>:<span className="badge">Inactive</span>}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+          {sel && <AdminUserEditor key={sel.id} u={sel} vocab={vocab} onClose={()=>setSel(null)} onSave={(patch)=>save(sel.id, patch)} />}
+        </div>
+      ))}
+
+      {tab==='taxonomy' && (
+        <div>
+          <div className="card card-pad" style={{ background:'var(--surface-2)', marginBottom:18, maxWidth:760 }}><Hint icon="info">Departments, clearance levels, and user types are the fixed ABAC vocabulary enforced by the engine. Projects are discovered from documents.</Hint></div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(330px, 1fr))', gap:16 }}>
+            {[['Department','building', vocab.departments.map(d=>d.name)],['Clearance Level','shield', vocab.clearances],['User Type','users', vocab.user_types],['Project / Engagement','hash', vocab.projects]].map(([cat,icon,vals])=>(
+              <div key={cat} className="panel" style={{ padding:18 }}>
+                <div className="spread" style={{ marginBottom:14 }}><div className="row" style={{ gap:8 }}><Icon name={icon} size={16} style={{ color:'var(--blue-600)' }} /><span style={{ fontWeight:600, fontSize:14, color:'var(--ink-900)' }}>{cat}</span></div><span className="badge">{vals.length}</span></div>
+                <div className="row wrap" style={{ gap:7 }}>{cat==='Clearance Level'?vals.map(v=><Clearance key={v} level={v} size="sm" />):vals.map(v=><Attr key={v} v={v} />)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {tab==='auth' && (
+        <div className="col" style={{ gap:16, maxWidth:560 }}>
+          <div className="panel" style={{ padding:20 }}>
+            <div className="lbl" style={{ marginBottom:12 }}>Authentication (active)</div>
+            {[['Method','Username + password'],['Session token','HS256 JWT (Bearer)'],['Token lifetime','12 hours'],
+              ['Password storage','PBKDF2-HMAC-SHA256 (100k iterations)'],['Brute-force guard','Per-username throttle'],
+              ['Approval links','HMAC-signed, single-use, time-limited']].map(([k,v])=>(
+              <div key={k} className="spread" style={{ padding:'8px 0', borderBottom:'1px solid var(--line-100)' }}>
+                <span className="dim" style={{ fontSize:13 }}>{k}</span>
+                <span className="mono" style={{ fontSize:12.5, fontWeight:500, color:'var(--ink-900)' }}>{v}</span>
+              </div>
+            ))}
+          </div>
+          <div className="card card-pad" style={{ background:'var(--surface-2)' }}><Hint icon="shieldCheck">These are the real, active authentication settings. OAuth/SSO and API keys are on the roadmap (not enabled in this build).</Hint></div>
+        </div>
+      )}
+    </div>
+  );
+}
+function AdminUserEditor({ u, vocab, onClose, onSave }) {
+  const [departments, setDepartments] = useState(()=>new Set(vocab.departments.filter(g=>u.departments.includes(g.name)).map(g=>g.id)));
+  const [clearance, setClearance] = useState(u.clearance);
+  const [userType, setUserType] = useState(u.user_type);
+  const [projects, setProjects] = useState(()=>new Set(u.projects));
+  const [active, setActive] = useState(!!u.is_active);
+  const tog = (setter,v)=>setter(s=>{ const n=new Set(s); n.has(v)?n.delete(v):n.add(v); return n; });
+  const Chip = ({on,onClick,children})=>(<button onClick={onClick} className="attr" style={{ cursor:'pointer', borderColor:on?'var(--blue-500)':'var(--line-200)', background:on?'var(--blue-50)':'var(--surface-2)', color:on?'var(--blue-700)':'var(--ink-700)', fontWeight:on?600:500 }}>{on && <Icon name="check" size={12} />}{children}</button>);
+  return (
+    <div className="panel fade-up" style={{ padding:20, position:'sticky', top:12 }}>
+      <div className="spread" style={{ marginBottom:16 }}>
+        <div className="row" style={{ gap:11 }}><Avatar name={u.name} size={40} /><div className="col" style={{ lineHeight:1.3 }}><span style={{ fontWeight:600, fontSize:15, color:'var(--ink-900)' }}>{u.name}</span><span className="dim" style={{ fontSize:12.5 }}>{u.email}</span></div></div>
+        <button className="icon-btn" style={{ width:30, height:30 }} onClick={onClose}><Icon name="x" size={16} /></button>
+      </div>
+      <div className="col" style={{ gap:14 }}>
+        <div className="field"><label style={{ fontSize:12 }}>Departments</label><div className="row wrap" style={{ gap:6 }}>{vocab.departments.map(g=><Chip key={g.id} on={departments.has(g.id)} onClick={()=>tog(setDepartments,g.id)}>{g.name}</Chip>)}</div></div>
+        <div className="field"><label style={{ fontSize:12 }}>Clearance</label><div className="row wrap" style={{ gap:7 }}>{vocab.clearances.map(c=><button key={c} onClick={()=>setClearance(c)} style={{ border:'none', background:'none', padding:0, cursor:'pointer', opacity:clearance===c?1:.5, outline:clearance===c?'2px solid var(--blue-500)':'none', borderRadius:999 }}><Clearance level={c} size="sm" /></button>)}</div></div>
+        <div className="field"><label style={{ fontSize:12 }}>User type</label><div className="row wrap" style={{ gap:6 }}>{vocab.user_types.map(t=><Chip key={t} on={userType===t} onClick={()=>setUserType(t)}>{t}</Chip>)}</div></div>
+        <div className="field"><label style={{ fontSize:12 }}>Projects</label><div className="row wrap" style={{ gap:6 }}>{vocab.projects.map(p=><Chip key={p} on={projects.has(p)} onClick={()=>tog(setProjects,p)}>{p}</Chip>)}</div></div>
+        <label className="row" style={{ gap:9, cursor:'pointer' }}><input type="checkbox" checked={active} onChange={e=>setActive(e.target.checked)} /><span style={{ fontSize:13.5 }}>Active</span></label>
+      </div>
+      <button className="btn btn-primary btn-block" style={{ marginTop:16 }} onClick={()=>onSave({ departments:[...departments], clearance, user_type:userType, projects:[...projects], is_active:active })}><Icon name="check" size={16} />Save attributes</button>
+    </div>
+  );
+}
+const AUDIT_META = {
+  'document.upload':{cat:'Document',icon:'upload'}, 'document.view':{cat:'Document',icon:'eye'},
+  'document.download':{cat:'Document',icon:'download'}, 'document.share':{cat:'Access',icon:'users'},
+  'search.query':{cat:'Search',icon:'search'}, 'ai.turn':{cat:'AI',icon:'chat'},
+  'ai.session_start':{cat:'AI',icon:'sparkle'},
+};
+function ScreenAudit({ namesById }) {
+  const toast = useToast();
+  const [rows, setRows] = useState(null);
+  const [cat, setCat] = useState('All');
+  useEffect(()=>{ api('/audit').then(setRows).catch(e=>{ toast('Audit load failed: '+e.message,{danger:true}); setRows([]); }); }, []);
+  if(rows===null) return <div className="content-pad"><Spinner label="Loading audit log…" /></div>;
+  const enriched = rows.map(r=>{ const m=AUDIT_META[r.event]||{cat:'System',icon:'info'}; let detail=''; try{ detail=JSON.stringify(JSON.parse(r.detail)); }catch{ detail=r.detail||''; } return {...r, ...m, detail}; });
+  const cats = ['All', ...Array.from(new Set(enriched.map(r=>r.cat)))];
+  const shown = enriched.filter(r=>cat==='All'||r.cat===cat);
+  return (
+    <div className="content-pad fade-up">
+      <div className="spread" style={{ marginBottom:22 }}>
+        <div><h1 className="h1">Audit log</h1><p className="muted" style={{ margin:'6px 0 0', fontSize:15 }}>Append-only record of uploads, shares, searches, approvals, and AI turns.</p></div>
+        <button className="btn btn-ghost" onClick={async ()=>{
+          try { const r = await fetch('/api/audit.csv',{headers:authHeader()}); const url=URL.createObjectURL(await r.blob());
+            const a=document.createElement('a'); a.href=url; a.download='aibox_audit.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000);
+            toast('Audit exported'); } catch(e){ toast('Export failed: '+e.message,{danger:true}); }
+        }}><Icon name="download" size={16} />Export CSV</button>
+      </div>
+      <div className="row wrap" style={{ gap:7, marginBottom:18 }}>
+        {cats.map(c=><button key={c} onClick={()=>setCat(c)} className={'badge'+(cat===c?' solid-blue':'')} style={{ cursor:'pointer', border:cat===c?'none':'1px solid var(--line-200)', padding:'5px 12px' }}>{c}</button>)}
+        <div className="grow" /><Hint icon="database">{rows.length} recent events</Hint>
+      </div>
+      <div className="panel" style={{ overflow:'hidden' }}>
+        <table className="tbl">
+          <thead><tr><th>Event</th><th>Category</th><th>Actor</th><th>Detail</th><th>Time</th></tr></thead>
+          <tbody>{shown.map((e,i)=>(
+            <tr key={i}>
+              <td><div className="row" style={{ gap:10 }}><span style={{ width:30, height:30, borderRadius:8, background:'var(--surface-2)', border:'1px solid var(--line-200)', display:'grid', placeItems:'center', flex:'0 0 auto' }}><Icon name={e.icon} size={15} style={{ color:'var(--ink-500)' }} /></span><span style={{ fontWeight:500, color:'var(--ink-900)', fontSize:13.5 }}>{e.event}</span></div></td>
+              <td><span className="badge outline" style={{ fontSize:11 }}>{e.cat}</span></td>
+              <td><div className="row" style={{ gap:7 }}><Avatar name={namesById[e.user_id]||e.user_id} size={22} /><span style={{ fontSize:13 }}>{namesById[e.user_id]||e.user_id}</span></div></td>
+              <td className="mono" style={{ fontSize:12, color:'var(--ink-500)', maxWidth:320, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{e.detail}</td>
+              <td className="dim" style={{ fontSize:12.5, whiteSpace:'nowrap' }}>{new Date(e.ts*1000).toLocaleString()}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   APP shell + router
+   ============================================================ */
+function App({ me, onLogout, onQuickLogin }) {
+  const [personas, setPersonas] = useState([]);     // seeded demo users (for quick-switch)
+  const [route, setRoute] = useState({ name:'search', params:{} });
+  const [chat, setChat] = useState({});             // persisted conversation state
+  const go = (name, params={}) => setRoute({ name, params });
+  useEffect(()=>{ api('/personas').then(setPersonas).catch(()=>{}); }, []);
+
+  const namesById = {}; personas.forEach(p=>namesById[p.id]=p.name);
+  const persona = { id:me.id, name:me.name, role:me.role, email:me.email, isAdmin:!!me.is_admin,
+    canUpload: me.is_admin || me.user_type==='employee', isApprover: me.is_admin || me.user_type==='employee',
+    attrs:{ department: me.departments||[], clearance: me.clearance, userType: me.user_type, projects: me.projects||[] },
+    groups: me.departments||[] };
+
+  const NAV = [
+    { id:'search', icon:'search', label:'Search' },
+    { id:'library', icon:'library', label:'Library' },
+    { id:'chat', icon:'chat', label:'Conversations' },
+    { id:'upload', icon:'upload', label:'Upload', show:persona.canUpload },
+  ];
+  const WORK = [{ id:'access', icon:'unlock', label:'Access requests' }];
+  const ADMIN = [{ id:'admin', icon:'users', label:'Users & attributes' }, { id:'audit', icon:'shield', label:'Audit log' }];
+  const titles = { search:'Search', library:'Library', chat:'Conversations', upload:'Upload document', document:'Document', access:'Access requests', admin:'Users & attributes', audit:'Audit log' };
+
+  let Screen;
+  switch(route.name){
+    case 'search': Screen = <ScreenSearch go={go} me={me} />; break;
+    case 'library': Screen = <ScreenLibrary go={go} me={me} />; break;
+    case 'document': Screen = <ScreenDocument go={go} me={me} route={route} />; break;
+    case 'upload': Screen = <ScreenUpload go={go} me={me} />; break;
+    case 'chat': Screen = <ScreenChat go={go} me={me} persona={persona} route={route} chat={chat} setChat={setChat} />; break;
+    case 'access': Screen = <ScreenAccess go={go} persona={persona} route={route} />; break;
+    case 'admin': Screen = <ScreenAdmin go={go} />; break;
+    case 'audit': Screen = <ScreenAudit namesById={namesById} />; break;
+    default: Screen = <ScreenSearch go={go} me={me} />;
+  }
+  const fullBleed = route.name==='chat';
+
+  const NavBtn = (item) => (item.show===undefined || item.show) && (
+    <button key={item.id} className={'nav-item'+(route.name===item.id?' active':'')} onClick={()=>go(item.id)}>
+      <Icon name={item.icon} size={19} /><span className="grow">{item.label}</span>
+      {item.count!=null && <span className="count">{item.count}</span>}
+    </button>
+  );
+
+  return (
+    <div className="app">
+      <nav className="rail">
+        <div className="rail-logo"><LogoMark size={34} /><span className="wordmark">AI<b>Box</b></span></div>
+        <div className="rail-nav">
+          {NAV.map(NavBtn)}
+          <div className="nav-section"><span className="lbl">Workflow</span></div>
+          {WORK.map(NavBtn)}
+          {persona.isAdmin && <><div className="nav-section"><span className="lbl">Administration</span></div>{ADMIN.map(NavBtn)}</>}
+        </div>
+        <div className="rail-foot">
+          <div className="card" style={{ padding:12, background:'var(--surface-2)', border:'1px solid var(--line-200)' }}>
+            <div className="row" style={{ gap:8 }}><Icon name="database" size={15} style={{ color:'var(--blue-600)' }} /><span style={{ fontSize:12, fontWeight:600, color:'var(--ink-900)' }}>Self-hosted</span><span className="badge green" style={{ marginLeft:'auto', fontSize:10.5 }}>Single-tenant</span></div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="main">
+        <header className="topbar">
+          <div className="row" style={{ gap:11, minWidth:0 }}>
+            <Icon name={(NAV.concat(WORK,ADMIN).find(n=>n.id===route.name)||{}).icon||'doc'} size={20} style={{ color:'var(--ink-400)' }} />
+            <span style={{ fontWeight:600, fontSize:16, color:'var(--ink-900)' }}>{titles[route.name]||'AI Box'}</span>
+          </div>
+          <div className="grow" />
+          {persona.canUpload && route.name!=='upload' && <button className="btn btn-ghost btn-sm" onClick={()=>go('upload')}><Icon name="plus" size={16} />Upload</button>}
+          <Menu align="right" width={320} trigger={(open)=>(
+            <button className="persona-card" style={{ borderColor:open?'var(--blue-500)':'var(--line-200)' }}>
+              <Avatar name={persona.name} size={30} />
+              <div className="col" style={{ alignItems:'flex-start', lineHeight:1.25, whiteSpace:'nowrap' }}><span style={{ fontSize:13.5, fontWeight:600, color:'var(--ink-900)' }}>{persona.name}</span><span className="dim" style={{ fontSize:11.5 }}>{persona.role}</span></div>
+              <Icon name="chevDown" size={16} style={{ color:'var(--ink-400)' }} />
+            </button>
+          )}>
+            {(close)=>(
+              <div>
+                <div className="row" style={{ gap:10, padding:'8px 10px 8px' }}>
+                  <Avatar name={persona.name} size={36} />
+                  <div className="col" style={{ alignItems:'flex-start', lineHeight:1.3, minWidth:0 }}>
+                    <span style={{ fontSize:14, fontWeight:600, color:'var(--ink-900)' }}>{persona.name}</span>
+                    <span className="dim" style={{ fontSize:12 }}>{me.email}</span>
+                  </div>
+                </div>
+                <div style={{ padding:'0 10px 10px' }}>
+                  <div className="lbl" style={{ marginBottom:7 }}>Access attributes (ABAC)</div>
+                  <div className="row wrap" style={{ gap:5 }}>
+                    {persona.attrs.department.map(d=><span key={d} className="badge blue"><Icon name="users" size={11} />{d}</span>)}
+                    <Clearance level={persona.attrs.clearance} size="sm" />
+                    <Attr k="type" v={persona.attrs.userType} />
+                    {persona.isAdmin && <span className="badge green">admin · sees all</span>}
+                  </div>
+                </div>
+                <div className="hr" style={{ margin:'2px 0 6px' }} />
+                <button className="nav-item" onClick={()=>{ close(); onLogout(); }} style={{ padding:'8px 10px' }}><Icon name="login" size={17} /><span style={{ fontSize:14 }}>Log out</span></button>
+                <div className="hr" style={{ margin:'6px 0' }} />
+                <div className="lbl" style={{ padding:'4px 10px 8px' }}>Switch user (demo quick-login)</div>
+                {personas.filter(p=>p.id!==me.id).map(p=>(
+                  <button key={p.id} className="nav-item" onClick={()=>{ close(); onQuickLogin(p.username); }} style={{ padding:8, gap:11 }}>
+                    <Avatar name={p.name} size={32} />
+                    <div className="col" style={{ alignItems:'flex-start', lineHeight:1.25 }}><span style={{ fontSize:13.5, fontWeight:600, color:'var(--ink-900)' }}>{p.name}</span><span className="dim" style={{ fontSize:11.5 }}>{p.role}{p.is_admin?' · admin':''} · {p.clearance}</span></div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </Menu>
+        </header>
+
+        {fullBleed ? <div key={route.name} className="grow" style={{ overflow:'hidden' }}>{Screen}</div> : <div key={route.name} className="content">{Screen}</div>}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   Login (username/password + demo quick-login) + auth root
+   ============================================================ */
+function Login({ onLogin }) {
+  const [list, setList] = useState([]);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [err, setErr] = useState(''); const [busy, setBusy] = useState(false);
+  useEffect(()=>{ fetch('/api/personas').then(r=>r.json()).then(setList).catch(()=>{}); }, []);
+  const submit = async (un, pw) => {
+    if(!un || !pw){ setErr('Enter a username and password'); return; }
+    setErr(''); setBusy(true);
+    try {
+      const r = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username: un, password: pw }) });
+      const d = await r.json().catch(()=>({}));
+      if(!r.ok){ setErr(d.detail || 'Login failed'); setBusy(false); return; }
+      setToken(d.token); onLogin(d.user);
+    } catch(e){ setErr(e.message); setBusy(false); }
+  };
+  return (
+    <div style={{ minHeight:'100vh', display:'grid', placeItems:'center', padding:24 }}>
+      <div className="panel fade-up" style={{ width:'100%', maxWidth:420, padding:32, boxShadow:'var(--sh-lg)' }}>
+        <div className="row" style={{ gap:12, marginBottom:6 }}>
+          <LogoMark size={40} /><span className="wordmark" style={{ fontFamily:'var(--font-display)', fontWeight:600, fontSize:24, color:'var(--navy-900)' }}>AI<b style={{ color:'var(--blue-600)' }}>Box</b></span>
+        </div>
+        <p className="muted" style={{ margin:'0 0 22px', fontSize:14 }}>Sign in to your access-governed knowledge base.</p>
+        <form onSubmit={e=>{ e.preventDefault(); submit(username, password); }}>
+          <div className="field" style={{ marginBottom:14 }}><label>Username</label>
+            <input className="input" value={username} autoFocus onChange={e=>setUsername(e.target.value)} placeholder="alice / bob / carol" /></div>
+          <div className="field" style={{ marginBottom:18 }}><label>Password</label>
+            <input className="input" type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="password" /></div>
+          {err && <div className="badge red" style={{ marginBottom:14 }}><Icon name="xCircle" size={12} />{err}</div>}
+          <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={busy}><Icon name="login" size={17} />{busy?'Signing in…':'Sign in'}</button>
+        </form>
+        {list.length>0 && <>
+          <div className="row" style={{ gap:10, margin:'20px 0 12px' }}><div className="hr grow" /><span className="dim" style={{ fontSize:12 }}>demo accounts</span><div className="hr grow" /></div>
+          <div className="col" style={{ gap:8 }}>
+            {list.map(p=>(
+              <button key={p.id} className="persona-card" style={{ width:'100%' }} onClick={()=>{ setUsername(p.username); setPassword(p.username); submit(p.username, p.username); }}>
+                <Avatar name={p.name} size={30} />
+                <div className="col grow" style={{ alignItems:'flex-start', lineHeight:1.25 }}>
+                  <span style={{ fontSize:13.5, fontWeight:600, color:'var(--ink-900)' }}>{p.name}</span>
+                  <span className="dim" style={{ fontSize:11.5 }}>{p.role} · {p.clearance}{p.is_admin?' · admin':''}</span>
+                </div>
+                <Icon name="arrowRight" size={16} style={{ color:'var(--ink-400)' }} />
+              </button>
+            ))}
+          </div>
+          <p className="dim" style={{ fontSize:11.5, margin:'14px 0 0', textAlign:'center' }}>Demo passwords match the username.</p>
+        </>}
+      </div>
+    </div>
+  );
+}
+
+function Root() {
+  const [me, setMe] = useState(undefined);   // undefined = loading, null = logged out
+  useEffect(()=>{
+    onAuthFail = () => setMe(null);
+    if(TOKEN) api('/me').then(setMe).catch(()=>{ setToken(''); setMe(null); });
+    else setMe(null);
+  }, []);
+  const quickLogin = async (username) => {
+    try {
+      const r = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password: username }) });
+      if(r.ok){ const d = await r.json(); setToken(d.token); setMe(d.user); }
+    } catch(e){}
+  };
+  const logout = () => { setToken(''); setMe(null); };
+  if(me === undefined) return <div style={{ display:'grid', placeItems:'center', height:'100vh' }}><Spinner label="Starting AI Box…" /></div>;
+  if(!me) return <Login onLogin={setMe} />;
+  return <App key={me.id} me={me} onLogout={logout} onQuickLogin={quickLogin} />;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<ToastHost><Root /></ToastHost>);
+</script>
+</body>
+</html>

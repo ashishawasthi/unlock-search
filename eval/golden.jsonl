@@ -1,0 +1,12 @@
+{"id": "fin-001", "question": "What is the company travel reimbursement limit per night for hotels?", "expected_doc_substrings": ["Travel and Expense Policy"], "expected_answer_keywords": ["250", "per night", "hotel"]}
+{"id": "fin-002", "question": "When is the Q3 board financial review scheduled?", "expected_doc_substrings": ["Q3 Financial Summary"], "expected_answer_keywords": ["November", "board", "review"]}
+{"id": "fin-003", "question": "What was total revenue reported for the third quarter?", "expected_doc_substrings": ["Q3 Financial Summary"], "expected_answer_keywords": ["12.4", "million", "revenue"]}
+{"id": "fin-004", "question": "How are expense reports approved above five thousand dollars?", "expected_doc_substrings": ["Travel and Expense Policy"], "expected_answer_keywords": ["5000", "director", "approval"]}
+{"id": "hr-001", "question": "How many paid vacation days do full-time employees accrue per year?", "expected_doc_substrings": ["Employee Handbook"], "expected_answer_keywords": ["20", "vacation", "accrue"]}
+{"id": "hr-002", "question": "What is the parental leave entitlement for new parents?", "expected_doc_substrings": ["Employee Handbook"], "expected_answer_keywords": ["12", "weeks", "parental"]}
+{"id": "hr-003", "question": "What is the remote work eligibility requirement?", "expected_doc_substrings": ["Remote Work Guidelines"], "expected_answer_keywords": ["six months", "manager", "approval"]}
+{"id": "hr-004", "question": "How often are performance reviews conducted?", "expected_doc_substrings": ["Employee Handbook"], "expected_answer_keywords": ["twice", "year", "performance"]}
+{"id": "legal-001", "question": "What is the notice period to terminate the master services agreement?", "expected_doc_substrings": ["Master Services Agreement"], "expected_answer_keywords": ["30 days", "written notice", "terminate"]}
+{"id": "legal-002", "question": "How long do confidentiality obligations survive after the contract ends?", "expected_doc_substrings": ["Mutual NDA"], "expected_answer_keywords": ["three years", "confidential", "survive"]}
+{"id": "legal-003", "question": "What is the limitation of liability cap in the services agreement?", "expected_doc_substrings": ["Master Services Agreement"], "expected_answer_keywords": ["fees paid", "twelve months", "liability"]}
+{"id": "legal-004", "question": "Which governing law applies to the agreement?", "expected_doc_substrings": ["Master Services Agreement"], "expected_answer_keywords": ["Delaware", "governing law"]}

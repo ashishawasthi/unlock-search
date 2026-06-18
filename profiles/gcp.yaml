@@ -1,0 +1,36 @@
+# GCP profile: managed Google Cloud data plane.
+# Gemini + Vertex AI Search + AlloyDB + GCS + Document AI, with GCP-native safety,
+# eventing, telemetry, identity, and the Vertex Agent Engine orchestrator.
+profile: gcp
+adapters:
+  llm: gemini
+  embedder: vertex
+  reranker: vertex
+  object_store: gcs
+  relational: alloydb
+  retriever: vertex
+  parser: docai
+  guardrail: modelarmor
+  dlp: clouddlp
+  event_bus: eventarc
+  telemetry: cloudobs
+  identity: apigee
+  notifier: pubsub
+  orchestrator: agentengine
+config:
+  llm: { project: my-gcp-project, location: us-central1, model: gemini-2.5-flash }
+  embedder: { project: my-gcp-project, region: us-central1, model: text-embedding-004 }
+  reranker: { mode: passthrough, project: my-gcp-project, location: global }
+  object_store: { bucket: my-gcp-project-aibox-docs, project: my-gcp-project }
+  relational: { }              # ALLOYDB_DSN env (libpq DSN via the AlloyDB Auth Proxy)
+  retriever: { project: my-gcp-project, location: global, data_store_id: aibox-datastore }
+  parser: { project: my-gcp-project, location: us, processor_id: REPLACE_WITH_LAYOUT_PROCESSOR_ID }
+  guardrail: { project: my-gcp-project, location: us-central1 }
+  dlp: { project: my-gcp-project }
+  event_bus: { project: my-gcp-project }
+  telemetry: { project: my-gcp-project }
+  identity: { }                # Apigee passes verified principal claims in headers
+  notifier: { project: my-gcp-project, topic: aibox-notifications }
+  orchestrator: { project: my-gcp-project, location: us-central1 }
+secrets:
+  provider: gcp_secret_manager # GEMINI/API keys, ALLOYDB_DSN, AIBOX_JWT_SECRET

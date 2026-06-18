@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Runtime state (created by the local profile)
+data/
+
+# Secrets / env (never commit)
+.env
+.env.*
+*.pem
+*.key
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# pytest
+.pytest_cache/

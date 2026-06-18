@@ -1,0 +1,110 @@
+# Representative K8s manifests for the CORE app on the on-prem profile (AIBOX_PROFILE=onprem).
+# The app is stateless; all state lives in the backing services (Postgres, OpenSearch, MinIO)
+# and the hosted inference endpoints. Scale with replicas, not in-process workers.
+#
+#   kubectl apply -f deploy/k8s/app-deployment.yaml
+#
+# Non-secret wiring lives in the ConfigMap; credentials and endpoint URLs that carry tokens
+# live in the Secret. Provision the Secret out-of-band (sealed-secrets / external-secrets /
+# Vault); the literal below is a placeholder template, never commit real values.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gcp-unlock-config
+  labels: { app: gcp-unlock }
+data:
+  AIBOX_PROFILE: "onprem"
+  OPENSEARCH_URL: "https://opensearch.data.svc.cluster.local:9200"
+  MINIO_ENDPOINT: "https://minio.data.svc.cluster.local:9000"
+  TIKA_URL: "http://tika.data.svc.cluster.local:9998"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.observability.svc.cluster.local:4317"
+  OTEL_SERVICE_NAME: "gcp-unlock"
+  OIDC_IDENTITY_HEADER: "x-aibox-user"
+  GEMMA_MODEL: "gemma-2-9b-it"
+  LLAMAGUARD_MODEL: "meta-llama/Llama-Guard-4-12B"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gcp-unlock-secrets
+  labels: { app: gcp-unlock }
+type: Opaque
+stringData:
+  # PLACEHOLDERS. Replace via your secret manager; do not commit real values.
+  PG_DSN: "postgresql://aibox:CHANGE_ME@postgres-rw.data.svc.cluster.local:5432/aibox"
+  MINIO_ACCESS_KEY: "CHANGE_ME"
+  MINIO_SECRET_KEY: "CHANGE_ME"
+  OPENSEARCH_USER: "aibox"
+  OPENSEARCH_PASSWORD: "CHANGE_ME"
+  # Hosted inference endpoints (URLs may embed tokens, so keep them here).
+  GEMMA_BASE_URL: "https://gemma.inference.svc.cluster.local/v1"
+  GEMMA_API_KEY: ""
+  EMBED_ENDPOINT: "https://embeddings.inference.svc.cluster.local/v1/embeddings"
+  EMBED_API_KEY: ""
+  RERANK_ENDPOINT: "https://reranker.inference.svc.cluster.local/rerank"
+  LLAMAGUARD_BASE_URL: "https://llamaguard.inference.svc.cluster.local/v1"
+  # OIDC issuer / JWKS if the app verifies tokens itself instead of trusting the gateway.
+  OIDC_ISSUER: ""
+  OIDC_JWKS_URL: ""
+  AIBOX_JWT_SECRET: "CHANGE_ME"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gcp-unlock
+  labels: { app: gcp-unlock }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: gcp-unlock }
+  template:
+    metadata:
+      labels: { app: gcp-unlock }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+      containers:
+        - name: app
+          image: registry.example.com/gcp-unlock:onprem   # built from infra/Dockerfile --build-arg EXTRAS=onprem
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { name: http, containerPort: 8000 }
+          envFrom:
+            - configMapRef: { name: gcp-unlock-config }
+            - secretRef: { name: gcp-unlock-secrets }
+          resources:
+            requests: { cpu: "250m", memory: "512Mi" }
+            limits: { cpu: "1", memory: "1Gi" }
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /, port: http }
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gcp-unlock
+  labels: { app: gcp-unlock }
+spec:
+  type: ClusterIP
+  selector: { app: gcp-unlock }
+  ports:
+    - { name: http, port: 80, targetPort: http }
+# Expose externally via the API gateway (Kong/Envoy + OIDC), which attests the principal
+# and forwards the x-aibox-user header the OidcIdentity adapter trusts. See README.md.
