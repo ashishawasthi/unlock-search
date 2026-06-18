@@ -168,6 +168,25 @@ and pushed **into** the query. Access is never post-filtered, never decided by t
 enforced in the UI. Restricted documents are returned as server-side redacted cards. Secrets stay in
 the environment (profiles reference them via `*_env` indirection; YAML never holds a secret).
 
+## GCP-managed vs no-lock-in on-prem
+
+Same codebase, same domain logic — the comparison is purely the **platform** around the model
+(inference is an external hosted endpoint in **both** targets). Condensed below; the full
+dimension-by-dimension analysis lives in the [comparison deck](docs/comparison/gcp-vs-onprem.md).
+
+| Dimension | GCP-managed | No-lock-in on-prem | Edge |
+|---|---|---|---|
+| Time-to-market | Managed services; minimal assembly + hardening | DIY assembly + hardening of the full stack | **GCP** |
+| Quality (retrieval, parsing, model, guardrails, eval) | Managed reranker + Document AI + Gemini; high floor with zero tuning | OpenSearch + bge + Tika + Gemma; strong but self-wired and self-tuned | **GCP** |
+| Cost / TCO | Usage-based opex; scales toward zero; small integration team | License + hardware + a larger ops team | **GCP** |
+| Operational burden & scalability | Provider-absorbed patching, autoscale, scale-to-zero | Self-run K8s + multiple OSS systems + four hosted inference endpoints | **GCP** |
+| Risk, security & compliance | Managed controls (CMEK, VPC-SC, Cloud Armor) + inherited certifications | Equivalent controls, but assembled and operated by you | **GCP** |
+| Data residency / sovereignty | Region pin + VPC-SC + CMEK; ultimate control is the cloud's | Full physical control; platform can be air-gapped | **On-prem** |
+| Vendor lock-in / portability | Coupling lives only in adapters | No vendor dependency | Tie by design — hexagonal CORE; data portable (Postgres-wire, S3-compatible) |
+
+**Bottom line:** default to **GCP-managed** for the smallest operational surface; build **on-prem**
+as insurance, decisive under a hard data-residency/air-gap mandate or an already-sunk platform + team.
+
 ## More
 
 - Architecture deep-dive: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
