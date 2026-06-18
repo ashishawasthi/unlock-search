@@ -3,7 +3,6 @@ marp: true
 theme: default
 paginate: true
 size: 16:9
-header: 'gcp-unlock: GCP-managed vs No-Lock-In On-Prem'
 ---
 
 <style>
@@ -11,7 +10,7 @@ header: 'gcp-unlock: GCP-managed vs No-Lock-In On-Prem'
 section { font-size: 20px; }
 table { font-size: 20px; }
 blockquote { font-size: 20px; }
-header, footer, section::after { font-size: 20px; }  /* running header + page number */
+section::after { font-size: 20px; }  /* page number */
 h2 { margin-bottom: 0.3em; }
 li { margin-bottom: 0.2em; }
 </style>
