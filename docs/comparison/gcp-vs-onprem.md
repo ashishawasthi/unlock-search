@@ -235,8 +235,6 @@ Platform assembly + hardening only (inference external both ways; CORE identical
 - The shared CORE refactor is the Year-0 build common to both; the TTM **delta** is platform assembly, not the CORE.
 - On-prem also carries a recurring patch/upgrade tax across ~10 OSS systems plus four external inference endpoints.
 
-**Verdict: GCP wins decisively (~5×).** Weeks vs quarters to a hardened platform.
-
 ---
 
 ## Dimension: Quality
@@ -282,8 +280,6 @@ Inference excluded (equal, external both sides). Annual run-rate (infra + people
 
 - Headcount assumes **net-new hires**. If an existing under-utilized platform team absorbs it, the people delta shrinks materially (see "Where On-Prem Wins"). The two assumptions are mutually exclusive.
 - On-prem also runs four external inference endpoints (LLM, embedder, reranker, safety); GCP consumes one model endpoint + the managed bundle.
-
-**Verdict: GCP wins. Headcount, not hardware, is the differentiator.**
 
 ---
 
@@ -335,8 +331,6 @@ Net = exposure after typical mitigations.
 | Cost overrun | Med (needs budgets/quotas/alerts) | Med (pre-provision peak; step-function) | Tie |
 | Data residency / sovereignty | Low-Med (region pin, provider-held) | Low (full physical control) | **On-prem** |
 
-**Verdict: GCP wins on net risk.** Its top risks are policy- and architecture-governable; on-prem's top risks require continuous scarce labor.
-
 ---
 
 ## Dimension: Security & Compliance
@@ -351,8 +345,6 @@ Net = exposure after typical mitigations.
 | ABAC (server-side) | CORE model → Agent Search filter-DSL | CORE model → OpenSearch DLS / SQL | Tie |
 | Dev-auth `X-User` in prod | Apigee strips client identity headers | Gateway strips; trust signed/mTLS only | Tie |
 
-**Verdict: GCP wins on built-in controls and inherited certifications.**
-
 ---
 
 ## Dimension: Data Residency / Sovereignty
@@ -365,8 +357,6 @@ Net = exposure after typical mitigations.
 | Control-plane air-gap | Not possible (managed control plane) | Possible for the platform (model call still external) | **On-prem** |
 
 > **Key caveat:** a true air-gap forbidding external model calls breaks **both** designs equally and needs a different inference story — a model hosted inside the sovereign boundary.
-
-**Verdict: On-prem wins.** Strongest, often decisive on-prem case. A constraint that justifies on-prem, not a cost saving.
 
 ---
 
