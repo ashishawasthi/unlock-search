@@ -1,9 +1,9 @@
 """
 FastAPI application factory. The ONE place the HTTP surface is assembled. It is
-byte-identical across profiles: it builds a Container from AIBOX_PROFILE, migrates +
+byte-identical across profiles: it builds a Container from UNLOCK_PROFILE, migrates +
 seeds via the store port, and mounts the same routes + SPA. Retargeting is one env var.
 
-Run: AIBOX_PROFILE=local uvicorn core.api.app:create_app --factory --reload
+Run: UNLOCK_PROFILE=local uvicorn core.api.app:create_app --factory --reload
 """
 from __future__ import annotations
 

@@ -2,7 +2,7 @@
 
 The CORE app is one stateless image (`infra/Dockerfile`). The on-prem profile binds it to an
 open-source data plane: PostgreSQL+pgvector, OpenSearch, MinIO, Tika, plus four hosted
-inference endpoints. Retargeting is one env var: `AIBOX_PROFILE=onprem`.
+inference endpoints. Retargeting is one env var: `UNLOCK_PROFILE=onprem`.
 
 ## 1. Local stand-up (Docker Compose)
 
@@ -19,7 +19,7 @@ open http://localhost:8000
 | opensearch | 9200 | retriever: hybrid BM25 + kNN, ABAC pushed down as a filter |
 | minio | 9000 (API), 9001 (console) | object store: original files, presigned URLs |
 | tika | 9998 | rich document parsing (pypdf fallback if down) |
-| app | 8000 | CORE FastAPI app, `AIBOX_PROFILE=onprem` |
+| app | 8000 | CORE FastAPI app, `UNLOCK_PROFILE=onprem` |
 
 Works offline for upload, ABAC, and lexical search. RAG chat needs the LLM endpoint set.
 
@@ -56,7 +56,7 @@ docker push registry.example.com/gcp-unlock:onprem
 
 | Concern | Recommended on-prem component | Maps to |
 |---|---|---|
-| API gateway + OIDC | Kong or Envoy Gateway with the OIDC filter | attests principal, forwards `x-aibox-user` -> `OidcIdentity` |
+| API gateway + OIDC | Kong or Envoy Gateway with the OIDC filter | attests principal, forwards `x-unlock-user` -> `OidcIdentity` |
 | Relational store | CloudNativePG (PostgreSQL operator) + pgvector | `PgVectorStore` (`PG_DSN`) |
 | Search | OpenSearch Operator (cluster + dashboards) | `OpenSearchRetriever` (`OPENSEARCH_URL`) |
 | Object store | MinIO Operator (tenant + console) | `MinioObjectStore` (`MINIO_ENDPOINT`) |
@@ -78,6 +78,6 @@ Secret at them:
 
 - ABAC is enforced server-side on every retrieval (predicate pushed into the OpenSearch
   filter and the pgvector SQL); never post-filtered, never delegated to the model.
-- The gateway is the trust boundary: the app trusts the `x-aibox-user` header only because the
+- The gateway is the trust boundary: the app trusts the `x-unlock-user` header only because the
   gateway terminated OIDC. Do not expose the Service without the gateway in front.
 - Keep `gcp-unlock-secrets` out of git; the committed values are placeholders.

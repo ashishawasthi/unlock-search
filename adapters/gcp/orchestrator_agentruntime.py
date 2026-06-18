@@ -13,7 +13,7 @@ returns a uniform AgentResult. Reuses Gemini via the container LLM (already gemi
 in the gcp profile), so the model binding stays consistent across the two execution modes.
 
 Config kwargs: project, location, model. Env fallbacks: GOOGLE_CLOUD_PROJECT,
-GOOGLE_CLOUD_LOCATION, AIBOX_MODEL. Lazy imports throughout (importable in CI without ADK).
+GOOGLE_CLOUD_LOCATION, UNLOCK_MODEL. Lazy imports throughout (importable in CI without ADK).
 """
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ class AgentRuntimeOrchestrator:
         self.c = container
         self.project = project or os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCP_PROJECT", "")
         self.location = location or os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
-        self.model = os.environ.get("AIBOX_MODEL", model)
+        self.model = os.environ.get("UNLOCK_MODEL", model)
         self._agent = None
 
     def _build_agent(self, principal, doc_ids):

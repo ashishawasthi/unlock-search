@@ -5,7 +5,7 @@ smarthost). Pure stdlib smtplib + email.message; no third-party SDK.
 Backing service + config:
   SMTP_HOST   relay host (required to actually send; otherwise a clear RuntimeError)
   SMTP_PORT   relay port (default 587)
-  SMTP_FROM   envelope/from address (default 'aibox@localhost')
+  SMTP_FROM   envelope/from address (default 'unlock@localhost')
   SMTP_USER   optional auth user; if set, STARTTLS + LOGIN is used
   SMTP_PASS   optional auth password
 """
@@ -23,7 +23,7 @@ class SmtpNotifier:
                  password: str | None = None, use_tls: bool = True, **kw):
         self.host = host or os.environ.get("SMTP_HOST", "")
         self.port = int(port or os.environ.get("SMTP_PORT", "587"))
-        self.sender = sender or os.environ.get("SMTP_FROM", "aibox@localhost")
+        self.sender = sender or os.environ.get("SMTP_FROM", "unlock@localhost")
         self.user = user or os.environ.get("SMTP_USER", "")
         self.password = password or os.environ.get("SMTP_PASS", "")
         self.use_tls = use_tls

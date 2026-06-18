@@ -19,7 +19,7 @@ class OutboxNotifier:
         host = os.environ.get("SMTP_HOST")
         if host:
             msg = EmailMessage()
-            msg["From"] = os.environ.get("SMTP_FROM", "aibox@localhost")
+            msg["From"] = os.environ.get("SMTP_FROM", "unlock@localhost")
             msg["To"] = to
             msg["Subject"] = subject
             msg.set_content(body)

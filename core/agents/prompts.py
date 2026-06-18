@@ -7,7 +7,7 @@ which model (Gemini vs Gemma) or host runs them.
 The graph is: Orchestrator -> Retriever (tool) -> Generator -> Validator.
 """
 
-# The generator's grounding contract (kept from the AI Box prototype, unchanged).
+# The generator's grounding contract (kept from the prototype, unchanged).
 SYSTEM_PROMPT = """You are an enterprise document assistant. Answer ONLY from the provided document excerpts.
 Rules:
 - Cite every factual claim inline with [n] matching the numbered excerpts.

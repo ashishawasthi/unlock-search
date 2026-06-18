@@ -1,4 +1,4 @@
-# Representative K8s manifests for the CORE app on the on-prem profile (AIBOX_PROFILE=onprem).
+# Representative K8s manifests for the CORE app on the on-prem profile (UNLOCK_PROFILE=onprem).
 # The app is stateless; all state lives in the backing services (Postgres, OpenSearch, MinIO)
 # and the hosted inference endpoints. Scale with replicas, not in-process workers.
 #
@@ -14,13 +14,13 @@ metadata:
   name: gcp-unlock-config
   labels: { app: gcp-unlock }
 data:
-  AIBOX_PROFILE: "onprem"
+  UNLOCK_PROFILE: "onprem"
   OPENSEARCH_URL: "https://opensearch.data.svc.cluster.local:9200"
   MINIO_ENDPOINT: "https://minio.data.svc.cluster.local:9000"
   TIKA_URL: "http://tika.data.svc.cluster.local:9998"
   OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.observability.svc.cluster.local:4317"
   OTEL_SERVICE_NAME: "gcp-unlock"
-  OIDC_IDENTITY_HEADER: "x-aibox-user"
+  OIDC_IDENTITY_HEADER: "x-unlock-user"
   GEMMA_MODEL: "gemma-2-9b-it"
   LLAMAGUARD_MODEL: "meta-llama/Llama-Guard-4-12B"
 ---
@@ -32,10 +32,10 @@ metadata:
 type: Opaque
 stringData:
   # PLACEHOLDERS. Replace via your secret manager; do not commit real values.
-  PG_DSN: "postgresql://aibox:CHANGE_ME@postgres-rw.data.svc.cluster.local:5432/aibox"
+  PG_DSN: "postgresql://unlock:CHANGE_ME@postgres-rw.data.svc.cluster.local:5432/unlock"
   MINIO_ACCESS_KEY: "CHANGE_ME"
   MINIO_SECRET_KEY: "CHANGE_ME"
-  OPENSEARCH_USER: "aibox"
+  OPENSEARCH_USER: "unlock"
   OPENSEARCH_PASSWORD: "CHANGE_ME"
   # Hosted inference endpoints (URLs may embed tokens, so keep them here).
   GEMMA_BASE_URL: "https://gemma.inference.svc.cluster.local/v1"
@@ -47,7 +47,7 @@ stringData:
   # OIDC issuer / JWKS if the app verifies tokens itself instead of trusting the gateway.
   OIDC_ISSUER: ""
   OIDC_JWKS_URL: ""
-  AIBOX_JWT_SECRET: "CHANGE_ME"
+  UNLOCK_JWT_SECRET: "CHANGE_ME"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -107,4 +107,4 @@ spec:
   ports:
     - { name: http, port: 80, targetPort: http }
 # Expose externally via the API gateway (Kong/Envoy + OIDC), which attests the principal
-# and forwards the x-aibox-user header the OidcIdentity adapter trusts. See README.md.
+# and forwards the x-unlock-user header the OidcIdentity adapter trusts. See README.md.

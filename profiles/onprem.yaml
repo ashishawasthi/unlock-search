@@ -36,13 +36,13 @@ config:
     endpoint_url_env: MINIO_ENDPOINT
     access_key_env: MINIO_ACCESS_KEY
     secret_key_env: MINIO_SECRET_KEY
-    bucket: aibox
+    bucket: unlock
     region: us-east-1
   relational:
-    dsn_env: PG_DSN                       # postgresql://user:pass@host:5432/aibox
+    dsn_env: PG_DSN                       # postgresql://user:pass@host:5432/unlock
   retriever:
     url_env: OPENSEARCH_URL
-    index: aibox-chunks
+    index: unlock-chunks
     user_env: OPENSEARCH_USER
     password_env: OPENSEARCH_PASSWORD
     verify_certs: true
@@ -68,7 +68,7 @@ config:
     port: 587
     user_env: SMTP_USER
     password_env: SMTP_PASSWORD
-    from_addr: no-reply@aibox.local
+    from_addr: no-reply@unlock.local
   orchestrator:
     model: gemma-2-9b-it
 secrets:

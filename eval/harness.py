@@ -2,7 +2,7 @@
 Provider-agnostic RAG eval harness for gcp-unlock.
 
 Runs the SAME golden set against ANY profile, two ways:
-  1. in-process: build a core.container.Container (AIBOX_PROFILE selects local / onprem /
+  1. in-process: build a core.container.Container (UNLOCK_PROFILE selects local / onprem /
      gcp), ingest a tiny finance/HR/legal corpus through the real ingest path, then exercise
      the bound Retriever (Recall@k, MRR) and the shared agent loop core.agents.loop.run_rag_turn
      (answer keyword-coverage as a faithfulness proxy). This is the default.
@@ -16,8 +16,8 @@ Metrics (see eval/README.md for definitions):
 If `ragas` is installed it is lazy-imported for richer answer metrics; the harness works without it.
 
 Usage:
-  python -m eval.harness                          # in-process, active AIBOX_PROFILE, k=8
-  AIBOX_PROFILE=onprem python -m eval.harness      # in-process against the onprem container
+  python -m eval.harness                          # in-process, active UNLOCK_PROFILE, k=8
+  UNLOCK_PROFILE=onprem python -m eval.harness      # in-process against the onprem container
   python -m eval.harness --k 5 --golden eval/golden.jsonl
   python -m eval.harness --http http://127.0.0.1:8000 --user alice --password alice
   python -m eval.harness --json                    # machine-readable summary on stdout
@@ -195,7 +195,7 @@ def run_in_process(rows: list[Row], k: int, profile: str | None) -> list[dict]:
     from core.domain.abac import build_predicate
 
     if profile:
-        os.environ["AIBOX_PROFILE"] = profile
+        os.environ["UNLOCK_PROFILE"] = profile
     c = Container()
     c.store().migrate()
     try:
@@ -310,7 +310,7 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Provider-agnostic RAG eval harness for gcp-unlock.")
     ap.add_argument("--golden", default=str(DEFAULT_GOLDEN), help="path to golden.jsonl")
     ap.add_argument("--k", type=int, default=8, help="retrieval cutoff for Recall@k")
-    ap.add_argument("--profile", default=None, help="override AIBOX_PROFILE for in-process mode")
+    ap.add_argument("--profile", default=None, help="override UNLOCK_PROFILE for in-process mode")
     ap.add_argument("--http", default=None, metavar="BASE_URL",
                     help="target a running deployment over HTTP instead of in-process")
     ap.add_argument("--user", default="alice", help="http login username")
@@ -328,7 +328,7 @@ def main(argv: list[str] | None = None) -> int:
         results = run_http(rows, args.http, args.user, args.password, args.k)
     else:
         mode = "in-process"
-        profile = args.profile or os.environ.get("AIBOX_PROFILE", "local")
+        profile = args.profile or os.environ.get("UNLOCK_PROFILE", "local")
         results = run_in_process(rows, args.k, args.profile)
 
     summary = print_table(results, args.k, mode, profile)

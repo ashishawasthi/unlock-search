@@ -3,10 +3,10 @@ Port-conformance + ABAC contract suite for gcp-unlock.
 
 This is the security + behavior contract that EVERY profile must satisfy. It runs
 over the FastAPI TestClient (same as tests/test_smoke.py): create_app() builds a
-Container from AIBOX_PROFILE, migrates + seeds, and we exercise the HTTP surface as
+Container from UNLOCK_PROFILE, migrates + seeds, and we exercise the HTTP surface as
 the three seeded personas (password == username) plus a few extra seeded principals.
 
-The SAME suite runs against any backend: set AIBOX_PROFILE before invoking pytest.
+The SAME suite runs against any backend: set UNLOCK_PROFILE before invoking pytest.
 It defaults to local. ABAC is enforced server-side identically across profiles, so
 the accessible-set assertions below are profile-independent (they assert the rule,
 not the ranking). Backends needing a live service (Postgres, OpenSearch, Gemini Enterprise Agent Platform,
@@ -26,12 +26,12 @@ import os
 import tempfile
 import uuid
 
-os.environ.setdefault("AIBOX_PROFILE", "local")
-os.environ.setdefault("AIBOX_DATA", tempfile.mkdtemp(prefix="gcpu_contract_"))
-os.environ["AIBOX_QUIET_TELEMETRY"] = "1"
+os.environ.setdefault("UNLOCK_PROFILE", "local")
+os.environ.setdefault("UNLOCK_DATA", tempfile.mkdtemp(prefix="gcpu_contract_"))
+os.environ["UNLOCK_QUIET_TELEMETRY"] = "1"
 
 # A unique per-run salt baked into every uploaded body. The local SQLite store writes
-# to a persistent data/aibox.db, so this defeats the owner+file_hash upload-dedup on
+# to a persistent data/unlock.db, so this defeats the owner+file_hash upload-dedup on
 # reruns and keeps each run's corpus isolated (exact-set asserts intersect this run's
 # ids only). On backends with throwaway state it is simply a harmless nonce.
 RUN_SALT = uuid.uuid4().hex
@@ -43,7 +43,7 @@ from core.api.app import create_app              # noqa: E402
 from core.domain.abac import CLEARANCE           # noqa: E402
 from core.domain.auth import hash_password       # noqa: E402
 
-PROFILE = os.environ.get("AIBOX_PROFILE", "local")
+PROFILE = os.environ.get("UNLOCK_PROFILE", "local")
 
 
 # --------------------------------------------------------------------------- #

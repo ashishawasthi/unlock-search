@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Box</title>
+<title>Gen AI Assistant</title>
 <style>
 /* ============================================================
-   AIBox — Design System (from AIBox-Design/css/aibox.css)
+   Gen AI Assistant — Design System
    navy #0B1F3A + electric blue #1E6FD9 · Space Grotesk + IBM Plex
    ============================================================ */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
@@ -196,9 +196,9 @@ const { useState, useEffect, useRef, createContext, useContext } = React;
 /* ============================================================
    API client — every call carries the JWT bearer token (set at login)
    ============================================================ */
-let TOKEN = localStorage.getItem('aibox_token') || '';
+let TOKEN = localStorage.getItem('unlock_token') || '';
 let onAuthFail = () => {};   // set by <Root> to drop back to the login screen on 401
-function setToken(t){ TOKEN = t; if(t) localStorage.setItem('aibox_token', t); else localStorage.removeItem('aibox_token'); }
+function setToken(t){ TOKEN = t; if(t) localStorage.setItem('unlock_token', t); else localStorage.removeItem('unlock_token'); }
 const authHeader = () => TOKEN ? {'Authorization':'Bearer '+TOKEN} : {};
 const api = (p, opt={}) => fetch('/api'+p, {
   ...opt,
@@ -1554,7 +1554,7 @@ function ScreenAudit({ namesById }) {
         <div><h1 className="h1">Audit log</h1><p className="muted" style={{ margin:'6px 0 0', fontSize:15 }}>Append-only record of uploads, shares, searches, approvals, and AI turns.</p></div>
         <button className="btn btn-ghost" onClick={async ()=>{
           try { const r = await fetch('/api/audit.csv',{headers:authHeader()}); const url=URL.createObjectURL(await r.blob());
-            const a=document.createElement('a'); a.href=url; a.download='aibox_audit.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000);
+            const a=document.createElement('a'); a.href=url; a.download='unlock_audit.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),60000);
             toast('Audit exported'); } catch(e){ toast('Export failed: '+e.message,{danger:true}); }
         }}><Icon name="download" size={16} />Export CSV</button>
       </div>
@@ -1648,7 +1648,7 @@ function App({ me, onLogout, onQuickLogin }) {
         <header className="topbar">
           <div className="row" style={{ gap:11, minWidth:0 }}>
             <Icon name={(NAV.concat(WORK,ADMIN).find(n=>n.id===route.name)||{}).icon||'doc'} size={20} style={{ color:'var(--ink-400)' }} />
-            <span style={{ fontWeight:600, fontSize:16, color:'var(--ink-900)' }}>{titles[route.name]||'AI Box'}</span>
+            <span style={{ fontWeight:600, fontSize:16, color:'var(--ink-900)' }}>{titles[route.name]||'Gen AI Assistant'}</span>
           </div>
           <div className="grow" />
           {persona.canUpload && route.name!=='upload' && <button className="btn btn-ghost btn-sm" onClick={()=>go('upload')}><Icon name="plus" size={16} />Upload</button>}
@@ -1767,7 +1767,7 @@ function Root() {
     } catch(e){}
   };
   const logout = () => { setToken(''); setMe(null); };
-  if(me === undefined) return <div style={{ display:'grid', placeItems:'center', height:'100vh' }}><Spinner label="Starting AI Box…" /></div>;
+  if(me === undefined) return <div style={{ display:'grid', placeItems:'center', height:'100vh' }}><Spinner label="Starting Gen AI Assistant…" /></div>;
   if(!me) return <Login onLogin={setMe} />;
   return <App key={me.id} me={me} onLogout={logout} onQuickLogin={quickLogin} />;
 }

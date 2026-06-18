@@ -14,13 +14,13 @@ against a running deployment. One harness, one metric vocabulary, swappable back
 
 ## How to run
 
-In-process (default). `AIBOX_PROFILE` selects the backend; the harness builds the `Container`,
+In-process (default). `UNLOCK_PROFILE` selects the backend; the harness builds the `Container`,
 migrates + seeds, ingests the corpus through the real ingest path, then exercises the bound
 `Retriever` and the shared agent loop (`core.agents.loop.run_rag_turn`).
 
 ```
-python -m eval.harness                        # active AIBOX_PROFILE (default local), k=8
-AIBOX_PROFILE=onprem python -m eval.harness    # in-process against the onprem container
+python -m eval.harness                        # active UNLOCK_PROFILE (default local), k=8
+UNLOCK_PROFILE=onprem python -m eval.harness    # in-process against the onprem container
 python -m eval.harness --k 5                    # change the Recall@k / pool cutoff
 python -m eval.harness --json                   # JSON summary on stdout (for CI)
 ```

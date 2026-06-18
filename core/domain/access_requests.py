@@ -15,9 +15,9 @@ from core.domain.abac import build_predicate, can_access
 from core.domain.audit import audit
 from core.domain.auth import request_token
 
-BASE_URL = os.environ.get("AIBOX_BASE_URL", "http://127.0.0.1:8000")
-TOKEN_TTL = int(os.environ.get("AIBOX_TOKEN_TTL_HOURS", "48")) * 3600
-GRANT_DAYS = int(os.environ.get("AIBOX_GRANT_DAYS", "30"))
+BASE_URL = os.environ.get("UNLOCK_BASE_URL", "http://127.0.0.1:8000")
+TOKEN_TTL = int(os.environ.get("UNLOCK_TOKEN_TTL_HOURS", "48")) * 3600
+GRANT_DAYS = int(os.environ.get("UNLOCK_GRANT_DAYS", "30"))
 
 
 def create_request(c, principal, doc_id: str, justification: str) -> dict:

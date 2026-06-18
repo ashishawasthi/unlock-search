@@ -1,6 +1,6 @@
 """
 Seed the demo corpus's identities (provider-agnostic; writes via the store port).
-Idempotent. Same three personas as the AI Box demo: Alice (admin, all depts,
+Idempotent. Same three personas as the demo: Alice (admin, all depts,
 Restricted), Bob (employee, Finance, Internal), Carol (partner, External, Public).
 Password == username for the local demo only.
 """

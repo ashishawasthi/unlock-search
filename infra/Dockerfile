@@ -1,5 +1,5 @@
 # One image for the CORE app. The HTTP surface is byte-identical across profiles
-# (core/api/app.py:create_app); the active profile is chosen at runtime by AIBOX_PROFILE.
+# (core/api/app.py:create_app); the active profile is chosen at runtime by UNLOCK_PROFILE.
 #
 # Base build (local profile, no cloud/onprem SDKs):
 #   docker build -f infra/Dockerfile -t gcp-unlock:local .
@@ -11,7 +11,7 @@
 #   docker build -f infra/Dockerfile --build-arg EXTRAS=gcp -t gcp-unlock:gcp .
 #
 # Run:
-#   docker run -p 8000:8000 -e AIBOX_PROFILE=onprem ... gcp-unlock:onprem
+#   docker run -p 8000:8000 -e UNLOCK_PROFILE=onprem ... gcp-unlock:onprem
 FROM python:3.12-slim
 
 # EXTRAS selects the per-target extra requirements file: "" (none / local), "onprem", or "gcp".
@@ -21,7 +21,7 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    AIBOX_PROFILE=local
+    UNLOCK_PROFILE=local
 
 WORKDIR /app
 

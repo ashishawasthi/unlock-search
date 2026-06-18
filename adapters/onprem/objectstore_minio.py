@@ -9,7 +9,7 @@ and version_id is simply None).
 Config (profiles/onprem.yaml):
   endpoint_url_env: MINIO_ENDPOINT       -> endpoint_url: https://minio:9000 (required)
   access_key_env / secret_key_env        -> MINIO_ACCESS_KEY / MINIO_SECRET_KEY (required)
-  bucket: aibox                          -> bucket name (default aibox)
+  bucket: unlock                          -> bucket name (default unlock)
   region: us-east-1                      -> region (default us-east-1)
   secure: true                           -> retained for parity; TLS is implied by endpoint scheme
 """
@@ -20,7 +20,7 @@ from core.ports.types import ObjectRef
 
 class MinioObjectStore:
     def __init__(self, endpoint_url: str = "", access_key: str = "", secret_key: str = "",
-                 bucket: str = "aibox", region: str = "us-east-1", secure: bool = True, **kw):
+                 bucket: str = "unlock", region: str = "us-east-1", secure: bool = True, **kw):
         if not endpoint_url or not access_key or not secret_key:
             raise RuntimeError(
                 "MinioObjectStore needs endpoint_url + access_key + secret_key "

@@ -14,7 +14,7 @@ h2 { margin-bottom: 0.3em; }
 li { margin-bottom: 0.2em; }
 </style>
 
-# AI Box to Enterprise Gen AI Assistant
+# From Prototype to Enterprise Gen AI Assistant
 
 ## One Portable Codebase, Two Deployment Targets
 
@@ -94,7 +94,7 @@ Ports-and-adapters (hexagonal). The product is written once; the cloud underneat
 | CORE | ABAC, chunking, retrieval, ingest, audit; agent graph; /api routes; UI | No (byte-identical) |
 | PORTS | LLM, Embedder, Reranker, Retriever, Store, ObjectStore, Parser, Guardrail, DLP, EventBus, Telemetry, Identity, Orchestrator | No (interfaces) |
 | ADAPTERS | One implementation set per target | Yes |
-| PROFILE | `AIBOX_PROFILE` = local / onprem / gcp selects the adapter set | The one switch |
+| PROFILE | `UNLOCK_PROFILE` = local / onprem / gcp selects the adapter set | The one switch |
 
 - **~80% of the code never changes** between targets (CORE + UI + eval + tests).
 - What differs: only `adapters/<target>/`, `profiles/<target>.yaml`, `deploy/<target>/`.

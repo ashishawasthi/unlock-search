@@ -4,7 +4,7 @@ GCP LLM adapter: Gemini on Gemini Enterprise Agent Platform (default model 'gemi
 Backing service: Gemini Enterprise Agent Platform Generative Models. Needs a GCP project with the Gemini Enterprise Agent Platform
 API enabled and ADC credentials (GOOGLE_APPLICATION_CREDENTIALS or workload identity).
 Config kwargs: project, location, model. Env fallbacks: GOOGLE_CLOUD_PROJECT /
-GCP_PROJECT, GOOGLE_CLOUD_LOCATION (default 'us-central1'), AIBOX_MODEL.
+GCP_PROJECT, GOOGLE_CLOUD_LOCATION (default 'us-central1'), UNLOCK_MODEL.
 
 Mapping to the neutral LLM port:
   system            -> systemInstruction (with the RAG excerpts appended)
@@ -26,7 +26,7 @@ class GeminiLLM:
                  model: str = "gemini-2.5-flash", **kw):
         self.project = project or os.environ.get("GOOGLE_CLOUD_PROJECT") or os.environ.get("GCP_PROJECT", "")
         self.location = location or os.environ.get("GOOGLE_CLOUD_LOCATION", "us-central1")
-        self.model = os.environ.get("AIBOX_MODEL", model)
+        self.model = os.environ.get("UNLOCK_MODEL", model)
         self._model = None
 
     def _client(self):

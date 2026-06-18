@@ -1,15 +1,15 @@
 """End-to-end smoke test of the local profile via FastAPI TestClient.
 Exercises: login, upload + attributes, ABAC search (full vs restricted card), RAG chat.
-Run: AIBOX_PROFILE=local AIBOX_DATA=/tmp/gcpu_test python -m pytest tests/test_smoke.py -q
+Run: UNLOCK_PROFILE=local UNLOCK_DATA=/tmp/gcpu_test python -m pytest tests/test_smoke.py -q
 or just: python tests/test_smoke.py
 """
 import json
 import os
 import tempfile
 
-os.environ.setdefault("AIBOX_PROFILE", "local")
-os.environ.setdefault("AIBOX_DATA", tempfile.mkdtemp(prefix="gcpu_"))
-os.environ["AIBOX_QUIET_TELEMETRY"] = "1"
+os.environ.setdefault("UNLOCK_PROFILE", "local")
+os.environ.setdefault("UNLOCK_DATA", tempfile.mkdtemp(prefix="gcpu_"))
+os.environ["UNLOCK_QUIET_TELEMETRY"] = "1"
 
 from fastapi.testclient import TestClient   # noqa: E402
 

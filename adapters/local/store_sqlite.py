@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS audit(id INTEGER PRIMARY KEY AUTOINCREMENT, ts REAL, 
 
 
 class SqliteStore:
-    def __init__(self, path: str = "data/aibox.db", **kw):
+    def __init__(self, path: str = "data/unlock.db", **kw):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()

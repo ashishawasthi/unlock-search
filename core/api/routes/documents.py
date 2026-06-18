@@ -19,7 +19,7 @@ from core.domain.auth import to_principal
 from core.domain.ingest import MEDIA, add_version, doc_full, set_doc_attributes
 
 router = APIRouter()
-MAX_MB = int(os.environ.get("AIBOX_MAX_UPLOAD_MB", "50"))
+MAX_MB = int(os.environ.get("UNLOCK_MAX_UPLOAD_MB", "50"))
 
 
 def _file_response(c, key: str, title: str, file_type: str, download: bool):

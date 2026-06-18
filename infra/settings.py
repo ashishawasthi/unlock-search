@@ -1,5 +1,5 @@
 """
-Profile loading + config resolution. One env var (AIBOX_PROFILE) selects a YAML
+Profile loading + config resolution. One env var (UNLOCK_PROFILE) selects a YAML
 profile under profiles/. Secrets are referenced indirectly via *_env keys so the
 YAML never holds a secret. Paths are package-relative (works in a container).
 """
@@ -38,7 +38,7 @@ def _interp_env(cfg: Any) -> Any:
 
 @lru_cache(maxsize=None)
 def load_profile(name: str | None = None) -> dict:
-    name = name or os.environ.get("AIBOX_PROFILE", "local")
+    name = name or os.environ.get("UNLOCK_PROFILE", "local")
     path = PROFILES_DIR / f"{name}.yaml"
     if not path.exists():
         raise RuntimeError(f"unknown profile '{name}': {path} not found")
@@ -53,4 +53,4 @@ def load_profile(name: str | None = None) -> dict:
 
 
 def profile_name() -> str:
-    return os.environ.get("AIBOX_PROFILE", "local")
+    return os.environ.get("UNLOCK_PROFILE", "local")

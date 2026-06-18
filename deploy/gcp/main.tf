@@ -47,7 +47,7 @@ provider "google" {
 # is encrypted with a customer-managed key. Grant the GCS service agent the
 # roles/cloudkms.cryptoKeyEncrypterDecrypter role on that key first.
 resource "google_storage_bucket" "docs" {
-  name                        = "${var.project_id}-aibox-docs"
+  name                        = "${var.project_id}-unlock-docs"
   location                    = var.region
   uniform_bucket_level_access = true
   force_destroy               = false
@@ -64,14 +64,14 @@ resource "google_storage_bucket" "docs" {
 # AlloyDbStore subclasses PgVectorStore; reach it via the AlloyDB Auth Proxy or
 # Private Service Connect. The DSN goes into Secret Manager as ALLOYDB_DSN.
 resource "google_alloydb_cluster" "main" {
-  cluster_id = "aibox-cluster"
+  cluster_id = "unlock-cluster"
   location   = var.region
   # network_config { network = google_compute_network.vpc.id }  # add your VPC
 }
 
 resource "google_alloydb_instance" "primary" {
   cluster       = google_alloydb_cluster.main.name
-  instance_id   = "aibox-primary"
+  instance_id   = "unlock-primary"
   instance_type = "PRIMARY"
   machine_config { cpu_count = 2 }
 }
@@ -81,8 +81,8 @@ resource "google_alloydb_instance" "primary" {
 # compiled to a Agent Search filter expression over denormalized per-chunk ACL fields.
 resource "google_discovery_engine_data_store" "chunks" {
   location          = "global"
-  data_store_id     = "aibox-datastore"
-  display_name      = "aibox-chunks"
+  data_store_id     = "unlock-datastore"
+  display_name      = "unlock-chunks"
   industry_vertical = "GENERIC"
   content_config    = "NO_CONTENT" # structured/metadata records keyed by chunk_id
   solution_types    = ["SOLUTION_TYPE_SEARCH"]
@@ -93,7 +93,7 @@ resource "google_discovery_engine_data_store" "chunks" {
 # profiles/gcp.yaml -> config.parser.processor_id.
 resource "google_document_ai_processor" "layout" {
   location     = "us"
-  display_name = "aibox-layout-parser"
+  display_name = "unlock-layout-parser"
   type         = "LAYOUT_PARSER_PROCESSOR"
 }
 
@@ -102,7 +102,7 @@ resource "google_document_ai_processor" "layout" {
 # separately) reads the object, parses, chunks, embeds, and indexes. Shown as the
 # trigger wiring only; package the function and set its service URI.
 resource "google_eventarc_trigger" "on_upload" {
-  name     = "aibox-ingest-on-upload"
+  name     = "unlock-ingest-on-upload"
   location = var.region
 
   matching_criteria {
@@ -117,14 +117,14 @@ resource "google_eventarc_trigger" "on_upload" {
   # Point at the ingest Cloud Function / Cloud Run service once deployed:
   destination {
     cloud_run_service {
-      service = "aibox-ingest" # the ingest worker (deploy separately)
+      service = "unlock-ingest" # the ingest worker (deploy separately)
       region  = var.region
     }
   }
   service_account = google_service_account.app.email
 }
 
-# --- Cloud Run: the CORE app (AIBOX_PROFILE=gcp) -----------------------------
+# --- Cloud Run: the CORE app (UNLOCK_PROFILE=gcp) -----------------------------
 resource "google_cloud_run_v2_service" "app" {
   name     = "gcp-unlock"
   location = var.region
@@ -136,7 +136,7 @@ resource "google_cloud_run_v2_service" "app" {
       ports { container_port = 8000 }
 
       env {
-        name  = "AIBOX_PROFILE"
+        name  = "UNLOCK_PROFILE"
         value = "gcp"
       }
       env {
@@ -158,7 +158,7 @@ resource "google_cloud_run_v2_service" "app" {
         }
       }
       env {
-        name = "AIBOX_JWT_SECRET"
+        name = "UNLOCK_JWT_SECRET"
         value_source {
           secret_key_ref {
             secret  = google_secret_manager_secret.jwt_secret.secret_id
@@ -179,19 +179,19 @@ resource "google_cloud_run_v2_service" "app" {
 
 # --- Secret Manager ----------------------------------------------------------
 resource "google_secret_manager_secret" "alloydb_dsn" {
-  secret_id = "aibox-alloydb-dsn"
+  secret_id = "unlock-alloydb-dsn"
   replication {
     auto {}
   }
 }
 resource "google_secret_manager_secret" "jwt_secret" {
-  secret_id = "aibox-jwt-secret"
+  secret_id = "unlock-jwt-secret"
   replication {
     auto {}
   }
 }
 # Add secret VERSIONS out-of-band (do not put secret material in Terraform state):
-#   echo -n "$DSN" | gcloud secrets versions add aibox-alloydb-dsn --data-file=-
+#   echo -n "$DSN" | gcloud secrets versions add unlock-alloydb-dsn --data-file=-
 
 # --- Service account + minimal IAM (sketch) ---------------------------------
 resource "google_service_account" "app" {

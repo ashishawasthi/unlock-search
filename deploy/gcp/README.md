@@ -1,6 +1,6 @@
 # GCP deployment (sketch)
 
-The CORE app runs on Cloud Run with `AIBOX_PROFILE=gcp`, bound to a fully managed Google
+The CORE app runs on Cloud Run with `UNLOCK_PROFILE=gcp`, bound to a fully managed Google
 Cloud data plane. `main.tf` is a Terraform **sketch**: it enumerates the services and how they
 wire together. It needs project-specific values (VPC, CMEK, AlloyDB connectivity, IAM, the
 ingest function, Apigee/IAP) before it is production-ready.
@@ -30,10 +30,10 @@ run; you grant the Cloud Run service account `roles/aiplatform.user` and call th
 
 1. **Build and push the image** (gcp extras):
    ```bash
-   gcloud artifacts repositories create aibox --repository-format=docker --location=$REGION
+   gcloud artifacts repositories create unlock --repository-format=docker --location=$REGION
    docker build -f infra/Dockerfile --build-arg EXTRAS=gcp \
-     -t $REGION-docker.pkg.dev/$PROJECT/aibox/gcp-unlock:gcp .
-   docker push $REGION-docker.pkg.dev/$PROJECT/aibox/gcp-unlock:gcp
+     -t $REGION-docker.pkg.dev/$PROJECT/unlock/gcp-unlock:gcp .
+   docker push $REGION-docker.pkg.dev/$PROJECT/unlock/gcp-unlock:gcp
    ```
 
 2. **Enable APIs**: run, aiplatform, discoveryengine, documentai, alloydb, storage,
@@ -44,13 +44,13 @@ run; you grant the Cloud Run service account `roles/aiplatform.user` and call th
    cd deploy/gcp
    terraform init
    terraform apply -var project_id=$PROJECT -var region=$REGION \
-     -var image=$REGION-docker.pkg.dev/$PROJECT/aibox/gcp-unlock:gcp
+     -var image=$REGION-docker.pkg.dev/$PROJECT/unlock/gcp-unlock:gcp
    ```
 
 4. **Add secret versions out-of-band** (never in Terraform state):
    ```bash
-   echo -n "$ALLOYDB_DSN" | gcloud secrets versions add aibox-alloydb-dsn --data-file=-
-   echo -n "$JWT_SECRET"  | gcloud secrets versions add aibox-jwt-secret  --data-file=-
+   echo -n "$ALLOYDB_DSN" | gcloud secrets versions add unlock-alloydb-dsn --data-file=-
+   echo -n "$JWT_SECRET"  | gcloud secrets versions add unlock-jwt-secret  --data-file=-
    ```
 
 5. **Fill profile ids**: copy `data_store_id`, the Document AI `processor_id`, and the bucket

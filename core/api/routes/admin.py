@@ -69,4 +69,4 @@ def get_audit_csv(request: Request, u: dict = Depends(require_admin)):
         w.writerow([r["ts"], time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(r["ts"])),
                     r["user_id"], r["event"], r["detail"]])
     return Response(buf.getvalue(), media_type="text/csv",
-                    headers={"Content-Disposition": 'attachment; filename="aibox_audit.csv"'})
+                    headers={"Content-Disposition": 'attachment; filename="unlock_audit.csv"'})

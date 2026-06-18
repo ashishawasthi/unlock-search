@@ -12,7 +12,7 @@ from core.ports.types import LlmResult, ModelCapabilities, TokenUsage
 
 class AnthropicLLM:
     def __init__(self, model: str = "claude-sonnet-4-5", **kw):
-        self.model = os.environ.get("AIBOX_MODEL", model)
+        self.model = os.environ.get("UNLOCK_MODEL", model)
         self.key = os.environ.get("ANTHROPIC_API_KEY", "")
 
     def capabilities(self) -> ModelCapabilities:

@@ -2,7 +2,7 @@
 
 Provider-agnostic enterprise Gen AI Assistant (agentic RAG over access-controlled documents) that
 deploys two ways from one codebase: a GCP-managed target and a no-lock-in Kubernetes target. The repo
-is a ports-and-adapters refactor of the AI Box prototype, designed so the domain core, the agent
+is a ports-and-adapters refactor of the prototype, designed so the domain core, the agent
 prompts and graph, the HTTP API, and the SPA are written once and reused by every target. Only the
 provider edges (adapters), the per-target config (profiles), and the IaC (deploy) change.
 
@@ -14,7 +14,7 @@ provider edges (adapters), the per-target config (profiles), and the IaC (deploy
 |---|---|
 | One core | Domain logic, the agent prompts + Orchestrator->Retriever->Generator->Validator graph, the HTTP API, and the SPA are written once and reused across targets. |
 | Swappable adapters | Every provider edge (LLM, embedder, reranker, retrieval, storage, parsing, safety, DLP, eventing, telemetry, identity, agent runtime) sits behind a CORE-owned port. |
-| One switch | `AIBOX_PROFILE=gcp|onprem|local` binds the entire adapter set via a static registry. No code change to retarget. |
+| One switch | `UNLOCK_PROFILE=gcp|onprem|local` binds the entire adapter set via a static registry. No code change to retarget. |
 | Honest comparison | GCP advantages are concrete (managed retrieval quality, fewer inference endpoints to operate, speed-to-market). On-prem is a credible, fully swappable alternative. |
 | Inference is external in BOTH | No model, reranker, embedder, or safety classifier runs on customer GPUs in either target. Both call hosted endpoints. |
 
@@ -419,7 +419,7 @@ one set selected per target. **CONFIG/INFRA** is wiring, env, IaC.
 > implementations), `profiles/gcp.yaml` vs `profiles/onprem.yaml` (the one file binding ports ->
 > adapter keys + endpoints/secrets), and `deploy/gcp/*` vs `deploy/k8s/*` (IaC). Everything else (all
 > of `core/`, the agent prompts + graph, `ui/`, `eval/`, `tests/`, `infra/`) is shared and reused.
-> Retargeting is one flag: `AIBOX_PROFILE=gcp` vs `onprem`.
+> Retargeting is one flag: `UNLOCK_PROFILE=gcp` vs `onprem`.
 
 ### Designed reuse split
 
@@ -499,7 +499,7 @@ gcp-unlock/
 
 ## 5. Profile / config and the composition-root mechanism
 
-One env var (`AIBOX_PROFILE`) selects a YAML profile. The profile binds each port to an adapter **key**
+One env var (`UNLOCK_PROFILE`) selects a YAML profile. The profile binds each port to an adapter **key**
 (not a class path). `core/container.py` holds a **static `REGISTRY`** mapping `port -> {key ->
 "module:Class"}`. The YAML can only pick a key that already exists in `REGISTRY`. There is no
 `importlib` of arbitrary YAML-supplied class strings, so config cannot trigger arbitrary imports.
@@ -527,7 +527,7 @@ adapters:
 config:
   llm:        { model: gemini-2.5-flash, region: us-central1, max_context_tokens: 1000000 }
   relational: { dsn_env: ALLOYDB_DSN, index: scann }
-  retriever:  { datastore: aibox-docs }
+  retriever:  { datastore: unlock-docs }
   identity:   { dev_auth: false }     # single trust path: dev X-User / self-JWT OFF
 secrets: { provider: gcp_secret_manager }
 ```
@@ -582,7 +582,7 @@ runs in the cluster or VM.
 flowchart TD
     Client["Browser SPA"] -->|HTTPS| LB["Cloud Load Balancing + Cloud Armor (WAF/DDoS)"]
     LB --> APG["Apigee X<br/>OIDC verify, SpikeArrest, Quota"]
-    APG -->|mTLS + signed identity header| CR["Cloud Run: CORE (FastAPI + SPA)<br/>AIBOX_PROFILE=gcp"]
+    APG -->|mTLS + signed identity header| CR["Cloud Run: CORE (FastAPI + SPA)<br/>UNLOCK_PROFILE=gcp"]
 
     CR -->|run_turn| AE["Agent Runtime on Gemini Enterprise Agent Platform + ADK<br/>Orchestrator->Retriever->Generator->Validator"]
     AE -->|LLM| GEM["Gemini Enterprise Agent Platform: Gemini Flash"]
@@ -607,7 +607,7 @@ flowchart TD
 ```mermaid
 flowchart TD
     Client["Browser SPA"] -->|HTTPS| ING["Kong / Envoy<br/>OIDC (Keycloak/Dex), rate-limit, ModSecurity WAF"]
-    ING -->|mTLS + trusted identity header| POD["Deployment: CORE (FastAPI + SPA)<br/>AIBOX_PROFILE=onprem"]
+    ING -->|mTLS + trusted identity header| POD["Deployment: CORE (FastAPI + SPA)<br/>UNLOCK_PROFILE=onprem"]
 
     POD -->|run_turn| ADK["ADK on K8s<br/>Orchestrator->Retriever->Generator->Validator"]
     ADK -->|LLM (LiteLLM)| GMA["Gemma hosted endpoint (OpenAI-compat)"]
@@ -634,11 +634,11 @@ The on-prem diagram shows the four hosted inference endpoints explicitly: Gemma 
 
 | Phase | What ships | Adapters active | Demo milestone |
 |---|---|---|---|
-| 0. Carve-out (shared Year-0 build, costed once) | Refactor prototype into `core/` + `core/agents/` + `adapters/local/*` + ports + static-registry composition root + profiles. `SimpleOrchestrator` runs the 4-step graph in-process. Contract tests green. | `local/*` | `AIBOX_PROFILE=local` runs the AI Box demo (upload -> access-aware search -> multi-doc agentic chat with Validator + citations) on SQLite/FTS5/pypdf/Anthropic. (This profile runs end-to-end now.) |
-| 1. GCP data + retrieval spine | AlloyDB store, GCS object store, Document AI parser, Agent Search on Gemini Enterprise Agent Platform retriever, Eventarc async ingest. ABAC compiled to Agent Search filter-DSL and validated as pushdown. | gcp data/retrieval + `local` LLM/orchestrator | `AIBOX_PROFILE=gcp` ingests a PDF via Eventarc, layout-parsed by Document AI, retrieved with managed rerank, ACL-filtered. Side-by-side recall vs FTS5. |
+| 0. Carve-out (shared Year-0 build, costed once) | Refactor prototype into `core/` + `core/agents/` + `adapters/local/*` + ports + static-registry composition root + profiles. `SimpleOrchestrator` runs the 4-step graph in-process. Contract tests green. | `local/*` | `UNLOCK_PROFILE=local` runs the demo (upload -> access-aware search -> multi-doc agentic chat with Validator + citations) on SQLite/FTS5/pypdf/Anthropic. (This profile runs end-to-end now.) |
+| 1. GCP data + retrieval spine | AlloyDB store, GCS object store, Document AI parser, Agent Search on Gemini Enterprise Agent Platform retriever, Eventarc async ingest. ABAC compiled to Agent Search filter-DSL and validated as pushdown. | gcp data/retrieval + `local` LLM/orchestrator | `UNLOCK_PROFILE=gcp` ingests a PDF via Eventarc, layout-parsed by Document AI, retrieved with managed rerank, ACL-filtered. Side-by-side recall vs FTS5. |
 | 2. GCP agent + generation + edge | Gemini Flash LLM, Agent Runtime + ADK orchestrator (Validator on Gemini), Apigee/IAP identity (dev path off) + Cloud Armor, Cloud Observability + Gemini Enterprise Agent Platform Evals. | gcp llm/orchestrator/identity/telemetry | Full GCP agentic RAG behind Apigee with OIDC; groundedness gate active; faithfulness/Recall@k/MRR on a dashboard. |
 | 3. GCP safety | Model Armor guardrail (inject + RAI), Cloud DLP at the three scrub seams. | gcp guardrail/dlp | Injection prompt blocked with audited refusal; PII redacted at ingest and in answers. GCP target complete. |
-| 4. On-prem data + retrieval | pgvector store, MinIO, Tika parser, OpenSearch + bge-reranker + hosted embedder, Knative/KEDA ingest. Same contract tests pass. ABAC compiled to OpenSearch DLS. | onprem data/retrieval/embedder/reranker | `AIBOX_PROFILE=onprem` on K8s runs the identical demo. NEGATIVE ACL test green on OpenSearch DLS. |
+| 4. On-prem data + retrieval | pgvector store, MinIO, Tika parser, OpenSearch + bge-reranker + hosted embedder, Knative/KEDA ingest. Same contract tests pass. ABAC compiled to OpenSearch DLS. | onprem data/retrieval/embedder/reranker | `UNLOCK_PROFILE=onprem` on K8s runs the identical demo. NEGATIVE ACL test green on OpenSearch DLS. |
 | 5. On-prem agent + safety + obs | Gemma LLM (LiteLLM), ADK-on-K8s orchestrator (Validator on Gemma), Kong/Envoy OIDC, Llama Guard + NeMo + Presidio, OTel + Prom + Grafana + Langfuse/RAGAS/Phoenix. | `onprem/*` complete | Both targets pass the same conformance suite and the same eval golden set. The four-endpoint on-prem inference fan-out is provisioned and measured. |
 | 6. Comparison + hardening | Cross-target eval report, cost model (incl. on-prem 4-endpoint operational surface), runbooks, exit-path validation (AlloyDB dump/restore to self-hosted PG). | both | Defensible GCP-vs-on-prem comparison with measured numbers from phases 2-5. |
 
@@ -699,7 +699,7 @@ same suite the `local` profile passes.
 
 ## 10. Honest current state
 
-- The existing prototype (AI Box) is **SQLite + local filesystem + Anthropic API** today: a single-file
+- The existing prototype is **SQLite + local filesystem + Anthropic API** today: a single-file
   FastAPI app with straight-line `search -> expand -> call_claude`.
 - This repo is the **ports-and-adapters refactor**, the shared Year-0 build, costed once and common to
   both targets. The ~80% reuse figure is a **designed-intent** property of this refactor.

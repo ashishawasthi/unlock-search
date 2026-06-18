@@ -10,7 +10,7 @@ this adapter only ranks. A Reranker (bge) reached via the container reorders the
 
 Config (profiles/onprem.yaml):
   url_env: OPENSEARCH_URL    -> url: https://host:9200   (required)
-  index: aibox-chunks        -> index name (default aibox-chunks)
+  index: unlock-chunks        -> index name (default unlock-chunks)
   user_env / password_env    -> basic-auth (optional)
   verify_certs: true|false   -> TLS verification (default true)
   rrf_k: 60                  -> RRF constant (default 60)
@@ -27,7 +27,7 @@ from core.ports.types import AccessPredicate, Chunk, Hit
 
 
 class OpenSearchRetriever:
-    def __init__(self, url: str = "", index: str = "aibox-chunks", user: str = "",
+    def __init__(self, url: str = "", index: str = "unlock-chunks", user: str = "",
                  password: str = "", verify_certs: bool = True, rrf_k: int = 60,
                  container=None, **kw):
         if not url:

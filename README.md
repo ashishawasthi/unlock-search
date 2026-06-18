@@ -2,8 +2,8 @@
 
 A portable enterprise Gen AI document assistant: **upload, ABAC access-aware hybrid search,
 RAG chat with citations, access-request approval, and audit**. One codebase, two production
-targets: **GCP-managed** (lowest operational surface) or **no-lock-in Kubernetes** (no vendor
-dependency). The same domain logic, agent prompts, and HTTP API serve all three profiles;
+targets: **GCP-managed** (lowest operational surface) or **on-prem Kubernetes** (full platform
+control). The same domain logic, agent prompts, and HTTP API serve all three profiles;
 only the adapters change.
 
 ## What it is
@@ -24,6 +24,71 @@ Deployable two ways from one codebase:
 | **GCP** | Managed-first | Agent Search on Gemini Enterprise Agent Platform + Document AI fold embedding and reranking into one managed service. Smallest ops surface. |
 | **on-prem / K8s** | No lock-in | OpenSearch + pgvector + bge-reranker on Kubernetes. Portable, but depends on hosted inference endpoints (see below). |
 
+## Portability by design
+
+**Build the product once; move it between GCP and on-prem by swapping only the adapters.**
+The UI, domain logic, agent graph, and HTTP API are written once and never forked — the only thing
+that varies per target is the ring of adapters bound below the ports.
+
+### One CORE, one switch, three profiles
+
+The same CORE is reused by every target. `UNLOCK_PROFILE` is the single switch that binds one
+adapter per port; nothing in `core/` knows which cloud (if any) it is running on.
+
+```mermaid
+flowchart TB
+    UI["Web UI + HTTP API"] --> CORE["CORE — written once, byte-identical<br/>ABAC · chunking · agent graph · prompts · audit"]
+    CORE --> PORTS{{"Ports (Protocol interfaces)<br/>the only seam between CORE and the world"}}
+    PORTS --> SW{"UNLOCK_PROFILE<br/>binds one adapter per port"}
+    SW -->|"gcp"| GCP["adapters/gcp → Google Cloud (managed)<br/>AlloyDB · GCS · Gemini · Document AI<br/>Agent Search + Agent Runtime"]
+    SW -->|"onprem"| ONP["adapters/onprem → Kubernetes (self-hosted)<br/>pgvector · MinIO · OpenSearch · Tika<br/>Gemma · bge · ADK"]
+    SW -->|"local"| LOC["adapters/local → laptop, no cloud<br/>SQLite · FTS5 · filesystem · Anthropic"]
+```
+
+### What is reused vs what swaps
+
+Everything above the ports ships unchanged across targets; only the adapters and the platform
+beneath them differ. That shared band is the bulk of the codebase (CORE + UI + eval + tests).
+
+```mermaid
+flowchart TB
+    subgraph SHARED["Shared and identical in every target — never forked"]
+        direction TB
+        S1["UI · HTTP API"]
+        S2["CORE domain — ABAC · chunking · ingest · audit"]
+        S3["Agent graph + prompts<br/>Orchestrator → Retriever → Generator → Validator"]
+        S1 --- S2 --- S3
+    end
+    SHARED --> P{{"Ports — the contract both targets implement"}}
+    P -->|"gcp profile"| GA["adapters/gcp"]
+    P -->|"onprem profile"| OA["adapters/onprem"]
+    GA --> GPL["Google Cloud<br/>managed services"]
+    OA --> OPL["Kubernetes<br/>OSS + hosted inference"]
+```
+
+- **CORE imports no vendor SDK.** `core/` depends only on port `Protocol`s, so it *physically cannot* couple to a cloud — portability is enforced by the import graph, not by discipline.
+- **One env var retargets everything.** `UNLOCK_PROFILE` picks an adapter set from a static `REGISTRY` allowlist; moving between GCP, on-prem, and local is a config change, not a code change.
+- **Security and orchestration travel with the CORE.** The `AccessPredicate` and the Orchestrator → Retriever → Generator → Validator graph are built once in CORE and reused; only the per-backend ABAC compiler and the bound adapters differ.
+
+## GCP-managed vs on-prem
+
+Same codebase, same domain logic — the comparison is purely the **platform** around the model
+(inference is an external hosted endpoint in **both** targets). Condensed below; the full
+dimension-by-dimension analysis lives in the [comparison deck](docs/comparison/gcp-vs-onprem.pdf).
+
+| Dimension | GCP-managed | On-prem | Edge |
+|---|---|---|---|
+| Time-to-market | Managed services; minimal assembly + hardening | DIY assembly + hardening of the full stack | **GCP** |
+| Quality (retrieval, parsing, model, guardrails, eval) | Managed reranker + Document AI + Gemini; high floor with zero tuning | OpenSearch + bge + Tika + Gemma; strong but self-wired and self-tuned | **GCP** |
+| Cost / TCO | Usage-based opex; scales toward zero; small integration team | License + hardware + a larger ops team | **GCP** |
+| Operational burden & scalability | Provider-absorbed patching, autoscale, scale-to-zero | Self-run K8s + multiple OSS systems + four hosted inference endpoints | **GCP** |
+| Risk, security & compliance | Managed controls (CMEK, VPC-SC, Cloud Armor) + inherited certifications | Equivalent controls, but assembled and operated by you | **GCP** |
+| Data residency / sovereignty | Region pin + VPC-SC + CMEK; ultimate control is the cloud's | Full physical control; platform can be air-gapped | **On-prem** |
+| Vendor lock-in / portability | Coupling lives only in adapters | No vendor dependency | Tie by design — hexagonal CORE; data portable (Postgres-wire, S3-compatible) |
+
+**Bottom line:** default to **GCP-managed** for the smallest operational surface; build **on-prem**
+as insurance, decisive under a hard data-residency/air-gap mandate or an already-sunk platform + team.
+
 ## Ports-and-adapters principle
 
 One CORE, swappable adapters, one switch.
@@ -36,7 +101,7 @@ One CORE, swappable adapters, one switch.
 - One environment variable selects everything:
 
 ```
-AIBOX_PROFILE = local | onprem | gcp
+UNLOCK_PROFILE = local | onprem | gcp
 ```
 
 | Port | local | onprem | gcp |
@@ -80,23 +145,23 @@ Agent Search on Gemini Enterprise Agent Platform, which is the core of the GCP o
 flowchart LR
     subgraph CORE["CORE (provider-agnostic, never changes)"]
         direction TB
-        DOM["Domain: ABAC AccessPredicate, chunking,<br/>neighbor-continuation, ingest/version,<br/>access-requests, audit"]
-        AG["Agents: prompts + Orchestrator -> Retriever<br/>-> Generator -> Validator graph"]
-        API["HTTP API: core/api/app.py (thin handlers)"]
-        PORTS{{"PORTS (Protocols)"}}
+        DOM["Domain — ABAC (AccessPredicate), chunking,<br/>ingest + versioning, access requests, audit"]
+        AG["Agents — prompts + the<br/>Orchestrator → Retriever → Generator → Validator graph"]
+        API["HTTP API — FastAPI (core/api/app.py)"]
+        PORTS{{"Ports (Python Protocols)"}}
         API --- DOM
         DOM --- AG
         DOM --- PORTS
         AG --- PORTS
     end
 
-    UI["UI: ui/ (SPA, /api/* only)"] -->|HTTP + principal| API
+    UI["Web UI — single-page app (ui/),<br/>calls /api/* only"] -->|"HTTP + signed-in user"| API
 
-    PORTS --- L["adapters/local<br/>SQLite, FTS5, fs,<br/>Anthropic, in-proc"]
-    PORTS --- O["adapters/onprem<br/>pgvector, OpenSearch, MinIO,<br/>Gemma, bge, ADK/K8s"]
-    PORTS --- G["adapters/gcp<br/>AlloyDB, Agent Search on Gemini Enterprise Agent Platform, GCS,<br/>Gemini, DocAI, Agent Runtime"]
+    PORTS --- L["adapters/local<br/>SQLite, FTS5, filesystem, Anthropic"]
+    PORTS --- O["adapters/onprem<br/>pgvector, OpenSearch, MinIO,<br/>Gemma, bge, ADK on K8s"]
+    PORTS --- G["adapters/gcp<br/>AlloyDB, GCS, Gemini, Document AI,<br/>Agent Search + Agent Runtime"]
 
-    PROF["profiles/{local,onprem,gcp}.yaml<br/>AIBOX_PROFILE -> one adapter per port"] -.->|binds| PORTS
+    PROF["profiles/*.yaml<br/>UNLOCK_PROFILE → one adapter per port"] -.->|binds| PORTS
 ```
 
 ## Repo layout
@@ -127,7 +192,7 @@ Runs end-to-end now, on a laptop, no cloud account.
 
 ```
 pip install -r requirements.txt
-AIBOX_PROFILE=local uvicorn core.api.app:create_app --factory --reload
+UNLOCK_PROFILE=local uvicorn core.api.app:create_app --factory --reload
 ```
 
 Serves http://127.0.0.1:8000.
@@ -139,7 +204,7 @@ Serves http://127.0.0.1:8000.
 ## on-prem profile
 
 ```
-AIBOX_PROFILE=onprem  # stand up the stack via deploy/k8s/docker-compose.onprem.yml
+UNLOCK_PROFILE=onprem  # stand up the stack via deploy/k8s/docker-compose.onprem.yml
 ```
 
 Brings up PostgreSQL + pgvector, OpenSearch, and MinIO. It needs **hosted inference endpoints**
@@ -148,13 +213,13 @@ for the LLM (Gemma), embedder, reranker (bge), and safety (Llama Guard) configur
 
 ## gcp profile
 
-`AIBOX_PROFILE=gcp` binds the Gemini Enterprise Agent Platform / AlloyDB / GCS / Document AI / Agent Runtime adapters. These are
+`UNLOCK_PROFILE=gcp` binds the Gemini Enterprise Agent Platform / AlloyDB / GCS / Document AI / Agent Runtime adapters. These are
 real code and require a configured GCP project. Agent Search on Gemini Enterprise Agent Platform folds embedding and reranking into
 one managed service, removing two of the four inference endpoints the on-prem profile must host.
 
 ## Current state (honest scaffold reality)
 
-- The prototype **AI Box** is SQLite + local filesystem + Anthropic API today. This ports-and-adapters
+- The prototype is SQLite + local filesystem + Anthropic API today. This ports-and-adapters
   refactor is the shared **Year-0 build**, costed **once** and common to both targets.
 - **local** profile: runs end-to-end now.
 - **onprem** profile: code-complete (docker-compose).
@@ -167,25 +232,6 @@ compiled into the backend's native filter (SQL `WHERE` fragment, Agent Search fi
 and pushed **into** the query. Access is never post-filtered, never decided by the model, and never
 enforced in the UI. Restricted documents are returned as server-side redacted cards. Secrets stay in
 the environment (profiles reference them via `*_env` indirection; YAML never holds a secret).
-
-## GCP-managed vs no-lock-in on-prem
-
-Same codebase, same domain logic — the comparison is purely the **platform** around the model
-(inference is an external hosted endpoint in **both** targets). Condensed below; the full
-dimension-by-dimension analysis lives in the [comparison deck](docs/comparison/gcp-vs-onprem.md).
-
-| Dimension | GCP-managed | No-lock-in on-prem | Edge |
-|---|---|---|---|
-| Time-to-market | Managed services; minimal assembly + hardening | DIY assembly + hardening of the full stack | **GCP** |
-| Quality (retrieval, parsing, model, guardrails, eval) | Managed reranker + Document AI + Gemini; high floor with zero tuning | OpenSearch + bge + Tika + Gemma; strong but self-wired and self-tuned | **GCP** |
-| Cost / TCO | Usage-based opex; scales toward zero; small integration team | License + hardware + a larger ops team | **GCP** |
-| Operational burden & scalability | Provider-absorbed patching, autoscale, scale-to-zero | Self-run K8s + multiple OSS systems + four hosted inference endpoints | **GCP** |
-| Risk, security & compliance | Managed controls (CMEK, VPC-SC, Cloud Armor) + inherited certifications | Equivalent controls, but assembled and operated by you | **GCP** |
-| Data residency / sovereignty | Region pin + VPC-SC + CMEK; ultimate control is the cloud's | Full physical control; platform can be air-gapped | **On-prem** |
-| Vendor lock-in / portability | Coupling lives only in adapters | No vendor dependency | Tie by design — hexagonal CORE; data portable (Postgres-wire, S3-compatible) |
-
-**Bottom line:** default to **GCP-managed** for the smallest operational surface; build **on-prem**
-as insurance, decisive under a hard data-residency/air-gap mandate or an already-sunk platform + team.
 
 ## More
 

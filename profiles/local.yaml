@@ -17,10 +17,10 @@ adapters:
   notifier: outbox
   orchestrator: simple
 config:
-  relational: { path: data/aibox.db }
+  relational: { path: data/unlock.db }
   object_store: { root: data/files }
   notifier: { outbox: data/outbox }
   llm: { model: claude-sonnet-4-5 }
-  identity: { }            # set AIBOX_DEV_AUTH=1 to allow the X-User test header
+  identity: { }            # set UNLOCK_DEV_AUTH=1 to allow the X-User test header
 secrets:
-  provider: env            # ANTHROPIC_API_KEY (optional), AIBOX_JWT_SECRET (optional)
+  provider: env            # ANTHROPIC_API_KEY (optional), UNLOCK_JWT_SECRET (optional)

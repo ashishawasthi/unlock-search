@@ -11,7 +11,7 @@ from contextlib import contextmanager
 
 class StdoutTelemetry:
     def __init__(self, quiet: bool = False, **kw):
-        self.quiet = quiet or os.environ.get("AIBOX_QUIET_TELEMETRY") == "1"
+        self.quiet = quiet or os.environ.get("UNLOCK_QUIET_TELEMETRY") == "1"
 
     def log(self, event, attrs, severity="INFO"):
         if not self.quiet:

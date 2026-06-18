@@ -1,7 +1,7 @@
 """
 On-prem Identity: trust a gateway-attested identity header. An API gateway (Kong / Envoy
 / Istio ingress) terminates OIDC against the enterprise IdP, then injects a signed identity
-header (default X-AIBox-User) on the way to the app. This adapter NEVER accepts a raw client
+header (default X-Unlock-User) on the way to the app. This adapter NEVER accepts a raw client
 bearer token; only the gateway's attestation is trusted.
 
 Verification modes:
@@ -12,7 +12,7 @@ Verification modes:
     when the gateway is the sole network path, i.e. mTLS mesh / private ingress).
 
 Backing service + config:
-  OIDC_IDENTITY_HEADER   header name the gateway injects (default 'x-aibox-user')
+  OIDC_IDENTITY_HEADER   header name the gateway injects (default 'x-unlock-user')
   OIDC_GATEWAY_HMAC      shared secret for the HMAC mode (optional)
   OIDC_VERIFY_JWT        '1' to treat the header value as a gateway-signed HS256 JWT
 """
@@ -29,7 +29,7 @@ from core.ports.types import Principal
 class OidcIdentity:
     def __init__(self, identity_header: str | None = None, gateway_hmac: str | None = None,
                  verify_jwt: bool | None = None, **kw):
-        self.header = (identity_header or os.environ.get("OIDC_IDENTITY_HEADER", "x-aibox-user")).lower()
+        self.header = (identity_header or os.environ.get("OIDC_IDENTITY_HEADER", "x-unlock-user")).lower()
         self.hmac_secret = gateway_hmac or os.environ.get("OIDC_GATEWAY_HMAC", "")
         env_jwt = os.environ.get("OIDC_VERIFY_JWT", "0") not in ("0", "false", "")
         self.verify_jwt = env_jwt if verify_jwt is None else bool(verify_jwt)

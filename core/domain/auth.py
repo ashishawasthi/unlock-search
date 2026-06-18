@@ -20,11 +20,11 @@ from pathlib import Path
 from core.domain.abac import clr_label
 from core.ports.types import Principal
 
-DATA = Path(os.environ.get("AIBOX_DATA") or "data")
+DATA = Path(os.environ.get("UNLOCK_DATA") or "data")
 
 
 def _jwt_secret() -> str:
-    env = os.environ.get("AIBOX_JWT_SECRET")
+    env = os.environ.get("UNLOCK_JWT_SECRET")
     if env:
         return env
     try:

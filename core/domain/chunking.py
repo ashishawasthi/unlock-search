@@ -1,5 +1,5 @@
 """
-Structure-aware-lite chunking. Carried over from the AI Box prototype unchanged:
+Structure-aware-lite chunking. Carried over from the prototype unchanged:
 a heading starts a new chunk; long sections split at ~target chars; each chunk
 records the section heading that INTRODUCED it (so citations label the right
 section). Provider-agnostic CORE: it operates on neutral Page/Chunk types.
