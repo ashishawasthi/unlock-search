@@ -1,4 +1,4 @@
-# gcp-unlock
+# unlock-search
 
 A portable enterprise Gen AI document assistant: **upload, ABAC access-aware hybrid search,
 RAG chat with citations, access-request approval, and audit**. One codebase, two production
