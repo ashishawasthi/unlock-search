@@ -1,9 +1,11 @@
 # unlock-search
 
-A portable enterprise Gen AI document assistant: **upload, ABAC access-aware hybrid search,
-RAG chat with citations, access-request approval, and audit**. One codebase, two production
-targets: **GCP-managed** (lowest operational surface) or **on-prem Kubernetes** (full platform
-control). The same domain logic, agent prompts, and HTTP API serve all three profiles;
+A portable enterprise search. One codebase, two production targets:
+
+1. **GCP Managed Services** - lowest operational surface 
+2. **On-prem Kubernetes** - for full platform control as insurance policy
+
+The same domain logic, agent prompts, and HTTP API serve all three profiles;
 only the adapters change.
 
 ## What it is
