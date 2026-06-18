@@ -30,7 +30,7 @@ All figures INDICATIVE (2026): order-of-magnitude planning numbers, not vendor q
 
 **Part 1 — Overview.** What we're building, the architecture, two topologies, framing assumption, locked decisions.
 
-**Part 2 — Deep Dive.** Dimension by dimension: time-to-market, quality, cost/TCO, risk, security, sovereignty, scalability/ops/lock-in.
+**Part 2 — Deep Dive.** Dimension by dimension: time-to-market, quality, cost/TCO, risk, security, sovereignty, scalability/ops.
 
 **Part 3 — The Decision.** Weighted scorecard, sovereignty gate, risk register, where on-prem wins, rebuttal, portability caveats, roadmap, recommendation.
 
@@ -60,7 +60,7 @@ INDICATIVE (2026).
 ## Executive Summary
 
 - **Build ONCE, deploy two ways.** Hexagonal (ports-and-adapters) design keeps a provider-agnostic CORE identical across both targets. Only the adapters and platform change.
-- **Default to GCP-managed.** Best quality (Vertex AI Search + Document AI + Gemini Flash), fastest TTM (~7 vs ~36 eng-weeks, ~5×), lowest TCO (~$2.1M vs ~$5.7M over 3 yrs).
+- **Default to GCP-managed.** Best quality (Agent Search on Gemini Enterprise Agent Platform + Document AI + Gemini Flash), fastest TTM (~7 vs ~36 eng-weeks, ~5×), lowest TCO (~$2.1M vs ~$5.7M over 3 yrs).
 - **TCO gap is people, not gear.** Inference is external in both. On-prem: ~4–6 FTE platform ops; GCP: ~1–1.5 FTE to integrate, not operate.
 - **Honest baseline.** Year-0 ports-and-adapters refactor is costed once in both columns — that's why Year-0 is non-zero on both sides.
 - **Build on-prem to a tested baseline as insurance.** No-lock-in / data-residency / air-gap option; competitive only when sovereignty mandates it or capacity is already sunk.
@@ -105,15 +105,15 @@ Ports-and-adapters (hexagonal). The product is written once; the cloud underneat
 
 Same request path; different platform beneath the ports. Inference is an external hosted endpoint in **both**.
 
-**GCP-managed:** Apigee + Cloud Armor → Cloud Run (CORE) → Agent Engine/ADK → Vertex AI Search + Document AI over AlloyDB + GCS; Model Armor, Cloud DLP, Eventarc, Cloud Observability.
+**GCP-managed:** Apigee + Cloud Armor → Cloud Run (CORE) → Agent Runtime/ADK → Agent Search on Gemini Enterprise Agent Platform + Document AI over AlloyDB + GCS; Model Armor, Cloud DLP, Eventarc, Cloud Observability.
 
 **No-lock-in on K8s:** Kong/Envoy + OIDC → CORE pod → ADK on K8s → OpenSearch + bge + Tika over pgvector + MinIO; Llama Guard + NeMo + Presidio, Knative/KEDA, OTel + Grafana.
 
 | Tier | GCP | On-prem |
 |---|---|---|
 | Gateway | Apigee X + Cloud Armor | Kong / Envoy + OIDC |
-| Agent runtime | Vertex Agent Engine + ADK | ADK on K8s |
-| Retrieval | Vertex AI Search + Document AI | OpenSearch + bge + Tika |
+| Agent runtime | Agent Runtime on Gemini Enterprise Agent Platform + ADK | ADK on K8s |
+| Retrieval | Agent Search on Gemini Enterprise Agent Platform + Document AI | OpenSearch + bge + Tika |
 | Data | AlloyDB + GCS | pgvector + MinIO |
 | Safety / DLP | Model Armor + Cloud DLP | Llama Guard + NeMo + Presidio |
 
@@ -121,7 +121,7 @@ Same request path; different platform beneath the ports. Inference is an externa
 
 ## Framing Assumption: Inference Is External in BOTH Targets
 
-> **No AI inference runs on-premise in either target.** Both call a hosted model endpoint (GCP: Gemini via Vertex; on-prem: Gemma via LiteLLM). The comparison is the PLATFORM around the model.
+> **No AI inference runs on-premise in either target.** Both call a hosted model endpoint (GCP: Gemini on Gemini Enterprise Agent Platform; on-prem: Gemma via LiteLLM). The comparison is the PLATFORM around the model.
 
 | Implication | Consequence |
 |---|---|
@@ -152,11 +152,11 @@ INDICATIVE (2026).
 
 | # | Decision (final) |
 |---|---|
-| 1 | **Agent layer = ADK in both.** GCP: Vertex AI Agent Engine + ADK. On-prem: same ADK app on K8s. Agent graph + prompts live in CORE and are reused; only model binding and host differ. |
-| 2 | **Retrieval.** GCP: Vertex AI Search + Document AI; AlloyDB holds chunk text + ABAC side-tables. On-prem: OpenSearch (BM25+kNN) + bge-reranker; pgvector holds chunk text + ABAC. |
+| 1 | **Agent layer = ADK in both.** GCP: Agent Runtime on Gemini Enterprise Agent Platform + ADK. On-prem: same ADK app on K8s. Agent graph + prompts live in CORE and are reused; only model binding and host differ. |
+| 2 | **Retrieval.** GCP: Agent Search on Gemini Enterprise Agent Platform + Document AI; AlloyDB holds chunk text + ABAC side-tables. On-prem: OpenSearch (BM25+kNN) + bge-reranker; pgvector holds chunk text + ABAC. |
 | 3 | **Validator / groundedness gate** runs before every answer, in both targets. |
-| 4 | **ABAC is CORE-owned (`AccessPredicate`), compiled per backend:** SQL (SQLite/pgvector/AlloyDB), filter-DSL (Vertex), DLS (OpenSearch). Policy model + orchestration reused; enforcement per-adapter. |
-| 5 | **Embedder and Reranker are first-class ports.** On-prem depends on 4 external hosted inference endpoints (LLM, embedder, reranker, safety). GCP folds embedding + reranking into managed Vertex AI Search. |
+| 4 | **ABAC is CORE-owned (`AccessPredicate`), compiled per backend:** SQL (SQLite/pgvector/AlloyDB), filter-DSL (Agent Search), DLS (OpenSearch). Policy model + orchestration reused; enforcement per-adapter. |
+| 5 | **Embedder and Reranker are first-class ports.** On-prem depends on 4 external hosted inference endpoints (LLM, embedder, reranker, safety). GCP folds embedding + reranking into managed Agent Search on Gemini Enterprise Agent Platform. |
 
 ---
 
@@ -167,7 +167,7 @@ INDICATIVE (2026).
 | **Prototype** | SQLite + local FS + Anthropic API. No Postgres, no pgvector, no ADK graph, no port boundary yet. | Domain logic (ABAC, chunking, ACL retrieval, citations, audit) works end-to-end. |
 | **`local`** | Runs end-to-end (lightweight in-process runner). | CORE prompts and Orchestrator graph are real and runnable. |
 | **`onprem`** | Code-complete (docker-compose). | Four hosted-inference ports and OSS adapters are wired, not aspirational. |
-| **`gcp`** | Real adapter code; requires a GCP project to run. | Vertex / AlloyDB / Document AI adapters exist in code. |
+| **`gcp`** | Real adapter code; requires a GCP project to run. | Gemini Enterprise Agent Platform / AlloyDB / Document AI adapters exist in code. |
 
 - **The ports-and-adapters refactor is the shared Year-0 build**, common to both targets. It nets out of the differential and explains the non-zero Year-0 on both sides.
 - Reuse/portability claims are **designed intent realized in this repo**, not a claim that the GCP profile is in production.
@@ -178,25 +178,25 @@ INDICATIVE (2026).
 
 Everything above the ports ships unchanged (ABAC, chunking, citations, Validator, request/approval, audit, UI). Only the rows below differ.
 
-| CORE port | GCP-managed adapter | No-lock-in on-prem adapter |
+| CORE port | GCP-managed adapter | On-prem adapter |
 |---|---|---|
 | API gateway / edge | Apigee X + Cloud Armor | Kong / APISIX / Envoy + ModSecurity/Coraza |
 | Safety / guardrails | Model Armor (injection + RAI + DLP-aware) | Llama Guard 4 + NeMo Guardrails + Presidio |
-| Models / generation | Gemini via Vertex AI | Gemma via hosted OpenAI-compatible endpoint (LiteLLM) |
-| Agent runtime | Vertex AI Agent Engine + ADK (managed) | Same ADK app on K8s (self-managed) |
-| Retrieval + index + rerank | Vertex AI Search (hybrid RRF + reranker) | OpenSearch (BM25+kNN) + bge-reranker-v2-m3 |
+| Models / generation | Gemini on Gemini Enterprise Agent Platform | Gemma via hosted OpenAI-compatible endpoint (LiteLLM) |
+| Agent runtime | Agent Runtime on Gemini Enterprise Agent Platform + ADK (managed) | Same ADK app on K8s (self-managed) |
+| Retrieval + index + rerank | Agent Search on Gemini Enterprise Agent Platform (hybrid RRF + reranker) | OpenSearch (BM25+kNN) + bge-reranker-v2-m3 |
 | Doc parsing / OCR | Document AI Layout Parser | Tika / Unstructured + Tesseract/PaddleOCR |
 | PII / DLP | Cloud DLP / Sensitive Data Protection | Presidio |
 | Event-trigger ingestion | Cloud Functions + Eventarc | Knative / KEDA / Argo Events |
 | Object store | GCS | MinIO (S3-compatible, erasure-coded) |
 | Structured + vector store | AlloyDB (ScaNN, pgvector) | PostgreSQL 16 + pgvector (self-run HA) |
-| Observability + eval | Cloud Observability + Vertex Gen AI Eval | OTel + Prometheus + Grafana + Langfuse/RAGAS/Phoenix |
+| Observability + eval | Cloud Observability + Gemini Enterprise Agent Platform Evals | OTel + Prometheus + Grafana + Langfuse/RAGAS/Phoenix |
 
 ---
 
 ## Stack Mapping: The Reuse Win
 
-- **Embedder + Reranker are ports, not buried config.** On-prem must host them as separate inference endpoints; GCP folds both into managed Vertex AI Search.
+- **Embedder + Reranker are ports, not buried config.** On-prem must host them as separate inference endpoints; GCP folds both into managed Agent Search on Gemini Enterprise Agent Platform.
 - **On-prem depends on 4 external hosted inference endpoints** (LLM, embedder, reranker, safety). GCP calls one model endpoint and bundles the rest.
 - **One Postgres-compatible repository** serves both targets (AlloyDB is Postgres-wire-compatible). Same model port, same ADK agent graph, same ABAC policy model.
 - **Many "on-prem vs GCP" choices collapse to a connection string** + one-line index strategy (`USING scann` vs `USING hnsw`) + per-backend ABAC compiler.
@@ -218,29 +218,29 @@ INDICATIVE (2026).
 
 Platform assembly + hardening only (inference external both ways; CORE identical). Deltas are relative effort bars.
 
-| Capability | GCP | On-prem | Why on-prem is heavier |
+| Capability | GCP | On-prem | Edge |
 |---|---|---|---|
-| API gateway / authz edge | light | heavy | Kong HA, plugin tuning, cert rotation are DIY |
-| Guardrails / injection | light | heavy | NeMo rails authored/tested; host Llama Guard |
-| Retrieval / index / rerank | light | heaviest | OpenSearch sizing + separate reranker + fusion |
-| Doc parsing / layout | light | heavy | Layout/OCR hand-tuned; scale the parser yourself |
-| PII / redaction | light | heavy | Presidio recognizers, custom entities, FP/FN tuning |
-| Event-trigger ingestion | light | heavy | Event mesh, scale-to-zero, retry/DLQ self-built |
-| Object store | light | medium | Distributed MinIO, erasure coding, lifecycle |
-| Structured + vector DB | light | heavy | Self-run HA Postgres: replication, failover, PITR |
-| Eval / observability | light | heaviest | Four OSS tools to deploy, wire, dashboard, upgrade |
-| Cross-cutting security | light | heavy | More seams → IAM, network policy, pen-test |
-| **Total (assembly to prod)** | **~7 eng-weeks** | **~36 eng-weeks** | **~5× assembly effort on-prem** |
+| API gateway / authz edge | light | heavy | **GCP** — Kong HA, plugin tuning, cert rotation are DIY |
+| Guardrails / injection | light | heavy | **GCP** — NeMo rails authored/tested; host Llama Guard |
+| Retrieval / index / rerank | light | heaviest | **GCP** — OpenSearch sizing + separate reranker + fusion |
+| Doc parsing / layout | light | heavy | **GCP** — Layout/OCR hand-tuned; scale the parser yourself |
+| PII / redaction | light | heavy | **GCP** — Presidio recognizers, custom entities, FP/FN tuning |
+| Event-trigger ingestion | light | heavy | **GCP** — Event mesh, scale-to-zero, retry/DLQ self-built |
+| Object store | light | medium | **GCP** — Distributed MinIO, erasure coding, lifecycle |
+| Structured + vector DB | light | heavy | **GCP** — Self-run HA Postgres: replication, failover, PITR |
+| Eval / observability | light | heaviest | **GCP** — Four OSS tools to deploy, wire, dashboard, upgrade |
+| Cross-cutting security | light | heavy | **GCP** — More seams → IAM, network policy, pen-test |
+| **Total (assembly to prod)** | **~7 eng-weeks** | **~36 eng-weeks** | **GCP ~5× faster** |
 
 ---
 
 ## Time-to-Market: Milestones
 
-| Milestone | GCP | On-prem |
-|---|---|---|
-| First working slice | ~2 weeks | ~6–8 weeks |
-| Production-hardened (HA, security, eval, observability) | ~6–8 weeks | ~5–7 months |
-| Ongoing platform ops (recurring) | low (config) | ~0.5–1.0 FTE steady-state |
+| Milestone | GCP | On-prem | Edge |
+|---|---|---|---|
+| First working slice | ~2 weeks | ~6–8 weeks | **GCP** |
+| Production-hardened (HA, security, eval, observability) | ~6–8 weeks | ~5–7 months | **GCP** |
+| Ongoing platform ops (recurring) | low (config) | ~0.5–1.0 FTE steady-state | **GCP** |
 
 - TTM total (~7 vs ~36 eng-weeks) is **one-time assembly only**. The ~0.5–1.0 FTE is the separate recurring ops line, not double-counted.
 - The shared CORE refactor is the Year-0 build common to both; the TTM **delta** is platform assembly, not the CORE.
@@ -254,12 +254,12 @@ Platform assembly + hardening only (inference external both ways; CORE identical
 
 | Sub-dimension | GCP-managed | On-prem OSS | Edge |
 |---|---|---|---|
-| Retrieval (hybrid + rerank) | Vertex AI Search: managed RRF + tuned reranker, improved by Google | OpenSearch BM25/kNN + bge-reranker, self-wired/tuned | **GCP** |
+| Retrieval (hybrid + rerank) | Agent Search on Gemini Enterprise Agent Platform: managed RRF + tuned reranker, improved by Google | OpenSearch BM25/kNN + bge-reranker, self-wired/tuned | **GCP** |
 | Layout-aware parsing | Document AI: tables, forms, reading order, OCR managed | Tika/Unstructured: good text, weaker tables/scans without tuning | **GCP** |
 | Model / generation | Gemini: ~1M context, native tools, strong grounding | Gemma (hosted): solid floor, trails on long-context + nested structured output | **GCP** |
 | Guardrail coverage | Model Armor: managed injection + jailbreak + RAI + DLP-aware, auto-updated | Llama Guard 4 + NeMo + Presidio: strong, but you author/maintain rails | **GCP** |
 | PII detection | Cloud DLP: 100+ infoTypes, checksum/context validation | Presidio: strong on regex PII; NER quality = your model + tuning | **GCP** |
-| Eval tooling | Vertex Gen AI Eval: turnkey faithfulness/relevance/precision/recall | RAGAS + Langfuse + Phoenix: best-in-class OSS, but self-assembled | **GCP (slight)** |
+| Eval tooling | Gemini Enterprise Agent Platform Evals: turnkey faithfulness/relevance/precision/recall | RAGAS + Langfuse + Phoenix: best-in-class OSS, but self-assembled | **GCP (slight)** |
 
 ---
 
@@ -280,12 +280,12 @@ INDICATIVE (2026).
 
 Inference excluded (equal, external both sides). INDICATIVE annual run-rate (infra + people).
 
-| Cost shape | GCP-managed | On-prem-on-K8s |
-|---|---|---|
-| Pricing model | Usage-based opex; scales toward zero when idle | License + 3-yr hardware amortization + people |
-| HA/DR, patching, certs, upgrades | Provider-absorbed | Engineered, staffed, and drilled in-house |
-| Platform/SRE headcount | ~1.0–1.5 FTE (integrate + observe) | ~4–6 FTE (operate substrate 24×7 + on-call) |
-| Annual run-rate (ex-inference) | ~$350k–$700k | ~$1.1M–$2.2M |
+| Cost shape | GCP-managed | On-prem-on-K8s | Edge |
+|---|---|---|---|
+| Pricing model | Usage-based opex; scales toward zero when idle | License + 3-yr hardware amortization + people | **GCP** |
+| HA/DR, patching, certs, upgrades | Provider-absorbed | Engineered, staffed, and drilled in-house | **GCP** |
+| Platform/SRE headcount | ~1.0–1.5 FTE (integrate + observe) | ~4–6 FTE (operate substrate 24×7 + on-call) | **GCP** |
+| Annual run-rate (ex-inference) | ~$350k–$700k | ~$1.1M–$2.2M | **GCP** |
 
 - Headcount assumes **net-new hires**. If an existing under-utilized platform team absorbs it, the people delta shrinks materially (see "Where On-Prem Wins"). The two assumptions are mutually exclusive.
 - On-prem also runs four external inference endpoints (LLM, embedder, reranker, safety); GCP consumes one model endpoint + the managed bundle.
@@ -341,7 +341,6 @@ Net = exposure after typical mitigations.
 | Security-patch lag (CVEs) | Low (provider-side) | High (you own CVE-to-patch SLA across the stack) | **GCP** |
 | Talent / key-person | Low-Med (common skills) | High (scarce OpenSearch + PG-HA + K8s-eventing depth) | **GCP** |
 | Supply-chain (deps / images) | Low (managed surfaces) | High (transitive deps across ~10 projects) | **GCP** |
-| Vendor lock-in | Med (adapter-isolated) | Low (portable OSS) | **On-prem** |
 | Cost overrun | Med (needs budgets/quotas/alerts) | Med (pre-provision peak; step-function) | Tie |
 | Data residency / sovereignty | Low-Med (region pin, provider-held) | Low (full physical control) | **On-prem** |
 
@@ -358,7 +357,7 @@ Net = exposure after typical mitigations.
 | Inherited certifications | Provider compliance scope inherited (Assured Workloads) | Assemble + attest scanning, secrets, policy yourself | **GCP** |
 | Edge protection | Cloud Armor managed WAF (OWASP CRS) + L7 DDoS at Google edge | ModSecurity/Coraza WAF; perimeter DDoS solved outside gateway | **GCP** |
 | Audit logging | Cloud Audit Logs feed the CORE audit model | OTel/Prom/Grafana feed it with more wiring | **GCP** |
-| ABAC invariant (server-side, every retrieval) | CORE policy model, compiled to Vertex filter-DSL | CORE policy model, compiled to OpenSearch DLS / SQL | Tie (by design) |
+| ABAC invariant (server-side, every retrieval) | CORE policy model, compiled to Agent Search filter-DSL | CORE policy model, compiled to OpenSearch DLS / SQL | Tie (by design) |
 | Dev-auth `X-User` bypass in prod | Apigee strips client-supplied identity headers | Gateway strips headers; trust only signed/mTLS identity | Tie (must-do both) |
 
 **Verdict: GCP wins on built-in controls and inherited certification scope.** INDICATIVE (2026).
@@ -380,7 +379,7 @@ Net = exposure after typical mitigations.
 
 ---
 
-## Dimensions: Scalability, Ops, Lock-In
+## Dimensions: Scalability & Ops
 
 | Dimension | GCP-managed | On-prem OSS | Edge |
 |---|---|---|---|
@@ -388,7 +387,6 @@ Net = exposure after typical mitigations.
 | Durability (object store) | GCS 11-nines (multi/dual-region), strong consistency | MinIO erasure-coding matches on paper; realized = ops maturity | **GCP** |
 | Vector-retrieval at scale | AlloyDB ScaNN (vendor-cited faster vs pgvector HNSW) | pgvector HNSW; solid, manual tuning required | **GCP** |
 | Operational burden | None (no cluster); provider-absorbed patching | Continuous K8s + ~10 OSS + 4 inference endpoints to run/patch | **GCP** |
-| Vendor lock-in / portability | Adapter-isolated; data portable (pgvector; GCS S3-compatible API) | Maximal portability by construction | **On-prem** |
 | Talent / skills | Common skills, ~1.0–1.5 FTE | Scarce depth, ~4–6 FTE | **GCP** |
 
 INDICATIVE (2026).
@@ -405,7 +403,7 @@ INDICATIVE (2026).
 
 ## Weighted Scorecard (Transparent)
 
-Scores 1–5 (5 = best). Weights sum to 100.
+Scores 1–5 (5 = best). Weights sum to 97.
 
 | Dimension | Wt | GCP | On-prem | GCP wtd | On-prem wtd |
 |---|---|---|---|---|---|
@@ -419,10 +417,9 @@ Scores 1–5 (5 = best). Weights sum to 100.
 | Observability / eval maturity | 5 | 5 | 3 | 0.25 | 0.15 |
 | Talent / skills | 5 | 4 | 2 | 0.20 | 0.10 |
 | Data residency / sovereignty | 4 | 2 | 5 | 0.08 | 0.20 |
-| Vendor lock-in / portability | 3 | 3 | 5 | 0.09 | 0.15 |
-| **TOTAL** | **100** | | | **4.67** | **2.57** |
+| **TOTAL** | **97** | | | **4.58** | **2.42** |
 
-**GCP 4.67 vs On-prem 2.57.** GCP leads every high-weight dimension; on-prem leads only the two lowest-weight ones. INDICATIVE (2026).
+**GCP 4.58 vs On-prem 2.42.** GCP leads every high-weight dimension; on-prem leads only the lowest-weight one. INDICATIVE (2026).
 
 ---
 
@@ -432,13 +429,13 @@ The weighted score answers the *default* question. A hard residency mandate chan
 
 | Scenario | How sovereignty is treated | Result |
 |---|---|---|
-| **No hard residency mandate** | Sovereignty is one weighted factor (weight 4) | **GCP wins** (4.67 vs 2.57) |
+| **No hard residency mandate** | Sovereignty is one weighted factor (weight 4) | **GCP wins** (4.58 vs 2.42) |
 | **Hard residency mandate applies** | Sovereignty is a **pass/fail GATE**, not a weighted factor | **On-prem wins outright** (GCP is off the table regardless of price) |
 
 - When data legally may not sit in a managed cloud, you don't weigh it — it's a gate, and only the on-prem profile clears it.
 - Absent that gate, the weighted result is robust to reasonable weight changes.
 
-> **Sensitivity check:** gap = 4.67 − 2.57 = ~2.1. Doubling sovereignty (4→8) and lock-in (3→6) nets ~−0.18 to the gap, leaving ~1.9 in GCP's favor. The conclusion holds.
+> **Sensitivity check:** gap = 4.58 − 2.42 = ~2.16. Doubling sovereignty weight (4→8) shifts ~+0.08 to on-prem, leaving ~2.1 in GCP's favor. The conclusion holds.
 
 INDICATIVE (2026).
 
@@ -446,7 +443,7 @@ INDICATIVE (2026).
 
 ## Risk Register (After Mitigation)
 
-### On-prem / no-lock-in
+### On-prem
 
 | Risk | Net | Mitigation |
 |---|---|---|
@@ -459,8 +456,7 @@ INDICATIVE (2026).
 
 | Risk | Net | Mitigation |
 |---|---|---|
-| Vendor lock-in | **Med** | Hexagonal CORE + portable data (pgvector; GCS S3-compatible API) |
-| Cost overrun | **Med** | Billing budgets, quotas, alerts, Vertex eval sampling |
+| Cost overrun | **Med** | Billing budgets, quotas, alerts, Gemini Enterprise Agent Platform eval sampling |
 | Data residency / sovereignty | **Med** | Region pin + VPC-SC + CMEK (else use the on-prem profile) |
 | Service deprecation | **Low** | Provider lifecycle notices; adapter-isolated |
 
@@ -487,7 +483,6 @@ INDICATIVE (2026).
 | On-prem argument | Rebuttal |
 |---|---|
 | "Open source is free" | Inference is external both ways — on-prem's only saving is moot, while it carries ~4–6 FTE ops + four inference endpoints GCP bundles. 3-yr TCO ~$2.1M vs ~$5.7M. |
-| "We avoid lock-in" | Neutralized by construction: GCP coupling lives only in adapters; CORE never imports a vendor SDK; data is portable (AlloyDB = Postgres-wire-compatible; GCS has S3-compatible API). |
 | "We control our data" | Region pin + VPC-SC + CMEK cover most cases; for a genuine sovereignty mandate, move THAT workload to the on-prem profile — same product, no rewrite. |
 | "We can match the quality" | Only with sustained tuning; the model gap (Gemini vs Gemma) and managed reranker + layout-parser floor can't be closed by ops. |
 | "We can build it" | Yes — in ~5× the eng-weeks, months later, then ~0.5–1.0 FTE forever to keep ~10 OSS systems + four inference endpoints healthy. |
@@ -503,8 +498,8 @@ The exit path is real but not frictionless. Honest leak points:
 | Area | The leak | Consequence |
 |---|---|---|
 | Object store API | GCS offers an S3-compatible API, but some advanced S3 features differ (V4 signing, generation-vs-opaque version IDs, multipart edge cases) | Small provider-specific branch in the storage adapter |
-| ABAC enforcement | One policy model, compiled to different mechanisms (SQL / Vertex filter-DSL / OpenSearch DLS) | Security-critical reimplementation per adapter, validated separately |
-| Retrieval chunking | GCP may auto-chunk inside Vertex AI Search; on-prem reuses CORE chunking | Chunk boundaries (and citation spans) not byte-identical across targets |
+| ABAC enforcement | One policy model, compiled to different mechanisms (SQL / Agent Search filter-DSL / OpenSearch DLS) | Security-critical reimplementation per adapter, validated separately |
+| Retrieval chunking | GCP may auto-chunk inside Agent Search on Gemini Enterprise Agent Platform; on-prem reuses CORE chunking | Chunk boundaries (and citation spans) not byte-identical across targets |
 | Eval scores | Different judge models/prompts per backend | Absolute scores not comparable; gates use normalized names/ranges |
 
 **Net:** none of these flips the recommendation. They convert falsifiable claims into claims that survive scrutiny. INDICATIVE (2026).
@@ -518,8 +513,8 @@ Each phase is shippable; the demo spine comes first. Shared CORE refactor is Yea
 | Phase | Ships | Profile | Milestone |
 |---|---|---|---|
 | 0. Carve-out | CORE + ports + composition root; local adapters | local | Full demo runs on SQLite/FTS5/pypdf (119 tests) |
-| 1. GCP data + retrieval | AlloyDB, GCS, Document AI, Vertex AI Search, Eventarc | gcp | ABAC-filtered ingest + reranked retrieval on GCP |
-| 2. GCP generation + edge | Gemini, Apigee / IAP, Cloud Observability + Vertex Eval | gcp | Full GCP RAG behind Apigee, metrics on a dashboard |
+| 1. GCP data + retrieval | AlloyDB, GCS, Document AI, Agent Search on Gemini Enterprise Agent Platform, Eventarc | gcp | ABAC-filtered ingest + reranked retrieval on GCP |
+| 2. GCP generation + edge | Gemini, Apigee / IAP, Cloud Observability + Gemini Enterprise Agent Platform Evals | gcp | Full GCP RAG behind Apigee, metrics on a dashboard |
 | 3. GCP safety | Model Armor, Cloud DLP | gcp | Injection blocked, PII redacted; GCP target complete |
 | 4. On-prem data + retrieval | pgvector, MinIO, Tika, OpenSearch + bge, Knative/KEDA | onprem | Same demo on K8s; ABAC pushdown validated |
 | 5. On-prem gen + safety + obs | Gemma (LiteLLM), Kong/OIDC, Llama Guard + NeMo + Presidio, OTel | onprem | Both targets pass the same conformance + eval suite |
@@ -529,9 +524,9 @@ Each phase is shippable; the demo spine comes first. Shared CORE refactor is Yea
 
 ## Final Recommendation
 
-- **Default to GCP-managed.** Wins every high-weight dimension: fastest TTM (weeks vs quarters), best quality (reranker + layout parsing + Gemini), lowest TCO (~35–40% of on-prem), most governable risk. Scorecard **4.67 vs 2.57**.
+- **Default to GCP-managed.** Wins every high-weight dimension: fastest TTM (weeks vs quarters), best quality (reranker + layout parsing + Gemini), lowest TCO (~35–40% of on-prem), most governable risk. Scorecard **4.58 vs 2.42**.
 - **BUILD on-prem to a tested baseline as insurance** for genuine trump cards: a hard sovereignty/residency mandate, air-gap control, or an existing hardened platform + ops team you're obligated to reuse.
-- **Govern GCP's real risks by policy:** budgets + quotas + alerts (cost), region pin + VPC-SC + CMEK (residency), hexagonal CORE (lock-in).
+- **Govern GCP's real risks by policy:** budgets + quotas + alerts (cost), region pin + VPC-SC + CMEK (residency).
 
 | De-risking property | Mechanism |
 |---|---|
