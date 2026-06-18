@@ -23,7 +23,7 @@ li { margin-bottom: 0.2em; }
 
 Decision-grade comparison for enterprise architects and the exec sponsor.
 
-All figures INDICATIVE (2026): order-of-magnitude planning numbers, not vendor quotes.
+All figures are order-of-magnitude planning numbers, not vendor quotes.
 
 ---
 
@@ -35,8 +35,6 @@ All figures INDICATIVE (2026): order-of-magnitude planning numbers, not vendor q
 
 **Part 3 — The Decision.** Weighted scorecard, sovereignty gate, risk register, where on-prem wins, rebuttal, portability caveats, roadmap, recommendation.
 
-INDICATIVE (2026).
-
 ---
 
 ## Bottom Line Up Front
@@ -45,8 +43,6 @@ INDICATIVE (2026).
 - **Default to GCP-managed:** fastest TTM (~5× less assembly), best quality, lowest TCO (~35–40% of on-prem). Scorecard **4.67 vs 2.57 out of 5**.
 - **Build on-prem as insurance:** the no-lock-in / data-residency option; decisive only under a sovereignty mandate or already-sunk platform + people.
 - **Not a one-way door:** portability is an architectural property of the hexagonal CORE, not a deployment choice.
-
-INDICATIVE (2026).
 
 ---
 
@@ -65,8 +61,6 @@ INDICATIVE (2026).
 - **TCO gap is people, not gear.** Inference is external in both. On-prem: ~4–6 FTE platform ops; GCP: ~1–1.5 FTE to integrate, not operate.
 - **Honest baseline.** Year-0 ports-and-adapters refactor is costed once in both columns — that's why Year-0 is non-zero on both sides.
 - **Build on-prem to a tested baseline as insurance.** No-lock-in / data-residency / air-gap option; competitive only when sovereignty mandates it or capacity is already sunk.
-
-INDICATIVE (2026).
 
 ---
 
@@ -132,8 +126,6 @@ Same request path; different platform beneath the ports. Inference is an externa
 
 **The comparison is purely the platform:** gateway, guardrails, agent runtime, retrieval, parsing, DB, storage, eventing, DLP, observability, and the people who run it.
 
-INDICATIVE (2026).
-
 ---
 
 ## Scope and Assumptions
@@ -141,7 +133,7 @@ INDICATIVE (2026).
 | Area | Assumption |
 |---|---|
 | Workload | ~500–2,000 internal users; ~1M docs; moderate bursty volume; ~99.9% target |
-| Cost basis | ~$160k–$280k/FTE loaded; managed services as usage-based opex; INDICATIVE (2026) |
+| Cost basis | ~$160k–$280k/FTE loaded; managed services as usage-based opex |
 | Inference | External hosted endpoint in both; cost equal, excluded from differential |
 | In scope | Platform: gateway, agent runtime, retrieval, parsing, DB, storage, eventing, DLP, safety, observability + people |
 | Out of scope | Model fine-tuning, GPU capex/ops, data-migration specifics, org compliance audits |
@@ -177,21 +169,19 @@ INDICATIVE (2026).
 
 ## Side-by-Side Stack Mapping
 
-Everything above the ports ships unchanged (ABAC, chunking, citations, Validator, request/approval, audit, UI). Only the rows below differ.
+Everything above the ports ships unchanged (ABAC, chunking, citations, Validator, audit, UI). Only the rows below differ.
 
-| CORE port | GCP-managed adapter | On-prem adapter |
+| CORE port | GCP-managed | On-prem |
 |---|---|---|
-| API gateway / edge | Apigee X + Cloud Armor | Kong / APISIX / Envoy + ModSecurity/Coraza |
-| Safety / guardrails | Model Armor (injection + RAI + DLP-aware) | Llama Guard 4 + NeMo Guardrails + Presidio |
-| Models / generation | Gemini on Gemini Enterprise Agent Platform | Gemma via hosted OpenAI-compatible endpoint (LiteLLM) |
-| Agent runtime | Agent Runtime on Gemini Enterprise Agent Platform + ADK (managed) | Same ADK app on K8s (self-managed) |
-| Retrieval + index + rerank | Agent Search on Gemini Enterprise Agent Platform (hybrid RRF + reranker) | OpenSearch (BM25+kNN) + bge-reranker-v2-m3 |
-| Doc parsing / OCR | Document AI Layout Parser | Tika / Unstructured + Tesseract/PaddleOCR |
-| PII / DLP | Cloud DLP / Sensitive Data Protection | Presidio |
-| Event-trigger ingestion | Cloud Functions + Eventarc | Knative / KEDA / Argo Events |
-| Object store | GCS | MinIO (S3-compatible, erasure-coded) |
-| Structured + vector store | AlloyDB (ScaNN, pgvector) | PostgreSQL 16 + pgvector (self-run HA) |
-| Observability + eval | Cloud Observability + Gemini Enterprise Agent Platform Evals | OTel + Prometheus + Grafana + Langfuse/RAGAS/Phoenix |
+| API gateway / edge | Apigee X + Cloud Armor | Kong / Envoy + ModSecurity |
+| Safety / guardrails | Model Armor | Llama Guard 4 + NeMo + Presidio |
+| Model / generation | Gemini | Gemma (LiteLLM) |
+| Agent runtime | Agent Runtime + ADK (managed) | Same ADK app on K8s |
+| Retrieval + rerank | Agent Search (RRF + reranker) | OpenSearch (BM25+kNN) + bge-reranker |
+| Doc parsing / OCR | Document AI Layout Parser | Tika / Unstructured + Tesseract |
+| PII / DLP | Cloud DLP | Presidio |
+| Data (object + vector) | GCS + AlloyDB (ScaNN/pgvector) | MinIO + PostgreSQL/pgvector |
+| Eventing + observability | Eventarc + Cloud Observability | Knative/KEDA + OTel/Prometheus/Grafana |
 
 ---
 
@@ -202,8 +192,6 @@ Everything above the ports ships unchanged (ABAC, chunking, citations, Validator
 - **One Postgres-compatible repository** serves both targets (AlloyDB is Postgres-wire-compatible). Same model port, same ADK agent graph, same ABAC policy model.
 - **Many "on-prem vs GCP" choices collapse to a connection string** + one-line index strategy (`USING scann` vs `USING hnsw`) + per-backend ABAC compiler.
 - **ABAC nuance:** policy model + orchestration reused; enforcement compiled per adapter. NOT identical SQL everywhere.
-
-INDICATIVE (2026).
 
 ---
 
@@ -247,20 +235,26 @@ Platform assembly + hardening only (inference external both ways; CORE identical
 - The shared CORE refactor is the Year-0 build common to both; the TTM **delta** is platform assembly, not the CORE.
 - On-prem also carries a recurring patch/upgrade tax across ~10 OSS systems plus four external inference endpoints.
 
-**Verdict: GCP wins decisively (~5×).** Weeks vs quarters to a hardened platform. INDICATIVE (2026).
+**Verdict: GCP wins decisively (~5×).** Weeks vs quarters to a hardened platform.
 
 ---
 
 ## Dimension: Quality
 
+<style scoped>
+table { table-layout: fixed; width: 100%; }
+th:nth-child(1), td:nth-child(1) { width: 13%; }
+th:nth-child(4), td:nth-child(4) { width: 7%; }
+</style>
+
 | Sub-dimension | GCP-managed | On-prem OSS | Edge |
 |---|---|---|---|
-| Retrieval (hybrid + rerank) | Agent Search on Gemini Enterprise Agent Platform: managed RRF + tuned reranker, improved by Google | OpenSearch BM25/kNN + bge-reranker, self-wired/tuned | **GCP** |
-| Layout-aware parsing | Document AI: tables, forms, reading order, OCR managed | Tika/Unstructured: good text, weaker tables/scans without tuning | **GCP** |
-| Model / generation | Gemini: ~1M context, native tools, strong grounding | Gemma (hosted): solid floor, trails on long-context + nested structured output | **GCP** |
-| Guardrail coverage | Model Armor: managed injection + jailbreak + RAI + DLP-aware, auto-updated | Llama Guard 4 + NeMo + Presidio: strong, but you author/maintain rails | **GCP** |
-| PII detection | Cloud DLP: 100+ infoTypes, checksum/context validation | Presidio: strong on regex PII; NER quality = your model + tuning | **GCP** |
-| Eval tooling | Gemini Enterprise Agent Platform Evals: turnkey faithfulness/relevance/precision/recall | RAGAS + Langfuse + Phoenix: best-in-class OSS, but self-assembled | **GCP (slight)** |
+| Retrieval + parsing | Agent Search (RRF + reranker) + Document AI | OpenSearch BM25/kNN + bge; Tika | **GCP** |
+| Model / generation | Gemini: ~1M context, strong grounding | Gemma: trails on long-context | **GCP** |
+| Safety (guardrails + PII) | Model Armor + Cloud DLP, managed | Llama Guard + NeMo + Presidio, self-run | **GCP** |
+| Eval tooling | Agent Platform Evals: turnkey | RAGAS + Langfuse + Phoenix: DIY | **GCP** |
+
+GCP leads every sub-dimension; eval tooling only slightly.
 
 ---
 
@@ -273,13 +267,11 @@ Platform assembly + hardening only (inference external both ways; CORE identical
 
 **Verdict: GCP wins; gap is largest exactly where RAG answer quality is made.**
 
-INDICATIVE (2026).
-
 ---
 
 ## Dimension: Cost / TCO
 
-Inference excluded (equal, external both sides). INDICATIVE annual run-rate (infra + people).
+Inference excluded (equal, external both sides). Annual run-rate (infra + people).
 
 | Cost shape | GCP-managed | On-prem-on-K8s | Edge |
 |---|---|---|---|
@@ -291,7 +283,7 @@ Inference excluded (equal, external both sides). INDICATIVE annual run-rate (inf
 - Headcount assumes **net-new hires**. If an existing under-utilized platform team absorbs it, the people delta shrinks materially (see "Where On-Prem Wins"). The two assumptions are mutually exclusive.
 - On-prem also runs four external inference endpoints (LLM, embedder, reranker, safety); GCP consumes one model endpoint + the managed bundle.
 
-**Verdict: GCP wins. Headcount, not hardware, is the differentiator.** INDICATIVE (2026).
+**Verdict: GCP wins. Headcount, not hardware, is the differentiator.**
 
 ---
 
@@ -309,13 +301,11 @@ Each on-prem role is undifferentiated heavy lifting — none differentiates the 
 
 On GCP the same coverage is the provider's job, baked into per-unit pricing and shared across the fleet. On-prem pays full loaded salary and can't share it. This is what "open source is free" comparisons leave out.
 
-INDICATIVE (2026).
-
 ---
 
 ## 3-Year TCO Summary
 
-> INDICATIVE (2026). Inference excluded (equal, external both sides). Headcount at loaded cost (~$160k–$280k/FTE).
+> Inference excluded (equal, external both sides). Headcount at loaded cost (~$160k–$280k/FTE).
 
 | Line | GCP-managed | On-prem-on-K8s |
 |---|---|---|
@@ -345,7 +335,7 @@ Net = exposure after typical mitigations.
 | Cost overrun | Med (needs budgets/quotas/alerts) | Med (pre-provision peak; step-function) | Tie |
 | Data residency / sovereignty | Low-Med (region pin, provider-held) | Low (full physical control) | **On-prem** |
 
-**Verdict: GCP wins on net risk.** Its top risks are policy- and architecture-governable; on-prem's top risks require continuous scarce labor. INDICATIVE (2026).
+**Verdict: GCP wins on net risk.** Its top risks are policy- and architecture-governable; on-prem's top risks require continuous scarce labor.
 
 ---
 
@@ -353,15 +343,15 @@ Net = exposure after typical mitigations.
 
 | Control | GCP-managed | On-prem OSS | Edge |
 |---|---|---|---|
-| Encryption / key management | CMEK via Cloud KMS, auto rotation, key-level audit | DIY KMS / Vault + KES | **GCP** |
-| Network isolation | VPC Service Controls perimeter, IAM conditions, private endpoints | NetworkPolicy + mesh mTLS (SPIFFE/SPIRE) self-built | **GCP** |
-| Inherited certifications | Provider compliance scope inherited (Assured Workloads) | Assemble + attest scanning, secrets, policy yourself | **GCP** |
-| Edge protection | Cloud Armor managed WAF (OWASP CRS) + L7 DDoS at Google edge | ModSecurity/Coraza WAF; perimeter DDoS solved outside gateway | **GCP** |
-| Audit logging | Cloud Audit Logs feed the CORE audit model | OTel/Prom/Grafana feed it with more wiring | **GCP** |
-| ABAC invariant (server-side, every retrieval) | CORE policy model, compiled to Agent Search filter-DSL | CORE policy model, compiled to OpenSearch DLS / SQL | Tie (by design) |
-| Dev-auth `X-User` bypass in prod | Apigee strips client-supplied identity headers | Gateway strips headers; trust only signed/mTLS identity | Tie (must-do both) |
+| Encryption / keys | CMEK via Cloud KMS, auto-rotation | DIY KMS / Vault + KES | **GCP** |
+| Network isolation | VPC-SC perimeter, IAM, private endpoints | NetworkPolicy + mTLS (SPIFFE/SPIRE), self-built | **GCP** |
+| Certifications | Inherited (Assured Workloads) | Assemble + attest yourself | **GCP** |
+| Edge protection | Cloud Armor WAF + L7 DDoS at Google edge | ModSecurity/Coraza WAF; DDoS solved elsewhere | **GCP** |
+| Audit logging | Cloud Audit Logs feed CORE audit | OTel/Prom/Grafana, more wiring | **GCP** |
+| ABAC (server-side) | CORE model → Agent Search filter-DSL | CORE model → OpenSearch DLS / SQL | Tie |
+| Dev-auth `X-User` in prod | Apigee strips client identity headers | Gateway strips; trust signed/mTLS only | Tie |
 
-**Verdict: GCP wins on built-in controls and inherited certification scope.** INDICATIVE (2026).
+**Verdict: GCP wins on built-in controls and inherited certifications.**
 
 ---
 
@@ -376,7 +366,7 @@ Net = exposure after typical mitigations.
 
 > **Key caveat:** a true air-gap forbidding external model calls breaks **both** designs equally and needs a different inference story — a model hosted inside the sovereign boundary.
 
-**Verdict: On-prem wins.** Strongest, often decisive on-prem case. A constraint that justifies on-prem, not a cost saving. INDICATIVE (2026).
+**Verdict: On-prem wins.** Strongest, often decisive on-prem case. A constraint that justifies on-prem, not a cost saving.
 
 ---
 
@@ -390,8 +380,6 @@ Net = exposure after typical mitigations.
 | Operational burden | None (no cluster); provider-absorbed patching | Continuous K8s + ~10 OSS + 4 inference endpoints to run/patch | **GCP** |
 | Talent / skills | Common skills, ~1.0–1.5 FTE | Scarce depth, ~4–6 FTE | **GCP** |
 
-INDICATIVE (2026).
-
 ---
 
 <!-- _class: lead -->
@@ -403,8 +391,6 @@ INDICATIVE (2026).
 ---
 
 ## Weighted Scorecard (Transparent)
-
-Scores 1–5 (5 = best). Weights sum to 97.
 
 | Dimension | Wt | GCP | On-prem | GCP wtd | On-prem wtd |
 |---|---|---|---|---|---|
@@ -420,7 +406,7 @@ Scores 1–5 (5 = best). Weights sum to 97.
 | Data residency / sovereignty | 4 | 2 | 5 | 0.08 | 0.20 |
 | **TOTAL** | **97** | | | **4.58** | **2.42** |
 
-**GCP 4.58 vs On-prem 2.42.** GCP leads every high-weight dimension; on-prem leads only the lowest-weight one. INDICATIVE (2026).
+**GCP 4.58 vs On-prem 2.42.** Scores 1–5 (5 best); GCP leads every high-weight dimension.
 
 ---
 
@@ -437,8 +423,6 @@ The weighted score answers the *default* question. A hard residency mandate chan
 - Absent that gate, the weighted result is robust to reasonable weight changes.
 
 > **Sensitivity check:** gap = 4.58 − 2.42 = ~2.16. Doubling sovereignty weight (4→8) shifts ~+0.08 to on-prem, leaving ~2.1 in GCP's favor. The conclusion holds.
-
-INDICATIVE (2026).
 
 ---
 
@@ -457,11 +441,11 @@ INDICATIVE (2026).
 
 | Risk | Net | Mitigation |
 |---|---|---|
-| Cost overrun | **Med** | Billing budgets, quotas, alerts, Gemini Enterprise Agent Platform eval sampling |
+| Cost overrun | **Med** | Billing budgets, quotas, alerts, eval sampling |
 | Data residency / sovereignty | **Med** | Region pin + VPC-SC + CMEK (else use the on-prem profile) |
 | Service deprecation | **Low** | Provider lifecycle notices; adapter-isolated |
 
-**Cross-cutting (both):** ABAC in CORE so neither runtime can leak access control into the model; OTel is the portable telemetry seam; spoofable dev `X-User` must be hard-off in prod.
+**Cross-cutting (both):** ABAC stays in CORE; OTel is the portable telemetry seam; dev `X-User` hard-off in prod.
 
 ---
 
@@ -475,7 +459,7 @@ INDICATIVE (2026).
 | **Existing under-utilized platform team** | Dominant cost (people) already paid with durable headroom; on-call already covers 24×7. | If you hire for this, the gap reopens immediately. |
 | **Pre-existing OpenSearch / Postgres / K8s estate** | Marginal team + license cost is incremental, shared across workloads. | Only if this app is a small add to an already-funded platform. |
 
-**Rule of thumb:** on-prem breaks even mainly when hardware AND people are already sunk + shared, or when residency law removes GCP from contention. INDICATIVE (2026).
+**Rule of thumb:** on-prem breaks even mainly when hardware AND people are already sunk + shared, or when residency law removes GCP from contention.
 
 ---
 
@@ -488,7 +472,7 @@ INDICATIVE (2026).
 | "We can match the quality" | Only with sustained tuning; the model gap (Gemini vs Gemma) and managed reranker + layout-parser floor can't be closed by ops. |
 | "We can build it" | Yes — in ~5× the eng-weeks, months later, then ~0.5–1.0 FTE forever to keep ~10 OSS systems + four inference endpoints healthy. |
 
-**The clincher:** the same hexagonal design that makes on-prem possible is what makes GCP safe. Portability is an architectural property, not a deployment choice. INDICATIVE (2026).
+**The clincher:** the same hexagonal design that makes on-prem possible is what makes GCP safe. Portability is an architectural property, not a deployment choice.
 
 ---
 
@@ -503,22 +487,20 @@ The exit path is real but not frictionless. Honest leak points:
 | Retrieval chunking | GCP may auto-chunk inside Agent Search on Gemini Enterprise Agent Platform; on-prem reuses CORE chunking | Chunk boundaries (and citation spans) not byte-identical across targets |
 | Eval scores | Different judge models/prompts per backend | Absolute scores not comparable; gates use normalized names/ranges |
 
-**Net:** none of these flips the recommendation. They convert falsifiable claims into claims that survive scrutiny. INDICATIVE (2026).
+**Net:** none of these flips the recommendation. They convert falsifiable claims into claims that survive scrutiny.
 
 ---
 
 ## Delivery Roadmap (Phased)
 
-Each phase is shippable; the demo spine comes first. Shared CORE refactor is Year-0, common to both targets.
-
 | Phase | Ships | Profile | Milestone |
 |---|---|---|---|
 | 0. Carve-out | CORE + ports + composition root; local adapters | local | Full demo runs on SQLite/FTS5/pypdf (119 tests) |
-| 1. GCP data + retrieval | AlloyDB, GCS, Document AI, Agent Search on Gemini Enterprise Agent Platform, Eventarc | gcp | ABAC-filtered ingest + reranked retrieval on GCP |
-| 2. GCP generation + edge | Gemini, Apigee / IAP, Cloud Observability + Gemini Enterprise Agent Platform Evals | gcp | Full GCP RAG behind Apigee, metrics on a dashboard |
+| 1. GCP data + retrieval | AlloyDB, GCS, Document AI, Agent Search, Eventarc | gcp | ABAC-filtered ingest + reranked retrieval on GCP |
+| 2. GCP generation + edge | Gemini, Apigee/IAP, Cloud Observability + Evals | gcp | Full GCP RAG behind Apigee, metrics on a dashboard |
 | 3. GCP safety | Model Armor, Cloud DLP | gcp | Injection blocked, PII redacted; GCP target complete |
-| 4. On-prem data + retrieval | pgvector, MinIO, Tika, OpenSearch + bge, Knative/KEDA | onprem | Same demo on K8s; ABAC pushdown validated |
-| 5. On-prem gen + safety + obs | Gemma (LiteLLM), Kong/OIDC, Llama Guard + NeMo + Presidio, OTel | onprem | Both targets pass the same conformance + eval suite |
+| 4. On-prem data + retrieval | pgvector, MinIO, Tika, OpenSearch, KEDA | onprem | Same demo on K8s; ABAC validated |
+| 5. On-prem gen + safety + obs | Gemma, Kong/OIDC, Llama Guard + NeMo, OTel | onprem | Both targets pass the conformance suite |
 | 6. Compare + harden | Cross-target eval, cost model, runbooks, exit-path test | both | This deck, backed by measured numbers |
 
 ---
@@ -537,4 +519,4 @@ Each phase is shippable; the demo spine comes first. Shared CORE refactor is Yea
 | Telemetry is portable | OTel SDK in CORE; swap the exporter, not the instrumentation. |
 | Sovereign workloads relocate later | Start on GCP for speed + quality; move a regulated workload to on-prem when a mandate demands — no product rewrite. |
 
-**Bottom line:** with one portable CORE, choose GCP-managed now for the fastest, highest-quality, lowest-TCO path — knowing the architecture preserves a clean exit to on-prem for any future sovereignty obligation. All figures INDICATIVE (2026).
+**Bottom line:** with one portable CORE, choose GCP-managed now for the fastest, highest-quality, lowest-TCO path — knowing the architecture preserves a clean exit to on-prem for any future sovereignty obligation. All figures
